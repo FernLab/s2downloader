@@ -37,9 +37,13 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinx.ext.todo',
     'sphinxarg.ext',
-    'sphinx_autodoc_typehints',
+    # 'sphinx_autodoc_typehints',
     'sphinx.ext.intersphinx'
 ]
+
+autosummary_generate = True
+numpydoc_show_class_members = False
+
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -74,7 +78,7 @@ release = s2downloader.__version__
 #
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
-language = None
+language = 'en'
 
 # There are two options for replacing |today|: either, you set today to
 # some non-false value, then it is used:
@@ -114,7 +118,7 @@ pygments_style = 'sphinx'
 
 # Define how to document class docstrings
 # '__init__' documents only the __init__ methods, 'class' documents only the class methods and 'both' documents both
-autoclass_content = 'both'
+autoclass_content = 'class'
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = True
@@ -153,9 +157,13 @@ html_theme_options = {
     'sticky_navigation': True,
     'navigation_depth': 4,
     'includehidden': True,
-    'titles_only': False,
-    'set_type_checking_flag': True  # option of sphinx_autodoc_typehints extension
+    'titles_only': False
+    # 'set_type_checking_flag': True  # option of sphinx_autodoc_typehints extension
 }
+
+# generate autosummary even if no references
+autosummary_generate = True
+autosummary_imported_members = True
 
 # Add any paths that contain custom themes here, relative to this directory.
 # html_theme_path = []
