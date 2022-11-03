@@ -32,17 +32,19 @@ version = {}
 with open("s2downloader/version.py") as version_file:
     exec(version_file.read(), version)
 
-req = []
+req = ['gdal', 'affine', 'pyproj', 'numpy', 'matplotlib', 'geojson', 'rasterio',
+       'pandas', 'geopandas>=0.11', 'shapely', 'rtree', 'python-dateutil', 'pystac', 'pystac_client', 'pydantic']
 
 req_setup = ['pytest-runner']
 
-req_test = ['pytest>=3', 'pytest-cov', 'pytest-reporter-html1', 'urlchecker']
+req_test = ['pytest>=3', 'pytest-cov', 'pytest-reporter-html1', 'urlchecker==0.0.32']
 
 req_doc = [
     'sphinx>=4.1.1',
     'sphinx-argparse',
     'sphinx-autodoc-typehints',
-    'sphinx_rtd_theme'
+    'sphinx_rtd_theme',
+    'numpydoc'
 ]
 
 req_lint = ['flake8', 'pycodestyle', 'pydocstyle']

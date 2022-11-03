@@ -1,0 +1,32 @@
+{
+    "user_settings": {
+        "tile_settings": {
+            "sentinel:data_coverage": {"gt": 80},
+            "eo:cloud_cover": {"lt": 20},
+            "bands": ["B01", "B05","B08"],
+            "time": "2021-09-01/2021-10-02"
+        },
+        "aoi_settings": {
+            "aoi_shapefile": "data/demo_shapefile/polygon_telegrafenberg.shp",
+            "apply_SCL_band_mask": false,
+            "SCL_filter_values": [3, 6],
+            "SCL_mask_valid_pixels_min_percentage": 10,
+            "aoi_min_coverage": 90,
+            "raster_resampling_method": "cubic"
+        },
+        "result_settings": {
+            "results_dir": "data/data_output/",
+            "target_resolution_in_m": 10,
+            "only_dates_no_data": false,
+            "download_thumbnails": false,
+            "download_overviews": false,
+            "save_raster_dtype_float32": false
+        }
+    },
+    "s2_settings": {
+        "collections": [
+            "sentinel-s2-l2a-cogs"
+        ],
+        "tiles_reference_global": "data/S2_tile_master/sentinel_2_index_shapefile_attr.shp"
+    }
+}

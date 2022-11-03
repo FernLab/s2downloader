@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Top-level package for S2Downloader."""
 
 # S2Downloader, Python Boilerplate contains all the boilerplate you need to create a Python package.

@@ -6,6 +6,20 @@ channels: &id1
 dependencies:
   - python=3.*.*
   - pip
+  - pyicu
+  - gdal
+  - numpy
+  - affine
+  - pyproj
+  - geojson
+  - matplotlib
+  - rasterio
+  - pandas
+  - geopandas>=0.11
+  - shapely
+  - rtree
+  - python-dateutil
+  - pydantic
 
   - pip:
     # setup requirements
@@ -15,7 +29,7 @@ dependencies:
     - pytest
     - pytest-cov
     - pytest-reporter-html1
-    - urlchecker
+    - urlchecker==0.0.32
 
     # lint requirements
     - flake8
@@ -26,8 +40,13 @@ dependencies:
     # doc requirements
     - sphinx>=4.1.1
     - sphinx-argparse
-    - sphinx_autodoc_typehints
+    # - sphinx_autodoc_typehints
     - sphinx_rtd_theme
+    - numpydoc
 
     # deployment requirements
     - twine
+
+    # code requirements
+    - pystac
+    - pystac_client

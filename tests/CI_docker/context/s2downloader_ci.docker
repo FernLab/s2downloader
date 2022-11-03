@@ -17,7 +17,7 @@ RUN rm Mambaforge-$(uname)-$(uname -m).sh
 ENV PATH=/root/mambaforge/bin:${PATH}
 
 # Python packages from conda
-RUN mamba install -y python=3.9
+RUN mamba install -y python=3.10
 RUN mamba install -y pip
 RUN mamba init bash
 
