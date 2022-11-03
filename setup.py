@@ -64,7 +64,7 @@ setup(
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10'
     ],
-    description="Python Boilerplate contains all the boilerplate you need to create a Python package.",
+    description="Downloader for Sentinel-2 from aws.",
     entry_points={
         'console_scripts': [
             's2downloader=bin.s2downloader_cli:main',
