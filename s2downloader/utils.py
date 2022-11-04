@@ -19,45 +19,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
-
 # third party packages
 import affine  # BSD
 import numpy as np  # BSD license
 import pyproj  # MIT
 import rasterio  # BSD License (BSD)
-
-
-def extendFilepath(*, input_file_path: str, prefix: str = '', suffix: str = '') -> str:
-    """Generate output path for tif from given directory and filename.
-
-    Parameters
-    ----------
-    input_file_path : str
-        Path to directory including the filename that should be altered.
-    prefix : str (optional)
-        Content that should be concatenated before the name of the file. Default: empty
-    suffix : str (optional)
-        Content that should be concatenated after the name and before the extension of the file. Default: empty
-
-    Returns
-    -------
-    : str
-        Newly concatenated output path.
-
-    Raises
-    ------
-    Exception
-        Failed to extend filename.
-    """
-    try:
-        dir_name = os.path.dirname(input_file_path)
-        file_name = os.path.basename(input_file_path)
-        file_base, file_extension = os.path.splitext(file_name)
-
-        return os.path.join(dir_name, f"{prefix}{file_base}{suffix}{file_extension}")
-    except Exception as e:  # pragma: no cover
-        raise Exception(f"Failed to extend filename => {e}")
+import rasterio.io
+from rasterio.enums import Resampling
 
 
 def saveRasterToDisk(*, out_image: np.ndarray, raster_crs: pyproj.crs.crs.CRS, out_transform: affine.Affine,
@@ -127,3 +95,115 @@ def saveRasterToDisk(*, out_image: np.ndarray, raster_crs: pyproj.crs.crs.CRS, o
                 dst.set_band_description(index, f"'Band':{band_name}")
     except Exception as e:  # pragma: no cover
         raise Exception(f"Failed to save raster to disk => {e}")
+
+
+def validPixelsFromSCLBand(scl_src: rasterio.io.DatasetReader, scl_filter_values: list[int]) -> tuple[float, float]:
+    """Percentage of valid SCL band pixels.
+
+    Parameters
+    ----------
+    scl_src : rasterio.io.DatasetReader
+        A DatasetReader for the SCL band.
+    scl_filter_values: list, default=[0], optional
+        List with the values of the SCL Band to filter out
+
+    Returns
+    -------
+    : float
+        Percentage of data pixels.
+    : float
+        Percentage of non-masked out pixels
+
+    Raises
+    ------
+    Exception
+        Failed to calculate percentage of valid SCL band pixels.
+    """
+    try:
+        scl_band = scl_src.read()
+        scl_band_nonzero = np.count_nonzero(scl_band)
+        nonzero_pixels_per = (float(scl_band_nonzero) / float(scl_band.size)) * 100
+        print(f"Nonzero pixels: {nonzero_pixels_per * 100} %")
+
+        scl_filter_values.append(0)
+        scl_band_mask = np.where(np.isin(scl_band, scl_filter_values), 0, 1)
+        valid_pixels_per = float(np.count_nonzero(scl_band_mask)) / float(scl_band_nonzero.size)
+        print(f"Valid pixels: {valid_pixels_per * 100} %")
+
+        return nonzero_pixels_per, valid_pixels_per
+    except Exception as e:  # pragma: no cover
+        raise Exception(f"Failed to count the number of valid pixels for the SCl band => {e}")
+
+
+def cloudMaskingFromSCLBand(*,
+                            band_src: rasterio.io.DatasetReader,
+                            scl_src: rasterio.io.DatasetReader,
+                            scl_filter_values: list[int],
+                            target_resolution: int = None,
+                            resampling_method: Resampling,
+                            ) -> np.ndarray:
+    """Based on the SCL band categorization, the input data is masked (clouds, cloud shadow, snow).
+
+    Parameters
+    ----------
+    band_src : rasterio.io.DatasetReader
+        A DatasetReader for a raster band.
+    scl_src : rasterio.io.DatasetReader
+        A DatasetReader for the SCL band.
+    scl_filter_values: list, default=[0], optional
+        List with the values of the SCL Band to filter out
+    target_resolution: int, default=None, optional
+        Target resolution, if None keep original.
+    resampling_method: rasterio.wrap.Resampling
+        The resampling method for a raster band.
+    Returns
+    -------
+    : np.ndarray
+        Masked image band.
+
+    Raises
+    ------
+    Exception
+        Failed to mask pixels from SCL band.
+    """
+    try:
+        band_scale_factor = 1.0
+
+        if target_resolution is not None:
+            scl_scale_factor = target_resolution / scl_src.transform[1]
+            band_scale_factor = target_resolution / band_src.transform[1]
+        else:
+            scl_scale_factor = band_src.transform[1] / scl_src.transform[1]
+
+        if scl_scale_factor != 1.0:
+            scl_band = scl_src.read(
+                out_shape=(
+                    scl_src.count,
+                    int(scl_src.height * scl_scale_factor),
+                    int(scl_src.width * scl_scale_factor)
+                ),
+                resampling=Resampling.nearest
+            )
+        else:
+            scl_band = scl_src.read()
+
+        if band_scale_factor != 1.0:
+            raster_band = band_src.read(
+                out_shape=(
+                    band_src.count,
+                    int(band_src.height * band_scale_factor),
+                    int(band_src.width * band_scale_factor)
+                ),
+                resampling=resampling_method
+            )
+        else:
+            raster_band = band_src.read()
+
+        scl_filter_values.append(0)
+        scl_band_mask = np.where(np.isin(scl_band, scl_filter_values), 0, 1)
+
+        # Mask out Clouds
+        image_band_masked = raster_band * scl_band_mask
+        return image_band_masked
+    except Exception as e:  # pragma: no cover
+        raise Exception(f"Failed to mask pixels from SCl band => {e}")
