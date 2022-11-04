@@ -35,6 +35,112 @@ from pystac import Item
 from .utils import extendFilepath, saveRasterToDisk
 
 
+def searchDataAtAWS(*, s2_collection: list[str],
+                    bb: list[float],
+                    props_json: dict,
+                    utm_zone: int,
+                    stac_catalog_url: str) -> tuple[list[Item], list[str], list[int]]:
+    """Search for Sentinel-2 data in given bounding box as defined in query_props.json (no data download yet).
+
+    Parameters
+    ----------
+    s2_collection: list[str]
+        Contains name of S2 collection at AWS (only tested for [sentinel-s2-l2a-cogs].)
+    bb : list[float]
+        A list of coordinates of the outer bounding box of all given coordinates.
+    props_json: dict
+        Dictionary of all search parameters retrieved from json file.
+    utm_zone : int
+        Best fitting UTM zone number.
+    stac_catalog_url : str
+        STAC catalog URL.
+
+    Returns
+    -------
+    : list[Item]
+        List of found Items at AWS server.
+    : list[str]
+        List of available scene dates (duplicates removed).
+    : list[int]
+        Index of the location of the selected dates in original query output.
+
+    Raises
+    ------
+    ValueError
+        When no data is found at AWS for given parameter settings.
+    Exception
+        Failed to find data at AWS server.
+    """
+    try:
+        # search AWS collection
+        catalogue = Client.open(stac_catalog_url)
+
+        item_search = catalogue.search(
+            collections=s2_collection,  # sentinel-s2-l2a-cogs
+            bbox=bb,  # bounding box
+            # intersects=geoj,   # method can be used instead of bbox, but currently throws error
+            query=props_json,  # cloud and data coverage properties
+            datetime=props_json['time'],  # time period
+            sortby="-properties.datetime"  # sort by data descending (minus sign)
+        )
+
+        # proceed if items are found
+        if len(list(item_search.items())) == 0:
+            raise ValueError("For these settings there is no data to be found at AWS. \n"
+                             "Try to adapt your search parameters:\n"
+                             "- increase time span,\n"
+                             "- allow more cloud coverage,\n"
+                             "- reduce data coverage (your polygon(s) may not be affected"
+                             " by a smaller tile coverage).")
+
+        # items to list
+        items_list = list(item_search.items())
+        item_list_dict = [i.to_dict() for i in items_list]
+
+        # print overview of found data
+        print("Date                    ID                          UTM Zone    Tile Cloud Cover    Tile Coverage")
+        [print(f"{i['properties']['datetime']}    {i['id']}    {i['properties']['sentinel:utm_zone']}"
+               f"          {i['properties']['eo:cloud_cover']}                "
+               f"{i['properties']['sentinel:data_coverage']}")
+         for i in item_list_dict]
+        print()
+
+        # collect all ids
+        ids = [id_item['id'] for id_item in item_list_dict]
+        ids_string = ''.join(ids)
+
+        # collect utm zones
+        utm_zone_list = [id_item['properties']['sentinel:utm_zone'] for id_item in item_list_dict]
+
+        # extract dates of available scenes from id search results
+        # TODO: This is S2 file name specific regexing,
+        #  maybe this can be improved to retrieve dates in a better way from the string
+        date_list = re.findall(r"\d{8}", ids_string)
+
+        # store date and utm zone information in dataframe
+        df_scene_dates = pd.DataFrame(zip(date_list, utm_zone_list), columns=["dates", "utm_zones"])
+
+        # keep scenes dates that are not duplicated OR where utm_zone fits best
+        df_scene_dates_clean = df_scene_dates[~df_scene_dates['dates'].duplicated(keep=False) |
+                                              df_scene_dates['utm_zones'].eq(utm_zone)]
+
+        def list2int(input_list):
+            return [int(i) for i in input_list]
+
+        # store index number of kept scenes to list and convert list items to integer
+        scene_dates_clean_index = df_scene_dates_clean.index.tolist()
+        scene_dates_clean_index_int = list2int(scene_dates_clean_index)
+
+        # selected dates to list
+        date_list_selected = []
+        for idx in scene_dates_clean_index_int:
+            date_list_selected.append(date_list[idx])
+
+        return items_list, date_list_selected, scene_dates_clean_index_int
+    except Exception as e:  # pragma: no cover
+        raise Exception(f"Failed to find data at AWS server => {e}")
+
+
 def noDataMaskingFromSCLBand(image_stack: np.ndarray, scl: np.ndarray) -> tuple[np.ndarray, float]:
     """Based on the SCL band categorization, the no data values are masked.
 
@@ -204,109 +310,3 @@ def rasterStackCloudMask(*,
             print(f"{tile_id} not saved to disk as minimum number of valid pixels is not met.")
     except Exception as e:  # pragma: no cover
         raise Exception(f"Failed to preprocess and cloud mask raster stack => {e}")
-
-
-def searchDataAtAWS(*, s2_collection: list[str],
-                    bb: list[float],
-                    props_json: dict,
-                    utm_zone: int,
-                    stac_catalog_url: str) -> tuple[list[Item], list[str], list[int]]:
-    """Search for Sentinel-2 data in given bounding box as defined in query_props.json (no data download yet).
-
-    Parameters
-    ----------
-    s2_collection: list[str]
-        Contains name of S2 collection at AWS (only tested for [sentinel-s2-l2a-cogs].)
-    bb : list[float]
-        A list of coordinates of the outer bounding box of all given coordinates.
-    props_json: dict
-        Dictionary of all search parameters retrieved from json file.
-    utm_zone : int
-        Best fitting UTM zone number.
-    stac_catalog_url : str
-        STAC catalog URL.
-
-    Returns
-    -------
-    : list[Item]
-        List of found Items at AWS server.
-    : list[str]
-        List of available scene dates (duplicates removed).
-    : list[int]
-        Index of the location of the selected dates in original query output.
-
-    Raises
-    ------
-    ValueError
-        When no data is found at AWS for given parameter settings.
-    Exception
-        Failed to find data at AWS server.
-    """
-    try:
-        # search AWS collection
-        catalogue = Client.open(stac_catalog_url)
-
-        item_search = catalogue.search(
-            collections=s2_collection,  # sentinel-s2-l2a-cogs
-            bbox=bb,  # bounding box
-            # intersects=geoj,   # method can be used instead of bbox, but currently throws error
-            query=props_json,  # cloud and data coverage properties
-            datetime=props_json['time'],  # time period
-            sortby="-properties.datetime"  # sort by data descending (minus sign)
-        )
-
-        # proceed if items are found
-        if len(list(item_search.items())) == 0:
-            raise ValueError("For these settings there is no data to be found at AWS. \n"
-                             "Try to adapt your search parameters:\n"
-                             "- increase time span,\n"
-                             "- allow more cloud coverage,\n"
-                             "- reduce data coverage (your polygon(s) may not be affected"
-                             " by a smaller tile coverage).")
-
-        # items to list
-        items_list = list(item_search.items())
-        item_list_dict = [i.to_dict() for i in items_list]
-
-        # print overview of found data
-        print("Date                    ID                          UTM Zone    Tile Cloud Cover    Tile Coverage")
-        [print(f"{i['properties']['datetime']}    {i['id']}    {i['properties']['sentinel:utm_zone']}"
-               f"          {i['properties']['eo:cloud_cover']}                "
-               f"{i['properties']['sentinel:data_coverage']}")
-         for i in item_list_dict]
-        print()
-
-        # collect all ids
-        ids = [id_item['id'] for id_item in item_list_dict]
-        ids_string = ''.join(ids)
-
-        # collect utm zones
-        utm_zone_list = [id_item['properties']['sentinel:utm_zone'] for id_item in item_list_dict]
-
-        # extract dates of available scenes from id search results
-        # TODO: This is S2 file name specific regexing,
-        #  maybe this can be improved to retrieve dates in a better way from the string
-        date_list = re.findall(r"\d{8}", ids_string)
-
-        # store date and utm zone information in dataframe
-        df_scene_dates = pd.DataFrame(zip(date_list, utm_zone_list), columns=["dates", "utm_zones"])
-
-        # keep scenes dates that are not duplicated OR where utm_zone fits best
-        df_scene_dates_clean = df_scene_dates[~df_scene_dates['dates'].duplicated(keep=False) |
-                                              df_scene_dates['utm_zones'].eq(utm_zone)]
-
-        def list2int(input_list):
-            return [int(i) for i in input_list]
-
-        # store index number of kept scenes to list and convert list items to integer
-        scene_dates_clean_index = df_scene_dates_clean.index.tolist()
-        scene_dates_clean_index_int = list2int(scene_dates_clean_index)
-
-        # selected dates to list
-        date_list_selected = []
-        for idx in scene_dates_clean_index_int:
-            date_list_selected.append(date_list[idx])
-
-        return items_list, date_list_selected, scene_dates_clean_index_int
-    except Exception as e:  # pragma: no cover
-        raise Exception(f"Failed to find data at AWS server => {e}")
