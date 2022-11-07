@@ -8,7 +8,7 @@
             "time": "2021-09-01/2021-10-02"
         },
         "aoi_settings": {
-            "bounding_box": [13.061691523442466, 52.37776235824628, 13.067522185540977, 52.383431172509056],
+            "bounding_box": [12.1439, 52.3832, 13.4204, 53.0389],
             "apply_SCL_band_mask": false,
             "SCL_filter_values": [3, 6],
             "SCL_mask_valid_pixels_min_percentage": 10,

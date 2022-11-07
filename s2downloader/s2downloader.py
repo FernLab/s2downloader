@@ -121,7 +121,7 @@ def searchDataAtAWS(*, s2_collection: list[str],
         df_scene_dates = pd.DataFrame(zip(date_list, utm_zone_list), columns=["dates", "utm_zones"])
 
         # keep scenes dates that are not duplicated OR where utm_zone fits best
-        df_scene_dates_clean = df_scene_dates[~df_scene_dates['dates'].duplicated(keep=False)]
+        df_scene_dates_clean = df_scene_dates
 
         def list2int(input_list):
             return [int(i) for i in input_list]
