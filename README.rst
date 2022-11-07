@@ -6,7 +6,7 @@ Python Boilerplate contains all the boilerplate you need to create a Python pack
 
 
 * Free software: Apache Software License 2.0
-* Documentation: https://fernlab.git-pages.gfz-potsdam.de/products/misac/misac-2//s2downloader/doc/
+* Documentation: https://fernlab.git-pages.gfz-potsdam.de/products/misac/misac-2/s2downloader/doc/
 
 
 
@@ -14,10 +14,10 @@ Status
 ------
 
 .. image:: https://git.gfz-potsdam.de/fernlab/products/misac/misac-2/s2downloader/badges/main/pipeline.svg
-        :target: https://git.gfz-potsdam.de/fernlab/misac/misac-2/s2downloader/pipelines
+        :target: https://git.gfz-potsdam.de/fernlab/products/misac/misac-2/s2downloader/pipelines
         :alt: Pipelines
 .. image:: https://git.gfz-potsdam.de/fernlab/products/misac/misac-2/s2downloader/badges/main/coverage.svg
-        :target: https://fernlab.git-pages.gfz-potsdam.de/misac/misac-2/s2downloader/coverage/
+        :target: https://fernlab.git-pages.gfz-potsdam.de/products/misac/misac-2/s2downloader/coverage/
         :alt: Coverage
 .. image:: https://img.shields.io/static/v1?label=Documentation&message=GitLab%20Pages&color=orange
         :target: https://fernlab.git-pages.gfz-potsdam.de/products/misac/misac-2/s2downloader/doc/
