@@ -29,8 +29,8 @@ from enum import Enum
 from json import JSONDecodeError
 
 # third party packages
-from pydantic import BaseModel, Field, validator, StrictBool, StrictInt, Extra, root_validator, HttpUrl
-from typing import Optional, Union, List, Dict
+from pydantic import BaseModel, Field, validator, StrictBool, Extra, HttpUrl
+from typing import Optional, List, Dict
 
 
 class ResamplingMethodName(str, Enum):
@@ -120,6 +120,10 @@ class TileSettings(BaseModel):
 class AoiSettings(BaseModel, extra=Extra.forbid):
     """Template for AOI settings in config file."""
 
+    bounding_box: List[float] = Field(
+        title="Bounding Box for AOI.",
+        description="SW and NE corner coordinates of AOI Bounding Box."
+    )
     SCL_filter_values: List[int] = Field(
         title="SCL values for the filter mask.",
         description="Define which values of SCL band should be applied as filter.",
@@ -138,13 +142,14 @@ class AoiSettings(BaseModel, extra=Extra.forbid):
         description="Define the method for resampling the raster to the target resolution.",
         default=ResamplingMethodName.cubic)
 
-    @validator('aoi_shapefile')
-    def validate_path(cls, v):
-        """Check path for the aoi."""
-        if os.path.isabs(v) is False:
-            v = os.path.realpath(v)
-            if not os.path.isfile(v):
-                raise FileNotFoundError(f"File not found: {v}")
+    @validator('bounding_box')
+    def validate_BB(cls, v):
+        """Check BoundingBox coordinates."""
+        if len(v) != 4:
+            raise ValueError("Bounding Box needs two pairs of lat/lon coordinates.")
+        if v[0] >= v[2] or v[1] >= v[3]:
+            raise ValueError("Bounding Box coordinates are not valid.")
+
         return v
 
     @validator("SCL_filter_values")
@@ -191,39 +196,6 @@ class ResultsSettings(BaseModel, extra=Extra.forbid):
         description="Downloads only the most recent scene from the available scenes.",
         default=False
     )
-    preferred_utm_zone: Union[StrictBool, StrictInt] = Field(
-        title="Define target UTM zone (optional).",
-        description="Define a target UTM zone for the output raster to be saved to.",
-        default=False)  # , gt=0, le=60)
-    save_raster_in_WGS_84_UTM_system: Optional[StrictBool] = Field(
-        title="Save raster into WGS84 coordinate system (native S2 tile format).",
-        description="Define output raster coordinate system.",
-        default=True)
-    save_raster_in_shp_coordinate_system: Optional[StrictBool] = Field(
-        title="Save raster into coordinate system provided by the shapefile.",
-        description="Define output raster coordinate system.",
-        default=False)
-    save_raster_dtype_float32: Optional[StrictBool] = Field(
-        title="Save raster with data type float32.",
-        description="Save raster without rounding and with the data type float32.",
-        default=False)
-
-    @validator('preferred_utm_zone')
-    def check_utm_zone(cls, v):
-        """Check if when a UTM is set it is between 0 and 60."""
-        if type(v) == int and (v < 0 or v > 60):
-            raise ValueError("UTM Zone should be between 0 and 60.")
-        if type(v) == bool and v is True:
-            raise ValueError("Define a number between 0 and 60 or set to false.")
-        return v
-
-    @root_validator
-    def validate_coordinate_system(cls, v):
-        """Check if either WGS 84 UTM or the shp coordinate system is provided."""
-        if v["save_raster_in_WGS_84_UTM_system"] is False and v["save_raster_in_shp_coordinate_system"] is False \
-           and v["only_dates_no_data"] is False:
-            raise ValueError("The raster should be saved either in WGS 84 UTM or in shp coordinate system.")
-        return v
 
     @validator('results_dir')
     def check_folder(cls, v):
@@ -260,25 +232,11 @@ class S2Settings(BaseModel, extra=Extra.forbid):
         default=["sentinel-s2-l2a-cogs"]
     )
 
-    tiles_reference_global: str = Field(
-        title="Location of the global S2 tiling reference shapefile",
-        description="S2 tiling shapefile needed for sorting polygons of multipolygon shapefiles.",
-        default="data/S2_tile_master/sentinel_2_index_shapefile_attr.shp")
-
     stac_catalog_url: Optional[HttpUrl] = Field(
         title="STAC catalog URL.",
         description="URL to access the STAC catalog.",
         default="https://earth-search.aws.element84.com/v0"
     )
-
-    @validator('tiles_reference_global')
-    def validate_path(cls, v):
-        """Check path for the global reference."""
-        if os.path.isabs(v) is False:
-            v = os.path.realpath(v)
-            if not os.path.isfile(v):
-                raise FileNotFoundError(f"File not found: {v}")
-        return v
 
 
 class Config(BaseModel):
