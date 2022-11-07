@@ -6,7 +6,7 @@ Python Boilerplate contains all the boilerplate you need to create a Python pack
 
 
 * Free software: Apache Software License 2.0
-* Documentation: https://fernlab.git-pages.gfz-potsdam.de/s2downloader/doc/
+* Documentation: https://fernlab.git-pages.gfz-potsdam.de/products/data-portal/s2downloader/doc/
 
 
 
@@ -20,7 +20,7 @@ Status
         :target: https://fernlab.git-pages.gfz-potsdam.de/s2downloader/coverage/
         :alt: Coverage
 .. image:: https://img.shields.io/static/v1?label=Documentation&message=GitLab%20Pages&color=orange
-        :target: https://fernlab.git-pages.gfz-potsdam.de/s2downloader/doc/
+        :target: https://fernlab.git-pages.gfz-potsdam.de/products/data-portal/s2downloader/doc/
         :alt: Documentation
 
 
@@ -37,7 +37,7 @@ History / Changelog
 -------------------
 
 You can find the protocol of recent changes in the S2Downloader package
-`here <https://git.gfz-potsdam.de/fernlab/s2downloader/-/blob/main/HISTORY.rst>`__.
+`here <https://git.gfz-potsdam.de/fernlab/products/data-portal/s2downloader/-/blob/main/HISTORY.rst>`__.
 
 
 Credits
@@ -47,5 +47,5 @@ This package was created with Cookiecutter_ and the `fernlab/cookiecutter-pypack
 
 .. _Cookiecutter: https://github.com/audreyr/cookiecutter
 .. _`fernlab/cookiecutter-pypackage`: https://github.com/fernlab/cookiecutter-pypackage
-.. _coverage: https://fernlab.git-pages.gfz-potsdam.de/s2downloader/coverage/
-.. _pytest: https://fernlab.git-pages.gfz-potsdam.de/s2downloader/test_reports/report.html
+.. _coverage: https://fernlab.git-pages.gfz-potsdam.de/products/data-portal/s2downloader/coverage/
+.. _pytest: https://fernlab.git-pages.gfz-potsdam.de/products/data-portal/s2downloader/test_reports/report.html
