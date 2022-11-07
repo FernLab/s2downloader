@@ -29,7 +29,7 @@ from enum import Enum
 from json import JSONDecodeError
 
 # third party packages
-from pydantic import BaseModel, Field, validator, StrictBool, Extra, HttpUrl
+from pydantic import BaseModel, Field, validator, StrictBool, Extra, HttpUrl, root_validator
 from typing import Optional, List, Dict
 
 
@@ -56,6 +56,11 @@ class TileSettings(BaseModel):
         alias="eo:cloud_cover",
         default={"lt": 20}
     )
+    target_resolution: Optional[int] = Field(
+        title="Output raster spatial resolution.",
+        description="Define the target resolution of the output raster."
+                    "It should be equal to one of the bands to download.",
+        default=10)
     bands: List[str] = Field(
         title="Bands",
         description="List of bands.",
@@ -88,6 +93,30 @@ class TileSettings(BaseModel):
                              " B08, B8A, B09, B10, B11, B12.")
         if len(v) != len(set(v)):
             raise ValueError("Remove duplicates.")
+        return v
+
+    @root_validator
+    def validate_target_resolution(cls, v):
+        """Check if target resolution fits to selected bands."""
+
+        resolution = v["target_resolution"]
+        if resolution not in [10, 20, 60]:
+            raise ValueError("Target resolution should be equal to 10, 20 or 60m.")
+
+        bands = v["bands"]
+        bands10m = ["B02", "B03", "B04", "B08"]
+        bands20m = ["B05", "B06", "B07", "B8A", "B11", "B12"]
+        bands60m = ["B01", "B09", "B10"]
+        if resolution == 10:
+            if not any(x in bands for x in bands10m):
+                raise ValueError(f"Target resolution is {resolution}m but no {resolution}m band is selected!")
+        if resolution == 20:
+            if not any(x in bands for x in bands20m):
+                raise ValueError(f"Target resolution is {resolution}m but no {resolution}m band is selected!")
+        if resolution == 60:
+            if not any(x in bands for x in bands60m):
+                raise ValueError(f"Target resolution is {resolution}m but no {resolution}m band is selected!")
+
         return v
 
     @validator("time")
@@ -175,11 +204,11 @@ class ResultsSettings(BaseModel, extra=Extra.forbid):
     results_dir: str = Field(
         title="Location of the output directory.",
         description="Define folder where all output data should be stored.")
-    target_resolution_in_m: int = Field(
-        title="Output raster spatial resolution.",
-        description="Define the target resolution of the output raster."
-                    "It should be equal to one of the bands to download.",
-        default=10, ge=1)
+    raster_stacking: StrictBool = Field(
+        title="Stack the downloaded files.",
+        description="If True the downloaded files will be stacked at target resolution.",
+        default=False
+    )
     only_dates_no_data: Optional[StrictBool] = Field(
         title="Download Dates.",
         description="Get only list of dates for all available scenes without downloading the scenes.",

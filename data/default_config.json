@@ -1,8 +1,9 @@
 {
     "user_settings": {
         "tile_settings": {
-            "sentinel:data_coverage": {"gt": 100},
-            "eo:cloud_cover": {"lt": 0},
+            "sentinel:data_coverage": {"ge": 100},
+            "eo:cloud_cover": {"le": 0},
+            "target_resolution": 10,
             "bands": ["B02", "B03","B04"],
             "time": "2021-09-01/2021-10-02"
         },
@@ -16,7 +17,7 @@
         },
         "result_settings": {
             "results_dir": "data/data_output/",
-            "target_resolution_in_m": 10,
+            "raster_stacking": false,
             "only_dates_no_data": false,
             "download_thumbnails": false,
             "download_overviews": false,
