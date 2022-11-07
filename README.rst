@@ -13,10 +13,10 @@ Python Boilerplate contains all the boilerplate you need to create a Python pack
 Status
 ------
 
-.. image:: https://git.gfz-potsdam.de/fernlab/s2downloader/badges/main/pipeline.svg
+.. image:: https://git.gfz-potsdam.de/fernlab/products/data-portal/s2downloader/badges/main/pipeline.svg
         :target: https://git.gfz-potsdam.de/fernlab/s2downloader/pipelines
         :alt: Pipelines
-.. image:: https://git.gfz-potsdam.de/fernlab/s2downloader/badges/main/coverage.svg
+.. image:: https://git.gfz-potsdam.de/fernlab/products/data-portal/s2downloader/badges/main/coverage.svg
         :target: https://fernlab.git-pages.gfz-potsdam.de/s2downloader/coverage/
         :alt: Coverage
 .. image:: https://img.shields.io/static/v1?label=Documentation&message=GitLab%20Pages&color=orange
