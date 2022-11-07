@@ -98,7 +98,6 @@ class TileSettings(BaseModel):
     @root_validator
     def validate_target_resolution(cls, v):
         """Check if target resolution fits to selected bands."""
-
         resolution = v["target_resolution"]
         if resolution not in [10, 20, 60]:
             raise ValueError("Target resolution should be equal to 10, 20 or 60m.")
