@@ -143,7 +143,7 @@ def searchDataAtAWS(*, s2_collection: list[str],
 def s2DataDownloader(*, config_dict: dict):
     """s2DataDownloader.
 
-        Parameters
+    Parameters
     ----------
     config_dict : dict
         Content of the user config file.
