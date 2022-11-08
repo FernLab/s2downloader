@@ -35,12 +35,12 @@ from pystac import Item
 from pystac_client import Client
 
 from .utils import saveRasterToDisk, validPixelsFromSCLBand, cloudMaskingFromSCLBand
+from .config import Config
 
 
 def searchDataAtAWS(*, s2_collection: list[str],
                     bb: list[float],
                     props_json: dict,
-                    utm_zone: int,
                     stac_catalog_url: str) -> tuple[list[Item], list[str], list[int]]:
     """Search for Sentinel-2 data in given bounding box as defined in query_props.json (no data download yet).
 
@@ -52,8 +52,6 @@ def searchDataAtAWS(*, s2_collection: list[str],
         A list of coordinates of the outer bounding box of all given coordinates.
     props_json: dict
         Dictionary of all search parameters retrieved from json file.
-    utm_zone : int
-        Best fitting UTM zone number.
     stac_catalog_url : str
         STAC catalog URL.
 
@@ -123,8 +121,7 @@ def searchDataAtAWS(*, s2_collection: list[str],
         df_scene_dates = pd.DataFrame(zip(date_list, utm_zone_list), columns=["dates", "utm_zones"])
 
         # keep scenes dates that are not duplicated OR where utm_zone fits best
-        df_scene_dates_clean = df_scene_dates[~df_scene_dates['dates'].duplicated(keep=False) |
-                                              df_scene_dates['utm_zones'].eq(utm_zone)]
+        df_scene_dates_clean = df_scene_dates
 
         def list2int(input_list):
             return [int(i) for i in input_list]
@@ -143,57 +140,13 @@ def searchDataAtAWS(*, s2_collection: list[str],
         raise Exception(f"Failed to find data at AWS server => {e}")
 
 
-def s2DataDownloader(*,
-                     collections: list[str],
-                     utm_zone: int,
-                     stac_catalog_url: str,
-                     tile_id: str,
-                     tile_settings: dict,
-                     bounding_box: list[float],
-                     aoi_settings: dict,
-                     aoi_name: str,
-                     result_dir: str,
-                     target_resolution: int = None,
-                     save_to_uint16: bool = True,
-                     raster_stacking: bool = False,
-                     download_thumbnails: bool = False,
-                     download_overviews: bool = False,
-                     only_dates_no_data: bool = False,
-                     download_only_one_scene: bool = False):
+def s2DataDownloader(*, config_dict: dict):
     """s2DataDownloader.
 
         Parameters
     ----------
-    stac_catalog_url: str
-        STAC catalog URL.
-    collections : list[str]
-        List of STAC collections.
-    utm_zone: int
-        UTM zone.
-    tile_id: str
-        Tile ID.
-    tile_settings: dict
-        Tile setting for the query_props.
-    bounding_box: list[float],
-        Bounding box.
-    aoi_settings: dict
-        AOI settings as a dictionary.
-    aoi_name: str
-        Name of AOI to distinguish request.
-    result_dir: str
-        Path to the result dir.
-    save_to_uint16: bool, default=True, optional
-        Save raster with dtype uint16.
-    raster_stacking: bool, default=False, optional
-        Stack all the bands into a single .tif file.
-    download_thumbnails: bool, default=False, optional
-        Download the thumbnails.
-    download_overviews: bool, default=False, optional
-        Download the overviews.
-    only_dates_no_data: bool, default=False, optional
-        Download only the list of dates for the available scenes, but not the data.
-    download_only_one_scene: bool, default=False, optional
-        Download only one scene, the most recent scene.
+    config_dict : dict
+        Content of the user config file.
 
     Raises
     ------
@@ -201,19 +154,38 @@ def s2DataDownloader(*,
         Failed to save raster to disk.
     """
     try:
+        config_dict = Config(**config_dict).dict(by_alias=True)
+
+        # read the variables from the config:
+        tile_settings = config_dict['user_settings']['tile_settings']
+        aoi_settings = config_dict['user_settings']['aoi_settings']
+        result_settings = config_dict['user_settings']['result_settings']
+        s2_settings = config_dict['s2_settings']
+
+        download_thumbnails = result_settings['download_thumbnails']
+        download_overviews = result_settings['download_overviews']
+        only_dates_no_data = result_settings['only_dates_no_data']
+
+        result_dir = result_settings['results_dir']
+        raster_stacking = result_settings['raster_stacking']
+        target_resolution = tile_settings['target_resolution']
+        save_to_uint16 = not result_settings["save_raster_dtype_float32"]
+
         # search for Sentinel-2 data within the bounding box as defined in query_props.json (no data download yet)
-        aws_items, date_list, scene_index = searchDataAtAWS(s2_collection=collections,
-                                                            bb=bounding_box,
+        aws_items, date_list, scene_index = searchDataAtAWS(s2_collection=s2_settings['collections'],
+                                                            bb=aoi_settings['bounding_box'],
                                                             props_json=tile_settings,
-                                                            utm_zone=utm_zone,
-                                                            stac_catalog_url=stac_catalog_url)
+                                                            stac_catalog_url=s2_settings['stac_catalog_url'])
 
         scene_index.sort()
         selected_scenes_index_list = scene_index
+
+        download_only_one_scene = False
         if download_only_one_scene:
             selected_scenes_index_list = [scene_index[0]]
 
         data_msg = []
+
         if download_thumbnails:
             data_msg.append("thumbnail")
         if download_overviews:
@@ -228,8 +200,7 @@ def s2DataDownloader(*,
             current_year = current_date[:len(current_date) // 2]
             current_month_day = current_date[len(current_date) // 2:]
             current_month = current_month_day[:len(current_month_day) // 2]
-            output_raster_directory_tile_date = os.path.join(result_dir, tile_id,
-                                                             current_year, current_month)
+            output_raster_directory_tile_date = os.path.join(result_dir, current_year, current_month)
 
             # get item for selected scene
             aws_item = aws_items[idx_scene]
@@ -253,19 +224,17 @@ def s2DataDownloader(*,
                     print(data_msg)
 
                     if download_thumbnails or download_overviews:
-                        output_path = os.path.join(result_dir, tile_id, current_year, current_month)
+                        output_path = os.path.join(result_dir, current_year, current_month)
                         if not os.path.isdir(output_path):
                             os.makedirs(output_path)
                         if download_thumbnails:
                             file_url = aws_item.assets["thumbnail"].href
                             thumbnail_path = os.path.join(output_raster_directory_tile_date,
-                                                          f"{aoi_name}"
                                                           f"_{aws_item.id}_{file_url.rsplit('/', 1)[1]}")
                             urllib.request.urlretrieve(file_url, thumbnail_path)
                         if download_overviews:
                             file_url = aws_item.assets["overview"].href
                             overview_path = os.path.join(output_raster_directory_tile_date,
-                                                         f"{aoi_name}"
                                                          f"_{aws_item.id}_{file_url.rsplit('/', 1)[1]}")
                             urllib.request.urlretrieve(file_url, overview_path)
                     if only_dates_no_data:
@@ -283,7 +252,7 @@ def s2DataDownloader(*,
                             os.makedirs(output_raster_directory_tile_date)
                         if not raster_stacking:
                             output_raster_path = os.path.join(output_raster_directory_tile_date,
-                                                              f"{aoi_name}_{file_url.split('/')[-2]}")
+                                                              f"_{file_url.split('/')[-2]}")
                             if not os.path.isdir(output_raster_path):
                                 os.makedirs(output_raster_path)
 
@@ -329,7 +298,7 @@ def s2DataDownloader(*,
                             print("Stack all bands.")
                             out_image_stack = np.concatenate(raster_bands, axis=0, out=None)
                             output_raster_path = os.path.join(output_raster_directory_tile_date,
-                                                              f"{aoi_name}_{file_url.split('/')[-2]}.tif")
+                                                              f"_{file_url.split('/')[-2]}.tif")
                             saveRasterToDisk(out_image=out_image_stack,
                                              raster_crs=bands_crs[0],
                                              out_transform=bands_transform[0],
@@ -339,7 +308,7 @@ def s2DataDownloader(*,
 
                         # Save the SCL band
                         output_scl_path = os.path.join(output_raster_directory_tile_date,
-                                                       f"{aoi_name}_{file_url.split('/')[-2]}_SCL.tif")
+                                                       f"_{file_url.split('/')[-2]}_SCL.tif")
                         saveRasterToDisk(out_image=scl_src.read(),
                                          raster_crs=scl_src.crs,
                                          out_transform=scl_src.transform,
@@ -349,7 +318,7 @@ def s2DataDownloader(*,
 
                     if only_dates_no_data:
                         scenes_info_path = os.path.join(result_dir,
-                                                        f"scenes_info_{tile_id}_"
+                                                        f"scenes_info_"
                                                         f"{tile_settings['time'].replace('/', '_')}.json")
                         if os.path.exists(scenes_info_path):
                             raise IOError(f"The scenes_info file: {scenes_info_path} already exists.")

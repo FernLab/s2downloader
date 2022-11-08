@@ -1,13 +1,14 @@
 {
     "user_settings": {
         "tile_settings": {
-            "sentinel:data_coverage": {"gt": 80},
-            "eo:cloud_cover": {"lt": 20},
-            "bands": ["B01", "B05","B08"],
+            "sentinel:data_coverage": {"ge": 100},
+            "eo:cloud_cover": {"le": 0},
+            "target_resolution": 10,
+            "bands": ["B02", "B03","B04"],
             "time": "2021-09-01/2021-10-02"
         },
         "aoi_settings": {
-            "aoi_shapefile": "data/demo_shapefile/polygon_telegrafenberg.shp",
+            "bounding_box": [12.1439, 52.3832, 13.4204, 53.0389],
             "apply_SCL_band_mask": false,
             "SCL_filter_values": [3, 6],
             "SCL_mask_valid_pixels_min_percentage": 10,
@@ -16,7 +17,7 @@
         },
         "result_settings": {
             "results_dir": "data/data_output/",
-            "target_resolution_in_m": 10,
+            "raster_stacking": false,
             "only_dates_no_data": false,
             "download_thumbnails": false,
             "download_overviews": false,
@@ -26,7 +27,6 @@
     "s2_settings": {
         "collections": [
             "sentinel-s2-l2a-cogs"
-        ],
-        "tiles_reference_global": "data/S2_tile_master/sentinel_2_index_shapefile_attr.shp"
+        ]
     }
 }
