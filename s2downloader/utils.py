@@ -171,10 +171,10 @@ def cloudMaskingFromSCLBand(*,
         band_scale_factor = 1.0
 
         if target_resolution is not None:
-            scl_scale_factor = target_resolution / scl_src.transform[1]
-            band_scale_factor = target_resolution / band_src.transform[1]
+            scl_scale_factor = target_resolution / scl_src.transform[0]
+            band_scale_factor = target_resolution / band_src.transform[0]
         else:
-            scl_scale_factor = band_src.transform[1] / scl_src.transform[1]
+            scl_scale_factor = band_src.transform[0] / scl_src.transform[0]
 
         if scl_scale_factor != 1.0:
             scl_band = scl_src.read(
