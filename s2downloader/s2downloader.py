@@ -169,6 +169,8 @@ def s2DataDownloader(*, config_dict: dict):
         result_dir = result_settings['results_dir']
         raster_stacking = result_settings['raster_stacking']
         target_resolution = tile_settings['target_resolution']
+        if not raster_stacking:
+            target_resolution = None
         save_to_uint16 = not result_settings["save_raster_dtype_float32"]
 
         # search for Sentinel-2 data within the bounding box as defined in query_props.json (no data download yet)
