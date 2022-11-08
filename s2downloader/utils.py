@@ -29,7 +29,7 @@ from rasterio.enums import Resampling
 
 
 def saveRasterToDisk(*, out_image: np.ndarray, raster_crs: pyproj.crs.crs.CRS, out_transform: affine.Affine,
-                     bands: list[str], output_raster_path: str, save_to_uint16: bool = False):
+                     output_raster_path: str, save_to_uint16: bool = False):
     """Save raster imagery data to disk.
 
     Parameters
@@ -40,8 +40,6 @@ def saveRasterToDisk(*, out_image: np.ndarray, raster_crs: pyproj.crs.crs.CRS, o
         Output raster coordinate system.
     out_transform : affine.Affine
         Output raster transformation parameters.
-    bands : list[str]
-        List containing all band names of the image stack.
     output_raster_path : str
         Path to raster output location.
     save_to_uint16 : bool, default=False, optional
@@ -91,8 +89,7 @@ def saveRasterToDisk(*, out_image: np.ndarray, raster_crs: pyproj.crs.crs.CRS, o
                 dst.write(out_image_uint16)
             else:
                 dst.write(out_image)
-            for index, band_name in enumerate(bands):
-                dst.set_band_description(index, f"'Band':{band_name}")
+
     except Exception as e:  # pragma: no cover
         raise Exception(f"Failed to save raster to disk => {e}")
 
@@ -123,12 +120,12 @@ def validPixelsFromSCLBand(scl_src: rasterio.io.DatasetReader, scl_filter_values
         scl_band = scl_src.read()
         scl_band_nonzero = np.count_nonzero(scl_band)
         nonzero_pixels_per = (float(scl_band_nonzero) / float(scl_band.size)) * 100
-        print(f"Nonzero pixels: {nonzero_pixels_per * 100} %")
+        print(f"Nonzero pixels: {nonzero_pixels_per} %")
 
         scl_filter_values.append(0)
         scl_band_mask = np.where(np.isin(scl_band, scl_filter_values), 0, 1)
-        valid_pixels_per = float(np.count_nonzero(scl_band_mask)) / float(scl_band_nonzero.size)
-        print(f"Valid pixels: {valid_pixels_per * 100} %")
+        valid_pixels_per = (float(np.count_nonzero(scl_band_mask)) / float(scl_band_nonzero)) * 100
+        print(f"Valid pixels: {valid_pixels_per} %")
 
         return nonzero_pixels_per, valid_pixels_per
     except Exception as e:  # pragma: no cover
@@ -156,6 +153,7 @@ def cloudMaskingFromSCLBand(*,
         Target resolution, if None keep original.
     resampling_method: rasterio.wrap.Resampling
         The resampling method for a raster band.
+
     Returns
     -------
     : np.ndarray
@@ -170,10 +168,10 @@ def cloudMaskingFromSCLBand(*,
         band_scale_factor = 1.0
 
         if target_resolution is not None:
-            scl_scale_factor = target_resolution / scl_src.transform[1]
-            band_scale_factor = target_resolution / band_src.transform[1]
+            scl_scale_factor = target_resolution / scl_src.transform[0]
+            band_scale_factor = target_resolution / band_src.transform[0]
         else:
-            scl_scale_factor = band_src.transform[1] / scl_src.transform[1]
+            scl_scale_factor = band_src.transform[0] / scl_src.transform[0]
 
         if scl_scale_factor != 1.0:
             scl_band = scl_src.read(
