@@ -167,10 +167,9 @@ def s2DataDownloader(*, config_dict: dict):
         only_dates_no_data = result_settings['only_dates_no_data']
 
         result_dir = result_settings['results_dir']
-        raster_stacking = result_settings['raster_stacking']
-        target_resolution = tile_settings['target_resolution']
-        if not raster_stacking:
-            target_resolution = None
+
+        target_resolution = result_settings['target_resolution']
+
         save_to_uint16 = not result_settings["save_raster_dtype_float32"]
 
         # search for Sentinel-2 data within the bounding box as defined in query_props.json (no data download yet)
@@ -252,11 +251,11 @@ def s2DataDownloader(*, config_dict: dict):
                         # Create results directory
                         if not os.path.isdir(output_raster_directory_tile_date):
                             os.makedirs(output_raster_directory_tile_date)
-                        if not raster_stacking:
-                            output_raster_path = os.path.join(output_raster_directory_tile_date,
-                                                              f"_{file_url.split('/')[-2]}")
-                            if not os.path.isdir(output_raster_path):
-                                os.makedirs(output_raster_path)
+
+                        output_raster_path = os.path.join(output_raster_directory_tile_date,
+                                                          f"_{file_url.split('/')[-2]}")
+                        if not os.path.isdir(output_raster_path):
+                            os.makedirs(output_raster_path)
 
                         raster_bands = []
                         bands_crs = []
@@ -270,43 +269,22 @@ def s2DataDownloader(*, config_dict: dict):
                             print(file_url)
 
                             with rasterio.open(file_url) as band_src:
-                                if target_resolution is not None:
-                                    raster_transform = \
-                                        band_src.transform * [1, target_resolution, 1, 1, target_resolution, 1]
-                                else:
-                                    raster_transform = band_src.transform
                                 raster_band = cloudMaskingFromSCLBand(
                                     band_src=band_src,
                                     scl_src=scl_src,
                                     scl_filter_values=aoi_settings["SCL_filter_values"],
                                     resampling_method=aoi_settings["raster_resampling_method"]
                                 )
-                                if not raster_stacking:
-                                    output_band_path = os.path.join(output_raster_path,
-                                                                    f"{band}.tif")
-                                    saveRasterToDisk(out_image=raster_band,
-                                                     raster_crs=band_src.crs,
-                                                     out_transform=band_src.transform,
-                                                     bands=[band],
-                                                     output_raster_path=output_band_path,
-                                                     save_to_uint16=save_to_uint16)
-                                else:
-                                    raster_bands.append(raster_band)
-                                    bands_crs.append(band_src.crs)
-                                    bands_transform.append(raster_transform)
 
-                        # stack raster bands from list
-                        if raster_stacking:
-                            print("Stack all bands.")
-                            out_image_stack = np.concatenate(raster_bands, axis=0, out=None)
-                            output_raster_path = os.path.join(output_raster_directory_tile_date,
-                                                              f"_{file_url.split('/')[-2]}.tif")
-                            saveRasterToDisk(out_image=out_image_stack,
-                                             raster_crs=bands_crs[0],
-                                             out_transform=bands_transform[0],
-                                             bands=bands,
-                                             output_raster_path=output_raster_path,
-                                             save_to_uint16=save_to_uint16)
+                                output_band_path = os.path.join(output_raster_path,
+                                                                f"{band}.tif")
+                                saveRasterToDisk(out_image=raster_band,
+                                                 raster_crs=band_src.crs,
+                                                 out_transform=band_src.transform,
+                                                 bands=[band],
+                                                 output_raster_path=output_band_path,
+                                                 save_to_uint16=save_to_uint16)
+
 
                         # Save the SCL band
                         output_scl_path = os.path.join(output_raster_directory_tile_date,

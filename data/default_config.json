@@ -1,10 +1,9 @@
 {
     "user_settings": {
         "tile_settings": {
-            "sentinel:data_coverage": {"ge": 100},
-            "eo:cloud_cover": {"le": 0},
-            "target_resolution": 10,
-            "bands": ["B02", "B03","B04"],
+            "sentinel:data_coverage": {"ge": 70},
+            "eo:cloud_cover": {"le": 20},
+            "bands": ["B05", "B06","B02"],
             "time": "2021-09-01/2021-10-02"
         },
         "aoi_settings": {
@@ -17,7 +16,6 @@
         },
         "result_settings": {
             "results_dir": "data/data_output/",
-            "raster_stacking": false,
             "only_dates_no_data": false,
             "download_thumbnails": false,
             "download_overviews": false,
