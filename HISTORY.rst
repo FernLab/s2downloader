@@ -5,9 +5,9 @@ History
 0.1.1 (2022-11-08)
 ------------------
 
-* Clean config file and config.py
-* fix some bugs
-* added config check and _cli
+* Define the first default config file and its schema.
+* First full run with the default config file.
+* Improve command line client.
 
 0.1.0 (2022-11-03)
 ------------------
