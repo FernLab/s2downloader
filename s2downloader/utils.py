@@ -156,6 +156,7 @@ def cloudMaskingFromSCLBand(*,
         Target resolution, if None keep original.
     resampling_method: rasterio.wrap.Resampling
         The resampling method for a raster band.
+
     Returns
     -------
     : np.ndarray
