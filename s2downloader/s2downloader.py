@@ -23,7 +23,6 @@
 import json
 import re
 
-import numpy as np
 import os
 from datetime import datetime
 
@@ -168,7 +167,7 @@ def s2DataDownloader(*, config_dict: dict):
 
         result_dir = result_settings['results_dir']
 
-        target_resolution = result_settings['target_resolution']
+#        target_resolution = result_settings['target_resolution']
 
         save_to_uint16 = not result_settings["save_raster_dtype_float32"]
 
@@ -257,9 +256,6 @@ def s2DataDownloader(*, config_dict: dict):
                         if not os.path.isdir(output_raster_path):
                             os.makedirs(output_raster_path)
 
-                        raster_bands = []
-                        bands_crs = []
-                        bands_transform = []
                         file_url = None
                         for band in bands:
                             print(f"Retrieving band: {band}")
@@ -283,7 +279,6 @@ def s2DataDownloader(*, config_dict: dict):
                                                  out_transform=band_src.transform,
                                                  output_raster_path=output_band_path,
                                                  save_to_uint16=save_to_uint16)
-
 
                         # Save the SCL band
                         output_scl_path = os.path.join(output_raster_directory_tile_date,
