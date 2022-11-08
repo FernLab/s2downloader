@@ -123,12 +123,12 @@ def validPixelsFromSCLBand(scl_src: rasterio.io.DatasetReader, scl_filter_values
         scl_band = scl_src.read()
         scl_band_nonzero = np.count_nonzero(scl_band)
         nonzero_pixels_per = (float(scl_band_nonzero) / float(scl_band.size)) * 100
-        print(f"Nonzero pixels: {nonzero_pixels_per * 100} %")
+        print(f"Nonzero pixels: {nonzero_pixels_per} %")
 
         scl_filter_values.append(0)
         scl_band_mask = np.where(np.isin(scl_band, scl_filter_values), 0, 1)
-        valid_pixels_per = float(np.count_nonzero(scl_band_mask)) / float(scl_band_nonzero.size)
-        print(f"Valid pixels: {valid_pixels_per * 100} %")
+        valid_pixels_per = (float(np.count_nonzero(scl_band_mask)) / float(scl_band_nonzero)) * 100
+        print(f"Valid pixels: {valid_pixels_per} %")
 
         return nonzero_pixels_per, valid_pixels_per
     except Exception as e:  # pragma: no cover
