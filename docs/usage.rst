@@ -23,5 +23,5 @@ At the command line, S2Downloader provides the **s2downloader_cli.py** command:
 
 .. argparse::
    :filename: ./../bin/s2downloader_cli.py
-   :func: get_argparser
+   :func: getArgparser
    :prog: s2downloader_cli.py
