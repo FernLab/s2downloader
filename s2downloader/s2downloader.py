@@ -170,6 +170,7 @@ def s2DataDownloader(*, config_dict: dict):
 #        target_resolution = result_settings['target_resolution']
 
         save_to_uint16 = not result_settings["save_raster_dtype_float32"]
+        cloudmasking = aoi_settings["apply_SCL_band_mask"]
 
         # search for Sentinel-2 data within the bounding box as defined in query_props.json (no data download yet)
         aws_items, date_list, scene_index = searchDataAtAWS(s2_collection=s2_settings['collections'],
@@ -220,8 +221,8 @@ def s2DataDownloader(*, config_dict: dict):
                 if nonzero_pixels_per >= aoi_settings["SCL_mask_valid_pixels_min_percentage"]\
                    and valid_pixels_per >= aoi_settings["aoi_min_coverage"]:
                     if (download_thumbnails or download_overviews) or not only_dates_no_data:
-                        data_msg = f"Getting {','.join(data_msg)} for: {aws_item.id}"
-                    print(data_msg)
+                        msg = f"Getting {''.join(data_msg)} for: {aws_item.id}"
+                    print(msg)
 
                     if download_thumbnails or download_overviews:
                         output_path = os.path.join(result_dir, current_year, current_month)
@@ -265,12 +266,15 @@ def s2DataDownloader(*, config_dict: dict):
                             print(file_url)
 
                             with rasterio.open(file_url) as band_src:
-                                raster_band = cloudMaskingFromSCLBand(
-                                    band_src=band_src,
-                                    scl_src=scl_src,
-                                    scl_filter_values=aoi_settings["SCL_filter_values"],
-                                    resampling_method=aoi_settings["raster_resampling_method"]
-                                )
+                                if cloudmasking:
+                                    raster_band = cloudMaskingFromSCLBand(
+                                        band_src=band_src,
+                                        scl_src=scl_src,
+                                        scl_filter_values=aoi_settings["SCL_filter_values"],
+                                        resampling_method=aoi_settings["raster_resampling_method"]
+                                    )
+                                else:
+                                    raster_band = band_src.read()
 
                                 output_band_path = os.path.join(output_raster_path,
                                                                 f"{band}.tif")
@@ -282,7 +286,7 @@ def s2DataDownloader(*, config_dict: dict):
 
                         # Save the SCL band
                         output_scl_path = os.path.join(output_raster_directory_tile_date,
-                                                       f"_{file_url.split('/')[-2]}_SCL.tif")
+                                                       f"{file_url.split('/')[-2]}_SCL.tif")
                         saveRasterToDisk(out_image=scl_src.read(),
                                          raster_crs=scl_src.crs,
                                          out_transform=scl_src.transform,

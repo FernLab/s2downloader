@@ -3,7 +3,7 @@
         "tile_settings": {
             "sentinel:data_coverage": {"ge": 70},
             "eo:cloud_cover": {"le": 20},
-            "bands": ["B02", "B03","B04"],
+            "bands": ["B05", "B06"],
             "time": "2021-09-01/2021-10-02"
         },
         "aoi_settings": {
