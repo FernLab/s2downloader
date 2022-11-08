@@ -201,8 +201,8 @@ class ResultsSettings(BaseModel, extra=Extra.forbid):
         description="Save raster without rounding and with the data type float32.",
         default=False)
     target_resolution: Optional[int] = Field(
-        title="Output raster spatial resolution.",
-        description="Define the target resolution of the output raster."
+        title="Output raster spatial resolution in meters.",
+        description="Define the target resolution of the output raster in meters."
                     "It should be equal to one of the bands to download."
     )
 
