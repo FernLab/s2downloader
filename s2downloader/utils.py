@@ -29,7 +29,7 @@ from rasterio.enums import Resampling
 
 
 def saveRasterToDisk(*, out_image: np.ndarray, raster_crs: pyproj.crs.crs.CRS, out_transform: affine.Affine,
-                     bands: list[str], output_raster_path: str, save_to_uint16: bool = False):
+                     output_raster_path: str, save_to_uint16: bool = False):
     """Save raster imagery data to disk.
 
     Parameters
@@ -40,8 +40,6 @@ def saveRasterToDisk(*, out_image: np.ndarray, raster_crs: pyproj.crs.crs.CRS, o
         Output raster coordinate system.
     out_transform : affine.Affine
         Output raster transformation parameters.
-    bands : list[str]
-        List containing all band names of the image stack.
     output_raster_path : str
         Path to raster output location.
     save_to_uint16 : bool, default=False, optional
@@ -91,8 +89,7 @@ def saveRasterToDisk(*, out_image: np.ndarray, raster_crs: pyproj.crs.crs.CRS, o
                 dst.write(out_image_uint16)
             else:
                 dst.write(out_image)
-            for index, band_name in enumerate(bands):
-                dst.set_band_description(index, f"'Band':{band_name}")
+
     except Exception as e:  # pragma: no cover
         raise Exception(f"Failed to save raster to disk => {e}")
 

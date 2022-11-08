@@ -281,7 +281,6 @@ def s2DataDownloader(*, config_dict: dict):
                                 saveRasterToDisk(out_image=raster_band,
                                                  raster_crs=band_src.crs,
                                                  out_transform=band_src.transform,
-                                                 bands=[band],
                                                  output_raster_path=output_band_path,
                                                  save_to_uint16=save_to_uint16)
 
@@ -292,7 +291,6 @@ def s2DataDownloader(*, config_dict: dict):
                         saveRasterToDisk(out_image=scl_src.read(),
                                          raster_crs=scl_src.crs,
                                          out_transform=scl_src.transform,
-                                         bands=bands,
                                          output_raster_path=output_scl_path,
                                          save_to_uint16=save_to_uint16)
 
