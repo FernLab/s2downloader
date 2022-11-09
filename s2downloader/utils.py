@@ -159,7 +159,7 @@ def cloudMaskingFromSCLBand(*,
         Failed to mask pixels from SCL band.
     """
     try:
-        scl_scale_factor = band_src.transform[0] / scl_src.transform[0]
+        scl_scale_factor = scl_src.transform[0] / band_src.transform[0]
 
         if scl_scale_factor != 1.0:
             scl_band = scl_src.read(

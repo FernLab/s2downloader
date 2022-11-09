@@ -251,7 +251,7 @@ def s2DataDownloader(*, config_dict: dict):
                             os.makedirs(output_raster_directory_tile_date)
 
                         output_raster_path = os.path.join(output_raster_directory_tile_date,
-                                                          f"_{file_url.split('/')[-2]}")
+                                                          f"{file_url.split('/')[-2]}")
                         if not os.path.isdir(output_raster_path):
                             os.makedirs(output_raster_path)
 
