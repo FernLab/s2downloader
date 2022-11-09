@@ -167,8 +167,6 @@ def s2DataDownloader(*, config_dict: dict):
 
         result_dir = result_settings['results_dir']
 
-#        target_resolution = result_settings['target_resolution']
-
         save_to_uint16 = not result_settings["save_raster_dtype_float32"]
         cloudmasking = aoi_settings["apply_SCL_band_mask"]
 
