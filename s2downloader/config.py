@@ -25,20 +25,11 @@ import os
 import json
 import re
 from datetime import datetime
-from enum import Enum
 from json import JSONDecodeError
 
 # third party packages
 from pydantic import BaseModel, Field, validator, StrictBool, Extra, HttpUrl
 from typing import Optional, List, Dict
-
-
-class ResamplingMethodName(str, Enum):
-    """Enum for supported and tested resampling methods."""
-
-    cubic = "cubic"
-    bilinear = "bilinear"
-    nearest = "nearest"
 
 
 class TileSettings(BaseModel):
@@ -141,10 +132,6 @@ class AoiSettings(BaseModel, extra=Extra.forbid):
         description="Define a minimum percentage of pixels that should be valid (not noData) after noData filtering"
                     " in the aoi.",
         default=0.0, ge=0.0, le=100.0)
-    raster_resampling_method: ResamplingMethodName = Field(
-        title="Rasterio resampling method name.",
-        description="Define the method for resampling the raster to the target resolution.",
-        default=ResamplingMethodName.cubic)
 
     @validator('bounding_box')
     def validate_BB(cls, v):
@@ -200,11 +187,6 @@ class ResultsSettings(BaseModel, extra=Extra.forbid):
         title="Save raster with data type float32.",
         description="Save raster without rounding and with the data type float32.",
         default=False)
-    target_resolution: Optional[int] = Field(
-        title="Output raster spatial resolution in meters.",
-        description="Define the target resolution of the output raster in meters."
-                    "It should be equal to one of the bands to download."
-    )
 
     @validator('results_dir')
     def check_folder(cls, v):
@@ -213,30 +195,6 @@ class ResultsSettings(BaseModel, extra=Extra.forbid):
             raise ValueError("Empty string is not allowed.")
         if os.path.isabs(v) is False:
             v = os.path.realpath(v)
-        return v
-
-    @validator("target_resolution")
-    def validate_target_resolution(cls, v):
-        """Check if target resolution fits to selected bands."""
-        if v is None:
-            return
-        if v not in [10, 20, 60]:
-            raise ValueError("Target resolution should be equal to 10, 20 or 60m.")
-
-        bands = v["bands"]
-        bands10m = ["B02", "B03", "B04", "B08"]
-        bands20m = ["B05", "B06", "B07", "B8A", "B11", "B12"]
-        bands60m = ["B01", "B09", "B10"]
-        if v == 10:
-            if not any(x in bands for x in bands10m):
-                raise ValueError(f"Target resolution is {v}m but no {v}m band is selected!")
-        if v == 20:
-            if not any(x in bands for x in bands20m):
-                raise ValueError(f"Target resolution is {v}m but no {v}m band is selected!")
-        if v == 60:
-            if not any(x in bands for x in bands60m):
-                raise ValueError(f"Target resolution is {v}m but no {v}m band is selected!")
-
         return v
 
 
