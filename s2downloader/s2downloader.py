@@ -220,7 +220,7 @@ def s2DataDownloader(*, config_dict: dict):
                    and valid_pixels_per >= aoi_settings["aoi_min_coverage"]:
                     if (download_thumbnails or download_overviews) or not only_dates_no_data:
                         msg = f"Getting {''.join(data_msg)} for: {aws_item.id}"
-                    print(msg)
+                        print(msg)
 
                     if download_thumbnails or download_overviews:
                         output_path = os.path.join(result_dir, current_year, current_month)
@@ -240,7 +240,10 @@ def s2DataDownloader(*, config_dict: dict):
                         item = aws_items[idx_scene]
                         date_str = date_list[idx_scene]
                         date = datetime(year=int(date_str[0:4]), month=int(date_str[4:6]), day=int(date_str[6:8]))
-                        scenes_info[date.strftime("%Y-%m-%d")] = {"id": item.to_dict()["id"]}
+                        if date.strftime("%Y-%m-%d") not in scenes_info:
+                            scenes_info[date.strftime("%Y-%m-%d")] = list()
+                        scenes_info[date.strftime("%Y-%m-%d")].append({"id": item.to_dict()["id"]})
+
                     else:
                         # Download all other bands
                         bands = tile_settings["bands"]
@@ -290,14 +293,14 @@ def s2DataDownloader(*, config_dict: dict):
                                          output_raster_path=output_scl_path,
                                          save_to_uint16=save_to_uint16)
 
-                    if only_dates_no_data:
-                        scenes_info_path = os.path.join(result_dir,
-                                                        f"scenes_info_"
-                                                        f"{tile_settings['time'].replace('/', '_')}.json")
-                        if os.path.exists(scenes_info_path):
-                            raise IOError(f"The scenes_info file: {scenes_info_path} already exists.")
-                        else:
-                            with open(scenes_info_path, "w") as write_file:
-                                json.dump(scenes_info, write_file, indent=4)
+        if only_dates_no_data:
+            scenes_info_path = os.path.join(result_dir,
+                                            f"scenes_info_"
+                                            f"{tile_settings['time'].replace('/', '_')}.json")
+            if os.path.exists(scenes_info_path):
+                raise IOError(f"The scenes_info file: {scenes_info_path} already exists.")
+            else:
+                with open(scenes_info_path, "w") as write_file:
+                    json.dump(scenes_info, write_file, indent=4)
     except Exception as e:
         raise Exception(f"Failed to run S2DataPortal main process => {e}")
