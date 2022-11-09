@@ -25,20 +25,11 @@ import os
 import json
 import re
 from datetime import datetime
-from enum import Enum
 from json import JSONDecodeError
 
 # third party packages
 from pydantic import BaseModel, Field, validator, StrictBool, Extra, HttpUrl
 from typing import Optional, List, Dict
-
-
-class ResamplingMethodName(str, Enum):
-    """Enum for supported and tested resampling methods."""
-
-    cubic = "cubic"
-    bilinear = "bilinear"
-    nearest = "nearest"
 
 
 class TileSettings(BaseModel):
@@ -141,10 +132,6 @@ class AoiSettings(BaseModel, extra=Extra.forbid):
         description="Define a minimum percentage of pixels that should be valid (not noData) after noData filtering"
                     " in the aoi.",
         default=0.0, ge=0.0, le=100.0)
-    raster_resampling_method: ResamplingMethodName = Field(
-        title="Rasterio resampling method name.",
-        description="Define the method for resampling the raster to the target resolution.",
-        default=ResamplingMethodName.cubic)
 
     @validator('bounding_box')
     def validate_BB(cls, v):
