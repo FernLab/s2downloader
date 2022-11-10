@@ -41,14 +41,45 @@ class ResamplingMethodName(str, Enum):
     nearest = "nearest"
 
 
+class S2Platform(str, Enum):
+    """Enum for Sentinel-2 platform."""
+
+    S2A = "sentinel-2a"
+    S2B = "sentinel-2b"
+
+
 class TileSettings(BaseModel):
     """Template for Tile settings in config file."""
+
+    platform: Optional[Dict] = Field(
+        title="Sentinel-2 platform.",
+        description="For which Sentinel-2 platform data should be downloaded.",
+        default={"in": [S2Platform.S2A, S2Platform.S2B]}
+    )
 
     data_coverage: Dict = Field(
         title="Data coverage",
         description="Percentage of data coverage.",
         alias="sentinel:data_coverage",
         default={"gt": 10}
+    )
+    utm_zone: Optional[Dict] = Field(
+        title="UTM zone",
+        description="UTM zones for which to search data.",
+        alias="sentinel:utm_zone",
+        default={}
+    )
+    latitude_band: Optional[Dict] = Field(
+        title="Latitude band",
+        description="Latitude band for which to search data.",
+        alias="sentinel:latitude_band",
+        default={}
+    )
+    grid_square: Optional[Dict] = Field(
+        title="Grid square",
+        description="Grid square for which to search data.",
+        alias="sentinel:grid_square",
+        default={}
     )
     cloud_cover: Dict = Field(
         title="Cloud coverage",
@@ -60,10 +91,6 @@ class TileSettings(BaseModel):
         title="Bands",
         description="List of bands.",
         default=["B02", "B03", "B05"]
-    )
-    time: str = Field(
-        title="Time range",
-        description="Time range expressed as two dates start/end."
     )
 
     @validator("data_coverage", "cloud_cover")
@@ -88,32 +115,6 @@ class TileSettings(BaseModel):
                              " B08, B8A, B09, B10, B11, B12.")
         if len(v) != len(set(v)):
             raise ValueError("Remove duplicates.")
-        return v
-
-    @validator("time")
-    def check_time(cls, v):
-        """Check if time parameter is a date or a date range (start/end)."""
-        if "/" in v:
-            try:
-                pattern = re.compile(r'^(\d{4}-\d{2}-\d{2})/(\d{4}-\d{2}-\d{2})$')
-                dates = pattern.search(v)
-                if dates is None:
-                    raise ValueError("It does not match the format yyyy-mm-dd/yyyy-mm-dd")
-                start = datetime.strptime(dates[1], '%Y-%m-%d')
-                end = datetime.strptime(dates[2], '%Y-%m-%d')
-                if start >= end:
-                    raise ValueError("start >= end.")
-            except Exception as err:
-                raise ValueError(f"The time range {v} is incorrect: {err}.")
-        else:
-            try:
-                pattern = re.compile(r'^(\d{4}-\d{2}-\d{2})$')
-                dates = pattern.search(v)
-                if dates is None:
-                    raise ValueError("It does not match the format yyyy-mm-dd")
-                datetime.strptime(dates[1], '%Y-%m-%d')
-            except Exception as err:
-                raise ValueError(f"The time {v} is incorrect: {err}.")
         return v
 
 
@@ -144,6 +145,14 @@ class AoiSettings(BaseModel, extra=Extra.forbid):
         title="Rasterio resampling method name.",
         description="Define the method to be used when resampling.",
         default=ResamplingMethodName.cubic)
+    date_range: List[datetime] = Field(
+        title="Date range.",
+        description="List with the start and end date. If the same it is a single date request.",
+        unique_items=False,
+        min_items=1,
+        max_items=2,
+        default=["2021-09-01", "2021-09-05"]
+    )
 
     @validator('bounding_box')
     def validate_BB(cls, v):
@@ -166,6 +175,12 @@ class AoiSettings(BaseModel, extra=Extra.forbid):
             raise ValueError("Provide a SCL class for filtering. If no filtering is wanted keep default values and "
                              "set apply_SCL_band_mask to 'False'.")
         return v
+
+    @validator("date_range")
+    def check_date_range(cls, v):
+        if isinstance(v, str) and re.match(r"%Y-%m-%d", v):
+            return v
+        raise ValueError("Invalid format")
 
 
 class ResultsSettings(BaseModel, extra=Extra.forbid):
