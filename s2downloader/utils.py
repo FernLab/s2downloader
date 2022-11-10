@@ -19,13 +19,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
+
 # third party packages
 import affine  # BSD
+import geopandas
 import numpy as np  # BSD license
 import pyproj  # MIT
+import pystac
 import rasterio  # BSD License (BSD)
 import rasterio.io
-from rasterio.enums import Resampling
+from rasterio.merge import merge
+from rasterio.warp import Resampling
+from shapely.geometry import box
 
 
 def saveRasterToDisk(*, out_image: np.ndarray, raster_crs: pyproj.crs.crs.CRS, out_transform: affine.Affine,
@@ -205,3 +211,48 @@ def cloudMaskingFromSCLBand(*,
         return image_band_masked
     except Exception as e:  # pragma: no cover
         raise Exception(f"Failed to mask pixels from SCl band => {e}")
+
+
+def getItemsPerDate(items_list: list[pystac.item.Item]) -> dict:
+    items_per_date = {}
+    for item in items_list:
+        date = item.datetime.strftime("%Y%m%d")
+        if date in items_per_date.keys():
+            items_per_date[date].append(item)
+        else:
+            items_per_date[date] = [item]
+    return items_per_date
+
+
+def getBoundsUTM(bounds: tuple, utm_zone: int):
+    bounding_box = box(*bounds)
+    bbox = geopandas.GeoSeries([bounding_box], crs=4326)
+    bbox = bbox.to_crs(crs=32600+utm_zone)
+    return tuple(bbox.bounds.values[0])
+
+
+def mosaicBands(bands: list[str],
+                mosaic_dates: dict,
+                output_dir: str,
+                bounds: tuple,
+                resolution: tuple = None,
+                resampling_method: Resampling = Resampling.nearest):
+    for date in mosaic_dates.keys():
+        for band in bands:
+            srcs_to_mosaic = []
+            sensor_name = mosaic_dates[date][0].id[0:3]
+            for item in mosaic_dates[date]:
+                srcs_to_mosaic.append(rasterio.open(item.assets[band].href))
+
+            mosaic_file_path = os.path.join(output_dir, f"{sensor_name}_{date}_{band}.tif")
+            arr, out_trans = merge(datasets=srcs_to_mosaic,
+                                   target_aligned_pixels=True,
+                                   bounds=bounds,
+                                   res=resolution,
+                                   resampling=resampling_method)
+            output_meta = arr.meta.copy()
+            output_meta.update({
+                "driver": "GTiff"
+            })
+            with rasterio.open(mosaic_file_path, 'w', **output_meta) as m:
+                m.write(arr)
