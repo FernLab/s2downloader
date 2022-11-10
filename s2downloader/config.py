@@ -29,8 +29,10 @@ from enum import Enum
 from json import JSONDecodeError
 
 # third party packages
-from pydantic import BaseModel, Field, validator, StrictBool, Extra, HttpUrl
+from pydantic import BaseModel, Field, validator, StrictBool, Extra, HttpUrl, root_validator
 from typing import Optional, List, Dict
+
+from .utils import getUTMZoneBB
 
 
 class ResamplingMethodName(str, Enum):
@@ -124,6 +126,12 @@ class AoiSettings(BaseModel, extra=Extra.forbid):
     bounding_box: List[float] = Field(
         title="Bounding Box for AOI.",
         description="SW and NE corner coordinates of AOI Bounding Box.")
+    bb_max_utm_zone_overlap: int = Field(
+        title="Max overlap of the BB over a second UTM zone.",
+        description="Max overlap of the BB over a second UTM zone in meters. It's upper bound is 100km.",
+        default=50000,
+        gt=0, lt=100000
+    )
     apply_SCL_band_mask: Optional[StrictBool] = Field(
         title="Apply a filter mask from SCL.",
         description="Define if SCL masking should be applied.",
@@ -154,14 +162,18 @@ class AoiSettings(BaseModel, extra=Extra.forbid):
         default=["2021-09-01", "2021-09-05"]
     )
 
-    @validator('bounding_box')
+    @root_validator
     def validate_BB(cls, v):
-        """Check BoundingBox coordinates."""
-        if len(v) != 4:
+        """Check if the Bounding Box is valid."""
+        bb = v["bounding_box"]
+        if len(bb) != 4:
             raise ValueError("Bounding Box needs two pairs of lat/lon coordinates.")
-        if v[0] >= v[2] or v[1] >= v[3]:
+        if bb[0] >= bb[2] or bb[1] >= bb[3]:
             raise ValueError("Bounding Box coordinates are not valid.")
 
+        bb_max_utm_zone_overlap = v["bb_max_utm_zone_overlap"]
+        utm_zone = getUTMZoneBB(bbox=bb, bb_max_utm_zone_overlap=bb_max_utm_zone_overlap)
+        v["sentinel:utm_zone"] = {"eq": utm_zone}
         return v
 
     @validator("SCL_filter_values")
@@ -176,7 +188,7 @@ class AoiSettings(BaseModel, extra=Extra.forbid):
                              "set apply_SCL_band_mask to 'False'.")
         return v
 
-    @validator("date_range")
+    @validator("date_range", pre=True)
     def check_date_range(cls, v):
         """Check data range."""
         if isinstance(v, str) and re.match(r"%Y-%m-%d", v):

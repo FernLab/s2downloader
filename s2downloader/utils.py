@@ -31,7 +31,8 @@ import rasterio  # BSD License (BSD)
 import rasterio.io
 from rasterio.merge import merge
 from rasterio.warp import Resampling
-from shapely.geometry import box
+from shapely.geometry import box, Point
+import shapely.geometry as sg
 
 
 def saveRasterToDisk(*, out_image: np.ndarray, raster_crs: pyproj.crs.crs.CRS, out_transform: affine.Affine,
@@ -277,3 +278,43 @@ def mosaicBands(bands: list[str],
             })
             with rasterio.open(mosaic_file_path, 'w', **output_meta) as m:
                 m.write(arr)
+
+
+def getUTMZoneBB(bbox: list[float], bb_max_utm_zone_overlap: int = 50000) -> int:
+    bb_geom = sg.box(*bbox, ccw=True)
+    utm_df = geopandas.read_file(os.path.abspath("../data/World_UTM_Grid.zip"))
+    utm_intersections = utm_df.intersection(bb_geom)
+    utm_indices = list(utm_intersections.loc[~utm_intersections.is_empty].index)
+    utms = utm_intersections.iloc[utm_indices]
+
+    utm_zones = utm_df.iloc[utm_indices]['ZONE'].values
+    if np.unique(utm_zones).size == 1:
+        return np.unique(utm_zones)[0]
+    elif np.unique(utm_zones).size == 2:
+        min_utm = np.min(utm_zones)
+        max_utm = np.max(utm_zones)
+        if max_utm > min_utm+1:
+            raise ValueError("The bounding box does not overlap over two consecutive UTM zones.")
+        else:
+            for utm_id in utms.index:
+                if 32 in utm_zones and utm_df.iloc[utm_id]['ZONE'] == 33:
+                    bb_box = geopandas.GeoSeries(utms.loc[utm_id], crs=4326)
+                    bb_box_utm = bb_box.to_crs(32600 + utm_df.iloc[utm_id]['ZONE'])[0]
+
+                    # get coordinates of polygon vertices
+                    x, y = bb_box_utm.exterior.coords.xy
+
+                    # get length of bounding box edges
+                    edge_length = (
+                        Point(x[0], y[0]).distance(Point(x[1], y[1])), Point(x[1], y[1]).distance(Point(x[2], y[2])))
+
+                    # get length of polygon as the longest edge of the bounding box
+                    length = max(edge_length)
+
+                    if length > bb_max_utm_zone_overlap:
+                        raise ValueError(
+                            f"The bounding box overlaps UTM zones 32 and 33, and its a length over the"
+                            f" 33 UTM zone is greater than {bb_max_utm_zone_overlap} meters: {length} meters!")
+            return min_utm
+    else:
+        raise ValueError(f"The bounding box overlaps more than 2 UTM zones: {np.unique(utm_zones)}!")
