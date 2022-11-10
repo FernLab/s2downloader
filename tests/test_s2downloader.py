@@ -162,3 +162,21 @@ class TestSentinel2Downloader(unittest.TestCase):
                                  rtol=0,
                                  atol=1e-4,
                                  equal_nan=False).all()
+
+    def testS2DownloaderErrorNoItemsAtAWS(self):
+        """Test configuration for error when search parameters do not yield a result"""
+
+        config = deepcopy(self.configuration)
+
+        config['user_settings']['tile_settings']['bands'] = ["B01"]
+        config['user_settings']['tile_settings']['eo:cloud_cover'] = {"eq": 0}
+        config['user_settings']['tile_settings']['sentinel:data_coverage'] = {"eq": 100}
+        config['user_settings']['tile_settings']['time'] = "2021-09-01/2021-09-02"
+
+        Config(**config)
+        with pytest.raises(Exception) as exinfo:
+            s2DataDownloader(config_dict=config)
+
+        if exinfo.value.args is not None:
+            message = exinfo.value.args[0]
+            assert str(message).__contains__('Failed to find data at AWS server')
