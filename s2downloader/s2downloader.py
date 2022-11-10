@@ -229,12 +229,12 @@ def s2DataDownloader(*, config_dict: dict):
                         if download_thumbnails:
                             file_url = aws_item.assets["thumbnail"].href
                             thumbnail_path = os.path.join(output_raster_directory_tile_date,
-                                                          f"_{aws_item.id}_{file_url.rsplit('/', 1)[1]}")
+                                                          f"{aws_item.id}_{file_url.rsplit('/', 1)[1]}")
                             urllib.request.urlretrieve(file_url, thumbnail_path)
                         if download_overviews:
                             file_url = aws_item.assets["overview"].href
                             overview_path = os.path.join(output_raster_directory_tile_date,
-                                                         f"_{aws_item.id}_{file_url.rsplit('/', 1)[1]}")
+                                                         f"{aws_item.id}_{file_url.rsplit('/', 1)[1]}")
                             urllib.request.urlretrieve(file_url, overview_path)
                     if only_dates_no_data:
                         item = aws_items[idx_scene]
