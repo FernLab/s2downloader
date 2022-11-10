@@ -180,3 +180,122 @@ class TestSentinel2Downloader(unittest.TestCase):
         if exinfo.value.args is not None:
             message = exinfo.value.args[0]
             assert str(message).__contains__('Failed to find data at AWS server')
+
+    def testSentinel2TileSettingsTime(self):
+        """Test configuration to test time range for the tile settings"""
+
+        config = deepcopy(self.configuration)
+        config['user_settings']['tile_settings']['time'] = "2020-06-01/2020-09-01"
+        Config(**config)
+
+        config['user_settings']['tile_settings']['time'] = "2020-06-01"
+        Config(**config)
+
+        config['user_settings']['tile_settings']['time'] = "2020/06/01"
+        with pytest.raises(ValueError):
+            Config(**config)
+
+        config['user_settings']['tile_settings']['time'] = "2020/06-01"
+        with pytest.raises(ValueError):
+            Config(**config)
+
+        config['user_settings']['tile_settings']['time'] = "2020-06-01-2020-09-01"
+        with pytest.raises(ValueError):
+            Config(**config)
+
+        config['user_settings']['tile_settings']['time'] = "2020/06-01/2020-09-01"
+        with pytest.raises(ValueError):
+            Config(**config)
+
+        config['user_settings']['tile_settings']['time'] = "2020-06-01/2020/09-01"
+        with pytest.raises(ValueError):
+            Config(**config)
+
+        config['user_settings']['tile_settings']['time'] = "2020-09-01/2020-06-01"
+        with pytest.raises(ValueError):
+            Config(**config)
+
+    def testSentinel2dataCoverage(self):
+        """Test configuration to test coverage for the tile settings"""
+
+        config = deepcopy(self.configuration)
+        config['user_settings']['tile_settings']['sentinel:data_coverage'] = {"lt": 80}
+        Config(**config)
+
+        config['user_settings']['tile_settings']['sentinel:data_coverage'] = {"xx": 25}
+        with pytest.raises(ValueError):
+            Config(**config)
+
+        config['user_settings']['tile_settings']['sentinel:data_coverage'] = {"gt": 25, "lt": 70}
+        with pytest.raises(ValueError):
+            Config(**config)
+
+        config['user_settings']['tile_settings']['sentinel:data_coverage'] = {"gt": -25}
+        with pytest.raises(ValueError):
+            Config(**config)
+
+        config['user_settings']['tile_settings']['sentinel:data_coverage'] = {"gt": "err"}
+        with pytest.raises(ValueError):
+            Config(**config)
+
+        config['user_settings']['tile_settings']['sentinel:data_coverage'] = {}
+        with pytest.raises(ValueError):
+            Config(**config)
+
+    def testSentinel2cloudCoverage(self):
+        """Test configuration to test coverage for the tile settings"""
+
+        config = deepcopy(self.configuration)
+        config['user_settings']['tile_settings']['eo:cloud_cover'] = {"lt": 80}
+        Config(**config)
+
+        config['user_settings']['tile_settings']['eo:cloud_cover'] = {"xx": 25}
+        with pytest.raises(ValueError):
+            Config(**config)
+
+        config['user_settings']['tile_settings']['eo:cloud_cover'] = {"gt": 25, 'lt': 70}
+        with pytest.raises(ValueError):
+            Config(**config)
+
+        config['user_settings']['tile_settings']['eo:cloud_cover'] = {"gt": -25}
+        with pytest.raises(ValueError):
+            Config(**config)
+
+        config['user_settings']['tile_settings']['eo:cloud_cover'] = {"gt": 'err'}
+        with pytest.raises(ValueError):
+            Config(**config)
+
+        config['user_settings']['tile_settings']['eo:cloud_cover'] = {}
+        with pytest.raises(ValueError):
+            Config(**config)
+
+    def testSentinel2TileSettingsBands(self):
+        """Test configuration to test bands for the tile settings"""
+
+        config = deepcopy(self.configuration)
+        config['user_settings']['tile_settings']['bands'] = \
+            ["B01", "B02", "B03", "B04", "B05", "B06", "B07", "B08", "B8A", "B09", "B10", "B11", "B12"]
+        Config(**config)
+
+        config['user_settings']['tile_settings']['bands'] = \
+            ["B01", "B02", "B07", "B08", "B8A", "B09", "B10", "B11", "B12"]
+        Config(**config)
+
+        config['user_settings']['tile_settings']['bands'] = \
+            ["B01"]
+        Config(**config)
+
+        config['user_settings']['tile_settings']['bands'] = \
+            []
+        with pytest.raises(ValueError):
+            Config(**config)
+
+        config['user_settings']['tile_settings']['bands'] = \
+            ["B01", "B02", "B03", "B02"]
+        with pytest.raises(ValueError):
+            Config(**config)
+
+        config['user_settings']['tile_settings']['bands'] = \
+            ["B01", "B34"]
+        with pytest.raises(ValueError):
+            Config(**config)
