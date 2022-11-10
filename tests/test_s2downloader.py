@@ -150,7 +150,7 @@ class TestSentinel2Downloader(unittest.TestCase):
             assert False
         with rasterio.open(scene_tif_path) as expected_res:
             assert expected_res.dtypes[0] == "uint16"
-            assert expected_res.shape == (5490, 5490)
+            assert (5490, 5490) == expected_res.shape
             assert expected_res.bounds == rasterio.coords.BoundingBox(left=300000.0, bottom=5790240.0,
                                                                       right=409800.0, top=5900040.0)
             assert expected_res.read_crs() == CRS.from_epsg(32633)
