@@ -3,16 +3,16 @@
         "tile_settings": {
             "sentinel:data_coverage": {"ge": 70},
             "eo:cloud_cover": {"le": 20},
-            "bands": ["B05", "B06"],
-            "time": "2021-09-01/2021-10-02"
+            "bands": ["B01","B02", "B05"],
+            "time": "2021-09-01/2021-09-05"
         },
         "aoi_settings": {
             "bounding_box": [12.1439, 52.3832, 13.4204, 53.0389],
-            "apply_SCL_band_mask": false,
+            "apply_SCL_band_mask": true,
             "SCL_filter_values": [3, 6],
             "SCL_mask_valid_pixels_min_percentage": 10,
             "aoi_min_coverage": 90,
-            "raster_resampling_method": "cubic"
+            "resampling_method": "cubic"
         },
         "result_settings": {
             "results_dir": "data/data_output/",
