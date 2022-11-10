@@ -213,7 +213,19 @@ def cloudMaskingFromSCLBand(*,
         raise Exception(f"Failed to mask pixels from SCl band => {e}")
 
 
-def getItemsPerDate(items_list: list[pystac.item.Item]) -> dict:
+def groupItemsPerDate(items_list: list[pystac.item.Item]) -> dict:
+    """Group STAC Items per date.
+
+    Parameters
+    ----------
+    items_list : list[pystac.item.Item]
+        List of STAC items.
+
+    Returns
+    -------
+    : dict
+        A dictionary with item grouped by date.
+    """
     items_per_date = {}
     for item in items_list:
         date = item.datetime.strftime("%Y%m%d")
@@ -224,7 +236,21 @@ def getItemsPerDate(items_list: list[pystac.item.Item]) -> dict:
     return items_per_date
 
 
-def getBoundsUTM(bounds: tuple, utm_zone: int):
+def getBoundsUTM(bounds: tuple, utm_zone: int) -> tuple:
+    """Get the bounds of a bounding box in UTM coordinates.
+
+    Parameters
+    ----------
+    bounds : tuple
+        Bounds defined as lat/long.
+    utm_zone : int
+        UTM zone number.
+
+    Returns
+    -------
+    : tuple
+        Bounds reprojected to the UTM zone.
+    """
     bounding_box = box(*bounds)
     bbox = geopandas.GeoSeries([bounding_box], crs=4326)
     bbox = bbox.to_crs(crs=32600+utm_zone)
@@ -237,6 +263,23 @@ def mosaicBands(bands: list[str],
                 bounds: tuple,
                 resolution: tuple = None,
                 resampling_method: Resampling = Resampling.nearest):
+    """Create a mosaic for each band.
+
+    Parameters
+    ----------
+    bands : list[str]
+        A list of bands.
+    mosaic_dates : dict
+        A dictionary with STAC items grouped by date.
+    output_dir: str
+        Output directory.
+    bounds: tuple
+        Bounds of the mosaic.
+    resolution: tuple, default=None, optional
+        Target resolution (x,y) in meters, if None keep original.
+    resampling_method: rasterio.wrap.Resampling
+        The resampling method for a raster band.
+    """
     for date in mosaic_dates.keys():
         for band in bands:
             srcs_to_mosaic = []
