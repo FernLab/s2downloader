@@ -167,8 +167,6 @@ def s2DataDownloader(*, config_dict: dict):
 
         result_dir = result_settings['results_dir']
 
-#        target_resolution = result_settings['target_resolution']
-
         save_to_uint16 = not result_settings["save_raster_dtype_float32"]
         cloudmasking = aoi_settings["apply_SCL_band_mask"]
 
@@ -253,7 +251,7 @@ def s2DataDownloader(*, config_dict: dict):
                             os.makedirs(output_raster_directory_tile_date)
 
                         output_raster_path = os.path.join(output_raster_directory_tile_date,
-                                                          f"_{file_url.split('/')[-2]}")
+                                                          f"{file_url.split('/')[-2]}")
                         if not os.path.isdir(output_raster_path):
                             os.makedirs(output_raster_path)
 
@@ -270,8 +268,7 @@ def s2DataDownloader(*, config_dict: dict):
                                     raster_band = cloudMaskingFromSCLBand(
                                         band_src=band_src,
                                         scl_src=scl_src,
-                                        scl_filter_values=aoi_settings["SCL_filter_values"],
-                                        resampling_method=aoi_settings["raster_resampling_method"]
+                                        scl_filter_values=aoi_settings["SCL_filter_values"]
                                     )
                                 else:
                                     raster_band = band_src.read()

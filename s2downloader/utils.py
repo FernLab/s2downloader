@@ -141,9 +141,7 @@ def validPixelsFromSCLBand(scl_src: rasterio.io.DatasetReader, scl_filter_values
 def cloudMaskingFromSCLBand(*,
                             band_src: rasterio.io.DatasetReader,
                             scl_src: rasterio.io.DatasetReader,
-                            scl_filter_values: list[int],
-                            target_resolution: int = None,
-                            resampling_method: Resampling,
+                            scl_filter_values: list[int]
                             ) -> np.ndarray:
     """Based on the SCL band categorization, the input data is masked (clouds, cloud shadow, snow).
 
@@ -155,10 +153,6 @@ def cloudMaskingFromSCLBand(*,
         A DatasetReader for the SCL band.
     scl_filter_values: list, default=[0], optional
         List with the values of the SCL Band to filter out
-    target_resolution: int, default=None, optional
-        Target resolution, if None keep original.
-    resampling_method: rasterio.wrap.Resampling
-        The resampling method for a raster band.
 
     Returns
     -------
@@ -171,13 +165,7 @@ def cloudMaskingFromSCLBand(*,
         Failed to mask pixels from SCL band.
     """
     try:
-        band_scale_factor = 1.0
-
-        if target_resolution is not None:
-            scl_scale_factor = target_resolution / scl_src.transform[0]
-            band_scale_factor = target_resolution / band_src.transform[0]
-        else:
-            scl_scale_factor = band_src.transform[0] / scl_src.transform[0]
+        scl_scale_factor = scl_src.transform[0] / band_src.transform[0]
 
         if scl_scale_factor != 1.0:
             scl_band = scl_src.read(
@@ -191,17 +179,7 @@ def cloudMaskingFromSCLBand(*,
         else:
             scl_band = scl_src.read()
 
-        if band_scale_factor != 1.0:
-            raster_band = band_src.read(
-                out_shape=(
-                    band_src.count,
-                    int(band_src.height * band_scale_factor),
-                    int(band_src.width * band_scale_factor)
-                ),
-                resampling=resampling_method
-            )
-        else:
-            raster_band = band_src.read()
+        raster_band = band_src.read()
 
         scl_filter_values.append(0)
         scl_band_mask = np.where(np.isin(scl_band, scl_filter_values), 0, 1)
