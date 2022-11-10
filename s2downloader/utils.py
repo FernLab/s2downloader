@@ -281,6 +281,25 @@ def mosaicBands(bands: list[str],
 
 
 def getUTMZoneBB(bbox: list[float], bb_max_utm_zone_overlap: int = 50000) -> int:
+    """Create a mosaic for each band.
+
+    Parameters
+    ----------
+    bbox : list[float]
+        Bounding box bounds.
+    bb_max_utm_zone_overlap : int, default=50000, optional
+        Max overlap of the BB over a second UTM zone.
+
+    Returns
+    -------
+    : int
+        UTM zone number.
+
+    Raises
+    ------
+    ValueError
+        For invalid Bounding Box.
+    """
     bb_geom = sg.box(*bbox, ccw=True)
     utm_df = geopandas.read_file(os.path.abspath("../data/World_UTM_Grid.zip"))
     utm_intersections = utm_df.intersection(bb_geom)
