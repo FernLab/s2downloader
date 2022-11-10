@@ -142,7 +142,7 @@ class AoiSettings(BaseModel, extra=Extra.forbid):
         default=0.0, ge=0.0, le=100.0)
     resampling_method: ResamplingMethodName = Field(
         title="Rasterio resampling method name.",
-        description="Define the method for resampling the raster to the target resolution.",
+        description="Define the method to be used when resampling.",
         default=ResamplingMethodName.cubic)
 
     @validator('bounding_box')
