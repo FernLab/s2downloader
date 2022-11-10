@@ -178,6 +178,7 @@ class AoiSettings(BaseModel, extra=Extra.forbid):
 
     @validator("date_range")
     def check_date_range(cls, v):
+        """Check data range."""
         if isinstance(v, str) and re.match(r"%Y-%m-%d", v):
             return v
         raise ValueError("Invalid format")
