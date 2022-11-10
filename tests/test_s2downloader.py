@@ -35,7 +35,7 @@ from s2downloader.config import loadConfiguration, Config
 from copy import deepcopy
 
 
-class TestSentinel2Portal(unittest.TestCase):
+class TestSentinel2Downloader(unittest.TestCase):
     root_path = None
     config_file = None
     configuration = None
@@ -83,4 +83,63 @@ class TestSentinel2Portal(unittest.TestCase):
         s2DataDownloader(config_dict=config)
 
         # check output
-        
+        # number of files:
+        filecount = sum([len(files) for r, d, files in os.walk(self.output_data_path)])
+        assert filecount == 16
+
+        # features of two files:
+        path = os.path.abspath(
+            os.path.join(self.output_data_path, "2021/09/S2A_32UQD_20210903_0_L2A_SCL.tif"))
+        self.assertEqual((str(path), os.path.isfile(path)), (str(path), True))
+        with rasterio.open(path) as expected_res:
+            assert expected_res.dtypes[0] == "uint16"
+            assert expected_res.shape == (5490, 5490)
+            assert expected_res.bounds == rasterio.coords.BoundingBox(left=699960.0, bottom=5790240.0,
+                                                                      right=809760.0, top=5900040.0)
+            assert expected_res.read_crs() == CRS.from_epsg(32632)
+            assert numpy.isclose([699960.0, 20.0, 0.0, 5900040.0, 0.0, -20.0],
+                                 expected_res.read_transform(),
+                                 rtol=0,
+                                 atol=1e-4,
+                                 equal_nan=False).all()
+
+        path = os.path.abspath(
+            os.path.join(self.output_data_path, "2021/09/S2B_32UQD_20210905_0_L2A/B02.tif"))
+        self.assertEqual((str(path), os.path.isfile(path)), (str(path), True))
+        with rasterio.open(path) as expected_res:
+            expected_res.dtypes[0] == "uint16"
+            assert expected_res.shape == (10980, 10980)
+            assert expected_res.bounds == rasterio.coords.BoundingBox(left=699960.0, bottom=5790240.0,
+                                                                      right=809760.0, top=5900040.0)
+            assert expected_res.read_crs() == CRS.from_epsg(32632)
+            assert numpy.isclose([699960.0, 10.0, 0.0, 5900040.0, 0.0, -10.0],
+                                 expected_res.read_transform(),
+                                 rtol=0,
+                                 atol=1e-4,
+                                 equal_nan=False).all()
+
+    def testSentinel2ResultSettingsDoNotSaveScenes(self):
+        """Test configuration to test only dates download for the tile settings"""
+
+        config = deepcopy(self.configuration)
+        scenes_info_path = os.path.join(config["user_settings"]["result_settings"]["results_dir"],
+                                        "scenes_info_2021-09-01_2021-09-05.json")
+        scene_tif_path = os.path.join(
+            config["user_settings"]["result_settings"]["results_dir"],
+            "2021/09/S2B_32UQD_20210905_0_L2A/B05.tif")
+
+        config["user_settings"]["result_settings"]["only_dates_no_data"] = True
+        s2DataDownloader(config_dict=config)
+        with open(scenes_info_path) as json_file:
+            data = json.load(json_file)
+            assert list(data.keys())[0] == "2021-09-05"
+
+        if os.path.exists(scene_tif_path):
+            assert False
+
+        with pytest.raises(Exception) as exinfo:
+            s2DataDownloader(config_dict=config)
+
+        if exinfo.value.args is not None:
+            message = exinfo.value.args[0]
+            assert str(message).__contains__('.json already exists.')
