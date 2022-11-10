@@ -69,7 +69,7 @@ def saveRasterToDisk(*, out_image: np.ndarray, raster_crs: pyproj.crs.crs.CRS, o
             img_width = out_image.shape[2]
             img_count = out_image.shape[0]
 
-        out_image_dtype = out_image.dtype
+        out_image_dtype = rasterio.float32
         if save_to_uint16:
             out_image_dtype = rasterio.uint16
         with rasterio.open(output_raster_path, 'w',

@@ -122,11 +122,8 @@ class TestSentinel2Downloader(unittest.TestCase):
         """Test configuration to test only dates download for the tile settings"""
 
         config = deepcopy(self.configuration)
-        scenes_info_path = os.path.join(config["user_settings"]["result_settings"]["results_dir"],
-                                        "scenes_info_2021-09-01_2021-09-05.json")
-        scene_tif_path = os.path.join(
-            config["user_settings"]["result_settings"]["results_dir"],
-            "2021/09/S2A_33UUU_20210903_0_L2A/B05.tif")
+        scenes_info_path = os.path.join(self.output_data_path, "scenes_info_2021-09-01_2021-09-05.json")
+        scene_tif_path = os.path.join(self.output_data_path, "2021/09/S2A_33UUU_20210903_0_L2A/B05.tif")
 
         config["user_settings"]["result_settings"]["only_dates_no_data"] = True
         s2DataDownloader(config_dict=config)
@@ -153,7 +150,7 @@ class TestSentinel2Downloader(unittest.TestCase):
             assert False
         with rasterio.open(scene_tif_path) as expected_res:
             assert expected_res.dtypes[0] == "uint16"
-            assert (5490, 5490) == expected_res.shape
+            assert expected_res.shape == (5490, 5490)
             assert expected_res.bounds == rasterio.coords.BoundingBox(left=300000.0, bottom=5790240.0,
                                                                       right=409800.0, top=5900040.0)
             assert expected_res.read_crs() == CRS.from_epsg(32633)
@@ -299,3 +296,112 @@ class TestSentinel2Downloader(unittest.TestCase):
             ["B01", "B34"]
         with pytest.raises(ValueError):
             Config(**config)
+
+    def testS2DownloaderThumbnailsOverviews(self):
+        """Test configuration to download thumbnails and overviews for the tile settings"""
+
+        config = deepcopy(self.configuration)
+        config["user_settings"]["result_settings"]["download_overviews"] = True
+        config["user_settings"]["result_settings"]["download_thumbnails"] = True
+        config["user_settings"]["result_settings"]["only_dates_no_data"] = True
+
+        s2DataDownloader(config_dict=config)
+
+        scene_path = os.path.join(self.output_data_path, "2021/09/S2B_32UQD_20210905_0_L2A_L2A_PVI.tif")
+
+        if not os.path.exists(scene_path):
+            assert False
+
+        if not os.path.exists(
+            os.path.join(
+                self.output_data_path, "2021/09/S2B_33UUU_20210905_0_L2A_preview.jpg")
+        ):
+            assert False
+
+        with rasterio.open(scene_path) as expected_res:
+            assert expected_res.dtypes[0] == "uint8"
+            assert expected_res.shape == (343, 343)
+            assert expected_res.bounds == rasterio.coords.BoundingBox(left=699960.0, bottom=5790280.0,
+                                                                      right=809720.0, top=5900040.0)
+            assert expected_res.read_crs() == CRS.from_epsg(32632)
+            assert numpy.isclose([699960.0, 320.0, 0.0, 5900040.0, 0.0, -320.0],
+                                 expected_res.read_transform(),
+                                 rtol=0,
+                                 atol=1e-4,
+                                 equal_nan=False).all()
+
+    def testSentinel2SCLFilterValues(self):
+        """Test configuration to test SCL filter values for mask"""
+
+        config = deepcopy(self.configuration)
+        config['user_settings']['aoi_settings']['SCL_filter_values'] = \
+            [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+        Config(**config)
+
+        config['user_settings']['aoi_settings']['SCL_filter_values'] = \
+            [3, 7, 8, 9, 10]
+        Config(**config)
+
+        config['user_settings']['aoi_settings']['SCL_filter_values'] = \
+            [0]
+        Config(**config)
+
+        config['user_settings']['aoi_settings']['SCL_filter_values'] = \
+            []
+        with pytest.raises(ValueError):
+            Config(**config)
+
+        config['user_settings']['aoi_settings']['SCL_filter_values'] = \
+            [3, 7, 8, 9, 10, 3]
+        with pytest.raises(ValueError):
+            Config(**config)
+
+        config['user_settings']['aoi_settings']['SCL_filter_values'] = \
+            [3, 33]
+        with pytest.raises(ValueError):
+            Config(**config)
+
+    def testSentinel2ResultDtype(self):
+        """Test configuration to check the 'save_raster_dtype_float32' option"""
+
+        config = deepcopy(self.configuration)
+        tif_path = os.path.join(self.output_data_path, "2021/09/S2B_32UQD_20210905_0_L2A/B01.tif")
+
+        config["user_settings"]["result_settings"]["save_raster_dtype_float32"] = True
+        Config(**config)
+        s2DataDownloader(config_dict=config)
+
+        # check output
+        self.assertEqual((str(tif_path), os.path.isfile(tif_path)), (str(tif_path), True))
+        with rasterio.open(tif_path) as expected_res:
+            assert expected_res.shape == (1830, 1830)
+            assert expected_res.bounds == rasterio.coords.BoundingBox(left=699960.0, bottom=5790240.0,
+                                                                      right=809760.0, top=5900040.0)
+            assert expected_res.read_crs() == CRS.from_epsg(32632)
+            assert numpy.isclose([699960.0, 60.0, 0.0, 5900040.0, 0.0, -60.0],
+                                 expected_res.read_transform(),
+                                 rtol=0,
+                                 atol=1e-4,
+                                 equal_nan=False).all()
+            for dtype in expected_res.dtypes:
+                assert dtype == rasterio.float32
+
+        config["user_settings"]["result_settings"]["save_raster_dtype_float32"] = False
+        Config(**config)
+        s2DataDownloader(config_dict=config)
+
+        # check output
+        self.assertEqual((str(tif_path), os.path.isfile(tif_path)), (str(tif_path), True))
+
+        with rasterio.open(tif_path) as expected_res:
+            assert expected_res.shape == (1830, 1830)
+            assert expected_res.bounds == rasterio.coords.BoundingBox(left=699960.0, bottom=5790240.0,
+                                                                      right=809760.0, top=5900040.0)
+            assert expected_res.read_crs() == CRS.from_epsg(32632)
+            assert numpy.isclose([699960.0, 60.0, 0.0, 5900040.0, 0.0, -60.0],
+                                 expected_res.read_transform(),
+                                 rtol=0,
+                                 atol=1e-4,
+                                 equal_nan=False).all()
+            for dtype in expected_res.dtypes:
+                assert dtype == rasterio.uint16
