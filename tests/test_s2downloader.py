@@ -405,3 +405,33 @@ class TestSentinel2Downloader(unittest.TestCase):
                                  equal_nan=False).all()
             for dtype in expected_res.dtypes:
                 assert dtype == rasterio.uint16
+
+    def testS2BoundingBox(self):
+        """Test configuration and output for BoundingBox Parameter."""
+
+        config = deepcopy(self.configuration)
+
+        config['user_settings']['aoi_settings']['bounding_box'] = [12.1439, 52.3832, 13.4204, 53.0389]
+        with pytest.raises(ValueError):
+            Config(**config)
+
+        config['user_settings']['aoi_settings']['bounding_box'] = [12., 52., 12.3, 52.3]
+        Config(**config)
+        s2DataDownloader(config_dict=config)
+
+        # check output
+        tif_path = os.path.abspath(
+            os.path.join(self.output_data_path, "2021/09/S2A_33UUT_20210903_0_L2A/B02.tif"))
+        self.assertEqual((str(tif_path), os.path.isfile(tif_path)), (str(tif_path), True))
+
+        with rasterio.open(tif_path) as expected_res:
+            assert expected_res.dtypes[0] == rasterio.uint16
+            assert expected_res.shape == (10980, 10980)
+            assert expected_res.bounds == rasterio.coords.BoundingBox(left=300000.0, bottom=5690220.0,
+                                                                      right=409800.0, top=5800020.0)
+            assert expected_res.read_crs() == CRS.from_epsg(32633)
+            assert numpy.isclose([300000.0, 10.0, 0.0, 5800020.0, 0.0, -10.0],
+                                 expected_res.read_transform(),
+                                 rtol=0,
+                                 atol=1e-4,
+                                 equal_nan=False).all()

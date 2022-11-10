@@ -24,6 +24,7 @@
 import os
 import json
 import re
+import geopy.distance
 from datetime import datetime
 from enum import Enum
 from json import JSONDecodeError
@@ -152,6 +153,15 @@ class AoiSettings(BaseModel, extra=Extra.forbid):
             raise ValueError("Bounding Box needs two pairs of lat/lon coordinates.")
         if v[0] >= v[2] or v[1] >= v[3]:
             raise ValueError("Bounding Box coordinates are not valid.")
+        coords_nw = (v[3], v[0])
+        coords_ne = (v[3], v[2])
+        coords_sw = (v[1], v[0])
+
+        ew_dist = geopy.distance.geodesic(coords_nw, coords_ne).km
+        ns_dist = geopy.distance.geodesic(coords_nw, coords_sw).km
+
+        if ew_dist > 50 or ns_dist > 50:
+            raise ValueError("Bounding Box is too large. It should be max 50*50km.")
 
         return v
 
