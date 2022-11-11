@@ -21,11 +21,14 @@
 
 # third party packages
 import affine  # BSD
+import geopandas
 import numpy as np  # BSD license
 import pyproj  # MIT
 import rasterio  # BSD License (BSD)
 import rasterio.io
 from rasterio.enums import Resampling
+from rasterio.windows import from_bounds
+from shapely.geometry import box
 
 
 def saveRasterToDisk(*, out_image: np.ndarray, raster_crs: pyproj.crs.crs.CRS, out_transform: affine.Affine,
@@ -94,7 +97,9 @@ def saveRasterToDisk(*, out_image: np.ndarray, raster_crs: pyproj.crs.crs.CRS, o
         raise Exception(f"Failed to save raster to disk => {e}")
 
 
-def validPixelsFromSCLBand(scl_src: rasterio.io.DatasetReader, scl_filter_values: list[int]) -> tuple[float, float]:
+def validPixelsFromSCLBand(scl_src: rasterio.io.DatasetReader,
+                           scl_filter_values: list[int],
+                           bounds_utm: tuple) -> tuple[float, float]:
     """Percentage of valid SCL band pixels.
 
     Parameters
@@ -103,6 +108,8 @@ def validPixelsFromSCLBand(scl_src: rasterio.io.DatasetReader, scl_filter_values
         A DatasetReader for the SCL band.
     scl_filter_values: list, default=[0], optional
         List with the values of the SCL Band to filter out
+    bounds_utm: tuple
+        Bounds of the bounding box in UTM coordinates.
 
     Returns
     -------
@@ -117,7 +124,11 @@ def validPixelsFromSCLBand(scl_src: rasterio.io.DatasetReader, scl_filter_values
         Failed to calculate percentage of valid SCL band pixels.
     """
     try:
-        scl_band = scl_src.read()
+        scl_band = scl_src.read(window=from_bounds(left=bounds_utm[0],
+                                                   bottom=bounds_utm[1],
+                                                   right=bounds_utm[2],
+                                                   top=bounds_utm[3],
+                                                   transform=scl_src.transform))
         scl_band_nonzero = np.count_nonzero(scl_band)
         nonzero_pixels_per = (float(scl_band_nonzero) / float(scl_band.size)) * 100
         print(f"Nonzero pixels: {nonzero_pixels_per} %")
@@ -135,7 +146,8 @@ def validPixelsFromSCLBand(scl_src: rasterio.io.DatasetReader, scl_filter_values
 def cloudMaskingFromSCLBand(*,
                             band_src: rasterio.io.DatasetReader,
                             scl_src: rasterio.io.DatasetReader,
-                            scl_filter_values: list[int]
+                            scl_filter_values: list[int],
+                            bounds_utm: tuple
                             ) -> np.ndarray:
     """Based on the SCL band categorization, the input data is masked (clouds, cloud shadow, snow).
 
@@ -147,6 +159,8 @@ def cloudMaskingFromSCLBand(*,
         A DatasetReader for the SCL band.
     scl_filter_values: list, default=[0], optional
         List with the values of the SCL Band to filter out
+    bounds_utm: tuple
+        Bounds of the bounding box in UTM coordinates.
 
     Returns
     -------
@@ -160,9 +174,13 @@ def cloudMaskingFromSCLBand(*,
     """
     try:
         scl_scale_factor = scl_src.transform[0] / band_src.transform[0]
-
         if scl_scale_factor != 1.0:
             scl_band = scl_src.read(
+                window=from_bounds(left=bounds_utm[0],
+                                   bottom=bounds_utm[1],
+                                   right=bounds_utm[2],
+                                   top=bounds_utm[3],
+                                   transform=scl_src.transform),
                 out_shape=(
                     scl_src.count,
                     int(scl_src.height * scl_scale_factor),
@@ -171,15 +189,45 @@ def cloudMaskingFromSCLBand(*,
                 resampling=Resampling.nearest
             )
         else:
-            scl_band = scl_src.read()
+            scl_band = scl_src.read(window=from_bounds(left=bounds_utm[0],
+                                                       bottom=bounds_utm[1],
+                                                       right=bounds_utm[2],
+                                                       top=bounds_utm[3],
+                                                       transform=scl_src.transform))
 
-        raster_band = band_src.read()
+        raster_band = band_src.read(window=from_bounds(left=bounds_utm[0],
+                                                       bottom=bounds_utm[1],
+                                                       right=bounds_utm[2],
+                                                       top=bounds_utm[3],
+                                                       transform=band_src.transform))
 
         scl_filter_values.append(0)
         scl_band_mask = np.where(np.isin(scl_band, scl_filter_values), 0, 1)
 
         # Mask out Clouds
         image_band_masked = raster_band * scl_band_mask
+
         return image_band_masked
     except Exception as e:  # pragma: no cover
         raise Exception(f"Failed to mask pixels from SCl band => {e}")
+
+
+def getBoundsUTM(bounds: tuple, utm_zone: int) -> tuple:
+    """Get the bounds of a bounding box in UTM coordinates.
+
+    Parameters
+    ----------
+    bounds : tuple
+        Bounds defined as lat/long.
+    utm_zone : int
+        UTM zone number.
+
+    Returns
+    -------
+    : tuple
+        Bounds reprojected to the UTM zone.
+    """
+    bounding_box = box(*bounds)
+    bbox = geopandas.GeoSeries([bounding_box], crs=4326)
+    bbox = bbox.to_crs(crs=32600+utm_zone)
+    return tuple(bbox.bounds.values[0])

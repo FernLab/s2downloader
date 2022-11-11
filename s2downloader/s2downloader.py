@@ -28,12 +28,13 @@ from datetime import datetime
 
 import pandas as pd
 import rasterio
+from rasterio.windows import from_bounds
 import urllib.request
 
 from pystac import Item
 from pystac_client import Client
 
-from .utils import saveRasterToDisk, validPixelsFromSCLBand, cloudMaskingFromSCLBand
+from .utils import saveRasterToDisk, validPixelsFromSCLBand, cloudMaskingFromSCLBand, getBoundsUTM
 from .config import Config
 
 
@@ -210,11 +211,13 @@ def s2DataDownloader(*, config_dict: dict):
             print(f"Retrieving band: {band}")
             file_url = aws_item.assets[band].href
             print(file_url)
+            bounds_utm = getBoundsUTM(aoi_settings['bounding_box'], aws_item.properties['sentinel:utm_zone'])
             with rasterio.open(file_url) as scl_src:
                 nonzero_pixels_per, valid_pixels_per = \
                     validPixelsFromSCLBand(
                         scl_src=scl_src,
-                        scl_filter_values=aoi_settings["SCL_filter_values"])
+                        scl_filter_values=aoi_settings["SCL_filter_values"],
+                        bounds_utm=bounds_utm)
 
                 if nonzero_pixels_per >= aoi_settings["SCL_mask_valid_pixels_min_percentage"]\
                    and valid_pixels_per >= aoi_settings["aoi_min_coverage"]:
@@ -271,10 +274,16 @@ def s2DataDownloader(*, config_dict: dict):
                                     raster_band = cloudMaskingFromSCLBand(
                                         band_src=band_src,
                                         scl_src=scl_src,
-                                        scl_filter_values=aoi_settings["SCL_filter_values"]
+                                        scl_filter_values=aoi_settings["SCL_filter_values"],
+                                        bounds_utm=bounds_utm
                                     )
                                 else:
-                                    raster_band = band_src.read()
+                                    raster_band = band_src.read(
+                                        window=from_bounds(left=bounds_utm[0],
+                                                           bottom=bounds_utm[1],
+                                                           right=bounds_utm[2],
+                                                           top=bounds_utm[3],
+                                                           transform=band_src.transform))
 
                                 output_band_path = os.path.join(output_raster_path,
                                                                 f"{band}.tif")
@@ -287,7 +296,12 @@ def s2DataDownloader(*, config_dict: dict):
                         # Save the SCL band
                         output_scl_path = os.path.join(output_raster_directory_tile_date,
                                                        f"{file_url.split('/')[-2]}_SCL.tif")
-                        saveRasterToDisk(out_image=scl_src.read(),
+                        saveRasterToDisk(out_image=scl_src.read(window=from_bounds(left=bounds_utm[0],
+                                                                                   bottom=bounds_utm[1],
+                                                                                   right=bounds_utm[2],
+                                                                                   top=bounds_utm[3],
+                                                                                   transform=scl_src.transform)
+                                                                ),
                                          raster_crs=scl_src.crs,
                                          out_transform=scl_src.transform,
                                          output_raster_path=output_scl_path,
