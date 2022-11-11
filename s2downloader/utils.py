@@ -166,10 +166,10 @@ def cloudMaskingFromSCLBand(*,
         scl_scale_factor = scl_src.transform[0] / band_src.transform[0]
         if scl_scale_factor != 1.0:
             bb_window = from_bounds(left=bounds_utm[0],
-                                   bottom=bounds_utm[1],
-                                   right=bounds_utm[2],
-                                   top=bounds_utm[3],
-                                   transform=scl_src.transform)
+                                    bottom=bounds_utm[1],
+                                    right=bounds_utm[2],
+                                    top=bounds_utm[3],
+                                    transform=scl_src.transform)
             scl_band = scl_src.read(
                 window=bb_window,
                 out_shape=(
@@ -193,11 +193,10 @@ def cloudMaskingFromSCLBand(*,
                                                        transform=band_src.transform))
 
         scl_filter_values.append(0)
-        scl_band_mask = np.where(np.isin(scl_band, scl_filter_values), 0, 1)
+        scl_band_mask = np.where(np.isin(scl_band, scl_filter_values), np.uint16(0), np.uint16(1))
 
         # Mask out Clouds
         image_band_masked = raster_band * scl_band_mask
-
         return image_band_masked
     except Exception as e:  # pragma: no cover
         raise Exception(f"Failed to mask pixels from SCl band => {e}")
