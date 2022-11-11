@@ -39,6 +39,7 @@ from .config import Config
 
 def searchDataAtAWS(*, s2_collection: list[str],
                     bb: list[float],
+                    date_range: list[str],
                     props_json: dict,
                     stac_catalog_url: str) -> tuple[list[Item], list[str], list[int]]:
     """Search for Sentinel-2 data in given bounding box as defined in query_props.json (no data download yet).
@@ -49,6 +50,8 @@ def searchDataAtAWS(*, s2_collection: list[str],
         Contains name of S2 collection at AWS (only tested for [sentinel-s2-l2a-cogs].)
     bb : list[float]
         A list of coordinates of the outer bounding box of all given coordinates.
+    date_range: list[str]
+        List with the start and end date. If the same it is a single date request.
     props_json: dict
         Dictionary of all search parameters retrieved from json file.
     stac_catalog_url : str
@@ -79,7 +82,7 @@ def searchDataAtAWS(*, s2_collection: list[str],
             bbox=bb,  # bounding box
             # intersects=geoj,   # method can be used instead of bbox, but currently throws error
             query=props_json,  # cloud and data coverage properties
-            datetime=props_json['time'],  # time period
+            datetime=date_range,  # time period
             sortby="-properties.datetime"  # sort by data descending (minus sign)
         )
 
@@ -173,6 +176,7 @@ def s2DataDownloader(*, config_dict: dict):
         # search for Sentinel-2 data within the bounding box as defined in query_props.json (no data download yet)
         aws_items, date_list, scene_index = searchDataAtAWS(s2_collection=s2_settings['collections'],
                                                             bb=aoi_settings['bounding_box'],
+                                                            date_range=aoi_settings['date_range'],
                                                             props_json=tile_settings,
                                                             stac_catalog_url=s2_settings['stac_catalog_url'])
 
