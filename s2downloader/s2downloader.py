@@ -21,12 +21,9 @@
 
 # python native libraries
 import json
-import re
-
 import os
 from datetime import datetime
 
-import pandas as pd
 import rasterio
 import urllib.request
 
@@ -41,7 +38,7 @@ def searchDataAtAWS(*, s2_collection: list[str],
                     bb: list[float],
                     date_range: list[str],
                     props_json: dict,
-                    stac_catalog_url: str) -> tuple[list[Item], list[str], list[int]]:
+                    stac_catalog_url: str) -> list[Item]:
     """Search for Sentinel-2 data in given bounding box as defined in query_props.json (no data download yet).
 
     Parameters
@@ -61,10 +58,6 @@ def searchDataAtAWS(*, s2_collection: list[str],
     -------
     : list[Item]
         List of found Items at AWS server.
-    : list[str]
-        List of available scene dates (duplicates removed).
-    : list[int]
-        Index of the location of the selected dates in original query output.
 
     Raises
     ------
@@ -107,37 +100,7 @@ def searchDataAtAWS(*, s2_collection: list[str],
          for i in item_list_dict]
         print()
 
-        # collect all ids
-        ids = [id_item['id'] for id_item in item_list_dict]
-        ids_string = ''.join(ids)
-
-        # collect utm zones
-        utm_zone_list = [id_item['properties']['sentinel:utm_zone'] for id_item in item_list_dict]
-
-        # extract dates of available scenes from id search results
-        # TODO: This is S2 file name specific regexing,
-        #  maybe this can be improved to retrieve dates in a better way from the string
-        date_list = re.findall(r"\d{8}", ids_string)
-
-        # store date and utm zone information in dataframe
-        df_scene_dates = pd.DataFrame(zip(date_list, utm_zone_list), columns=["dates", "utm_zones"])
-
-        # keep scenes dates that are not duplicated OR where utm_zone fits best
-        df_scene_dates_clean = df_scene_dates
-
-        def list2int(input_list):
-            return [int(i) for i in input_list]
-
-        # store index number of kept scenes to list and convert list items to integer
-        scene_dates_clean_index = df_scene_dates_clean.index.tolist()
-        scene_dates_clean_index_int = list2int(scene_dates_clean_index)
-
-        # selected dates to list
-        date_list_selected = []
-        for idx in scene_dates_clean_index_int:
-            date_list_selected.append(date_list[idx])
-
-        return items_list, date_list_selected, scene_dates_clean_index_int
+        return items_list
     except Exception as e:  # pragma: no cover
         raise Exception(f"Failed to find data at AWS server => {e}")
 
@@ -174,21 +137,13 @@ def s2DataDownloader(*, config_dict: dict):
         cloudmasking = aoi_settings["apply_SCL_band_mask"]
 
         # search for Sentinel-2 data within the bounding box as defined in query_props.json (no data download yet)
-        aws_items, date_list, scene_index = searchDataAtAWS(s2_collection=s2_settings['collections'],
-                                                            bb=aoi_settings['bounding_box'],
-                                                            date_range=aoi_settings['date_range'],
-                                                            props_json=tile_settings,
-                                                            stac_catalog_url=s2_settings['stac_catalog_url'])
-
-        scene_index.sort()
-        selected_scenes_index_list = scene_index
-
-        download_only_one_scene = False
-        if download_only_one_scene:
-            selected_scenes_index_list = [scene_index[0]]
+        aws_items = searchDataAtAWS(s2_collection=s2_settings['collections'],
+                                    bb=aoi_settings['bounding_box'],
+                                    date_range=aoi_settings['date_range'],
+                                    props_json=tile_settings,
+                                    stac_catalog_url=s2_settings['stac_catalog_url'])
 
         data_msg = []
-
         if download_thumbnails:
             data_msg.append("thumbnail")
         if download_overviews:
@@ -198,15 +153,8 @@ def s2DataDownloader(*, config_dict: dict):
 
         # extract data for all scenes
         scenes_info = {}
-        for idx_scene in selected_scenes_index_list:
-            current_date = date_list[idx_scene]
-            current_year = current_date[:len(current_date) // 2]
-            current_month_day = current_date[len(current_date) // 2:]
-            current_month = current_month_day[:len(current_month_day) // 2]
-            output_raster_directory_tile_date = os.path.join(result_dir, current_year, current_month)
-
+        for aws_item in aws_items:
             # get item for selected scene
-            aws_item = aws_items[idx_scene]
             print(f"Validating scene ID: {aws_item.id}")
 
             # Download the SCL band
@@ -226,35 +174,30 @@ def s2DataDownloader(*, config_dict: dict):
                         msg = f"Getting {''.join(data_msg)} for: {aws_item.id}"
                     print(msg)
 
+                    # Create results directory
+                    if not os.path.isdir(result_dir):
+                        os.makedirs(result_dir)
+
                     if download_thumbnails or download_overviews:
-                        output_path = os.path.join(result_dir, current_year, current_month)
-                        if not os.path.isdir(output_path):
-                            os.makedirs(output_path)
                         if download_thumbnails:
                             file_url = aws_item.assets["thumbnail"].href
-                            thumbnail_path = os.path.join(output_raster_directory_tile_date,
+                            thumbnail_path = os.path.join(result_dir,
                                                           f"_{aws_item.id}_{file_url.rsplit('/', 1)[1]}")
                             urllib.request.urlretrieve(file_url, thumbnail_path)
                         if download_overviews:
                             file_url = aws_item.assets["overview"].href
-                            overview_path = os.path.join(output_raster_directory_tile_date,
+                            overview_path = os.path.join(result_dir,
                                                          f"_{aws_item.id}_{file_url.rsplit('/', 1)[1]}")
                             urllib.request.urlretrieve(file_url, overview_path)
                     if only_dates_no_data:
-                        item = aws_items[idx_scene]
-                        date_str = date_list[idx_scene]
-                        date = datetime(year=int(date_str[0:4]), month=int(date_str[4:6]), day=int(date_str[6:8]))
-                        scenes_info[date.strftime("%Y-%m-%d")] = {"id": item.to_dict()["id"]}
+                        date = datetime.strptime(aws_item.properties['datetime'], "%Y-%m-%dT%H:%M:%SZ")
+                        scenes_info[date.strftime("%Y-%m-%d")] = {"id": aws_item.to_dict()["id"]}
                     else:
                         # Download all other bands
                         bands = tile_settings["bands"]
                         print(f"Bands to retrieve: {bands}")
 
-                        # Create results directory
-                        if not os.path.isdir(output_raster_directory_tile_date):
-                            os.makedirs(output_raster_directory_tile_date)
-
-                        output_raster_path = os.path.join(output_raster_directory_tile_date,
+                        output_raster_path = os.path.join(result_dir,
                                                           f"{file_url.split('/')[-2]}")
                         if not os.path.isdir(output_raster_path):
                             os.makedirs(output_raster_path)
@@ -286,7 +229,7 @@ def s2DataDownloader(*, config_dict: dict):
                                                  save_to_uint16=save_to_uint16)
 
                         # Save the SCL band
-                        output_scl_path = os.path.join(output_raster_directory_tile_date,
+                        output_scl_path = os.path.join(result_dir,
                                                        f"{file_url.split('/')[-2]}_SCL.tif")
                         saveRasterToDisk(out_image=scl_src.read(),
                                          raster_crs=scl_src.crs,

@@ -240,7 +240,7 @@ def mosaicBands(*,
                 bands: list[str],
                 mosaic_dates: dict,
                 output_dir: str,
-                bounds: tuple,
+                bounds_utm: tuple,
                 resolution: tuple = None,
                 resampling_method: Resampling = Resampling.nearest):
     """Create a mosaic for each band.
@@ -253,7 +253,7 @@ def mosaicBands(*,
         A dictionary with STAC items grouped by date.
     output_dir: str
         Output directory.
-    bounds: tuple
+    bounds_utm: tuple
         Bounds of the mosaic.
     resolution: tuple, default=None, optional
         Target resolution (x,y) in meters, if None keep original.
@@ -270,7 +270,7 @@ def mosaicBands(*,
             mosaic_file_path = os.path.join(output_dir, f"{sensor_name}_{date}_{band}.tif")
             arr, out_trans = merge(datasets=srcs_to_mosaic,
                                    target_aligned_pixels=True,
-                                   bounds=bounds,
+                                   bounds=bounds_utm,
                                    res=resolution,
                                    resampling=resampling_method)
             output_meta = arr.meta.copy()
