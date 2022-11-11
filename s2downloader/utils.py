@@ -165,16 +165,17 @@ def cloudMaskingFromSCLBand(*,
     try:
         scl_scale_factor = scl_src.transform[0] / band_src.transform[0]
         if scl_scale_factor != 1.0:
-            scl_band = scl_src.read(
-                window=from_bounds(left=bounds_utm[0],
+            bb_window = from_bounds(left=bounds_utm[0],
                                    bottom=bounds_utm[1],
                                    right=bounds_utm[2],
                                    top=bounds_utm[3],
-                                   transform=scl_src.transform),
+                                   transform=scl_src.transform)
+            scl_band = scl_src.read(
+                window=bb_window,
                 out_shape=(
                     scl_src.count,
-                    int(scl_src.height * scl_scale_factor),
-                    int(scl_src.width * scl_scale_factor)
+                    int(bb_window.height * scl_scale_factor),
+                    int(bb_window.width * scl_scale_factor)
                 ),
                 resampling=Resampling.nearest
             )
