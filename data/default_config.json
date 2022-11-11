@@ -4,7 +4,7 @@
             "sentinel:data_coverage": {"ge": 70},
             "eo:cloud_cover": {"le": 20},
             "bands": ["B01","B02", "B05"],
-            "time": "2021-09-01/2021-09-05"
+            "time": "2021-09-05/2021-09-05"
         },
         "aoi_settings": {
             "bounding_box": [13.058397, 52.376620, 13.073049, 52.383835],
