@@ -86,7 +86,8 @@ def saveRasterToDisk(*, out_image: np.ndarray, raster_crs: pyproj.crs.crs.CRS, o
         raise Exception(f"Failed to save raster to disk => {e}")
 
 
-def validPixelsFromSCLBand(scl_src: rasterio.io.DatasetReader,
+def validPixelsFromSCLBand(*,
+                           scl_src: rasterio.io.DatasetReader,
                            scl_filter_values: list[int],
                            bounds_utm: tuple) -> tuple[float, float]:
     """Percentage of valid SCL band pixels.
@@ -95,7 +96,7 @@ def validPixelsFromSCLBand(scl_src: rasterio.io.DatasetReader,
     ----------
     scl_src : rasterio.io.DatasetReader
         A DatasetReader for the SCL band.
-    scl_filter_values: list, default=[0], optional
+    scl_filter_values: list
         List with the values of the SCL Band to filter out
     bounds_utm: tuple
         Bounds of the bounding box in UTM coordinates.
@@ -146,7 +147,7 @@ def cloudMaskingFromSCLBand(*,
         A DatasetReader for a raster band.
     scl_src : rasterio.io.DatasetReader
         A DatasetReader for the SCL band.
-    scl_filter_values: list, default=[0], optional
+    scl_filter_values: list
         List with the values of the SCL Band to filter out
     bounds_utm: tuple
         Bounds of the bounding box in UTM coordinates.
@@ -201,7 +202,7 @@ def cloudMaskingFromSCLBand(*,
         raise Exception(f"Failed to mask pixels from SCl band => {e}")
 
 
-def getBoundsUTM(bounds: tuple, utm_zone: int) -> tuple:
+def getBoundsUTM(*, bounds: tuple, utm_zone: int) -> tuple:
     """Get the bounds of a bounding box in UTM coordinates.
 
     Parameters

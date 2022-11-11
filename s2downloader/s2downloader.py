@@ -209,7 +209,8 @@ def s2DataDownloader(*, config_dict: dict):
             print(f"Retrieving band: {band}")
             file_url = aws_item.assets[band].href
             print(file_url)
-            bounds_utm = getBoundsUTM(aoi_settings['bounding_box'], aws_item.properties['sentinel:utm_zone'])
+            bounds_utm = getBoundsUTM(bounds=aoi_settings['bounding_box'],
+                                      utm_zone=aws_item.properties['sentinel:utm_zone'])
             with rasterio.open(file_url) as scl_src:
                 nonzero_pixels_per, valid_pixels_per = \
                     validPixelsFromSCLBand(
