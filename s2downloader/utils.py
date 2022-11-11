@@ -192,7 +192,7 @@ def cloudMaskingFromSCLBand(*,
         raise Exception(f"Failed to mask pixels from SCl band => {e}")
 
 
-def groupItemsPerDate(items_list: list[pystac.item.Item]) -> dict:
+def groupItemsPerDate(*, items_list: list[pystac.item.Item]) -> dict:
     """Group STAC Items per date.
 
     Parameters
@@ -236,7 +236,8 @@ def getBoundsUTM(bounds: tuple, utm_zone: int) -> tuple:
     return tuple(bbox.bounds.values[0])
 
 
-def mosaicBands(bands: list[str],
+def mosaicBands(*,
+                bands: list[str],
                 mosaic_dates: dict,
                 output_dir: str,
                 bounds: tuple,
@@ -280,7 +281,7 @@ def mosaicBands(bands: list[str],
                 m.write(arr)
 
 
-def getUTMZoneBB(bbox: list[float], bb_max_utm_zone_overlap: int = 50000) -> int:
+def getUTMZoneBB(*, bbox: list[float], bb_max_utm_zone_overlap: int = 50000) -> int:
     """Create a mosaic for each band.
 
     Parameters
