@@ -218,11 +218,6 @@ class ResultsSettings(BaseModel, extra=Extra.forbid):
         description="For each scene download the provided preview.",
         default=False
     )
-    download_only_one_scene: Optional[StrictBool] = Field(
-        title="Download only one scene.",
-        description="Downloads only the most recent scene from the available scenes.",
-        default=False
-    )
     save_raster_dtype_float32: Optional[StrictBool] = Field(
         title="Save raster with data type float32.",
         description="Save raster without rounding and with the data type float32.",
