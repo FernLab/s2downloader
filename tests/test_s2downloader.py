@@ -378,4 +378,3 @@ class TestSentinel2Downloader(unittest.TestCase):
         config['user_settings']['aoi_settings']['bounding_box'] = []
         with pytest.raises(ValueError):
             Config(**config)
-
