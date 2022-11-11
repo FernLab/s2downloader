@@ -10,20 +10,19 @@
             "bands": ["B01","B02", "B05"]
         },
         "aoi_settings": {
-            "bounding_box": [12.1439, 52.3832, 13.4204, 53.0389],
+            "bounding_box": [13.058397, 52.376620, 13.073049, 52.383835],
             "apply_SCL_band_mask": true,
             "SCL_filter_values": [3, 6],
             "SCL_mask_valid_pixels_min_percentage": 10,
             "aoi_min_coverage": 90,
             "resampling_method": "cubic",
-            "date_range": ["2021-09-01", "2021-09-05"]
+            "date_range": ["2021-09-04", "2021-09-05"]
         },
         "result_settings": {
             "results_dir": "data/data_output/",
             "only_dates_no_data": false,
             "download_thumbnails": false,
-            "download_overviews": false,
-            "save_raster_dtype_float32": false
+            "download_overviews": false
         }
     },
     "s2_settings": {
