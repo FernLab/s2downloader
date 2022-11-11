@@ -32,7 +32,7 @@ from shapely.geometry import box
 
 
 def saveRasterToDisk(*, out_image: np.ndarray, raster_crs: pyproj.crs.crs.CRS, out_transform: affine.Affine,
-                     output_raster_path: str, save_to_uint16: bool = False):
+                     output_raster_path: str):
     """Save raster imagery data to disk.
 
     Parameters
@@ -45,8 +45,6 @@ def saveRasterToDisk(*, out_image: np.ndarray, raster_crs: pyproj.crs.crs.CRS, o
         Output raster transformation parameters.
     output_raster_path : str
         Path to raster output location.
-    save_to_uint16 : bool, default=False, optional
-        Converts NaN to 0 and saves the raster with the dtype rasterio.uint16.
 
     Raises
     ------
@@ -72,26 +70,17 @@ def saveRasterToDisk(*, out_image: np.ndarray, raster_crs: pyproj.crs.crs.CRS, o
             img_width = out_image.shape[2]
             img_count = out_image.shape[0]
 
-        out_image_dtype = rasterio.float32
-        if save_to_uint16:
-            out_image_dtype = rasterio.uint16
         with rasterio.open(output_raster_path, 'w',
                            driver='GTiff',
                            height=img_height,
                            width=img_width,
                            count=img_count,    # nr of bands
-                           dtype=out_image_dtype,
+                           dtype=out_image.dtype,
                            crs=raster_crs,
                            transform=out_transform,
                            nodata=0
                            ) as dst:
-            if save_to_uint16:
-                out_image_uint16 = out_image + 0.5
-                np.nan_to_num(out_image_uint16, copy=False, nan=0)
-                out_image_uint16 = out_image_uint16.astype(out_image_dtype)
-                dst.write(out_image_uint16)
-            else:
-                dst.write(out_image)
+            dst.write(out_image)
 
     except Exception as e:  # pragma: no cover
         raise Exception(f"Failed to save raster to disk => {e}")

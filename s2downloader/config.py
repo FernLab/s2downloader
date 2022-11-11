@@ -84,9 +84,9 @@ class TileSettings(BaseModel):
     def check_bands(cls, v):
         """Check if bands is set correctly."""
         if len(v) == 0 or not set(v).issubset(["B01", "B02", "B03", "B04", "B05", "B06", "B07", "B08", "B8A",
-                                               "B09", "B10", "B11", "B12"]):
+                                               "B09", "B11", "B12"]):
             raise ValueError("Only the following band names are supported: B01, B02, B03, B04, B05, B06, B07,"
-                             " B08, B8A, B09, B10, B11, B12.")
+                             " B08, B8A, B09, B11, B12.")
         if len(v) != len(set(v)):
             raise ValueError("Remove duplicates.")
         return v
@@ -205,10 +205,6 @@ class ResultsSettings(BaseModel, extra=Extra.forbid):
         description="Downloads only the most recent scene from the available scenes.",
         default=False
     )
-    save_raster_dtype_float32: Optional[StrictBool] = Field(
-        title="Save raster with data type float32.",
-        description="Save raster without rounding and with the data type float32.",
-        default=False)
 
     @validator('results_dir')
     def check_folder(cls, v):
