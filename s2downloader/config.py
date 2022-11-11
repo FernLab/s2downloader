@@ -205,10 +205,6 @@ class ResultsSettings(BaseModel, extra=Extra.forbid):
         description="Downloads only the most recent scene from the available scenes.",
         default=False
     )
-    save_raster_dtype_float32: Optional[StrictBool] = Field(
-        title="Save raster with data type float32.",
-        description="Save raster without rounding and with the data type float32.",
-        default=False)
 
     @validator('results_dir')
     def check_folder(cls, v):

@@ -18,8 +18,7 @@
             "results_dir": "data/data_output/",
             "only_dates_no_data": false,
             "download_thumbnails": false,
-            "download_overviews": false,
-            "save_raster_dtype_float32": false
+            "download_overviews": false
         }
     },
     "s2_settings": {

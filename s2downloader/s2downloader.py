@@ -166,8 +166,6 @@ def s2DataDownloader(*, config_dict: dict):
         only_dates_no_data = result_settings['only_dates_no_data']
 
         result_dir = result_settings['results_dir']
-
-        save_to_uint16 = not result_settings["save_raster_dtype_float32"]
         cloudmasking = aoi_settings["apply_SCL_band_mask"]
 
         # search for Sentinel-2 data within the bounding box as defined in query_props.json (no data download yet)
@@ -281,8 +279,7 @@ def s2DataDownloader(*, config_dict: dict):
                                 saveRasterToDisk(out_image=raster_band,
                                                  raster_crs=band_src.crs,
                                                  out_transform=band_src.transform,
-                                                 output_raster_path=output_band_path,
-                                                 save_to_uint16=save_to_uint16)
+                                                 output_raster_path=output_band_path)
 
                         # Save the SCL band
                         output_scl_path = os.path.join(output_raster_directory_tile_date,
@@ -290,8 +287,7 @@ def s2DataDownloader(*, config_dict: dict):
                         saveRasterToDisk(out_image=scl_src.read(),
                                          raster_crs=scl_src.crs,
                                          out_transform=scl_src.transform,
-                                         output_raster_path=output_scl_path,
-                                         save_to_uint16=save_to_uint16)
+                                         output_raster_path=output_scl_path)
 
         if only_dates_no_data:
             scenes_info_path = os.path.join(result_dir,
