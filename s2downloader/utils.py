@@ -324,7 +324,7 @@ def getUTMZoneBB(*, bbox: list[float], bb_max_utm_zone_overlap: int = 50000) -> 
 
     utm_zones = utm_df.iloc[utm_indices]['ZONE'].values
     if np.unique(utm_zones).size == 1:
-        return np.unique(utm_zones)[0]
+        return int(np.unique(utm_zones)[0])
     elif np.unique(utm_zones).size == 2:
         min_utm = np.min(utm_zones)
         max_utm = np.max(utm_zones)
@@ -350,6 +350,6 @@ def getUTMZoneBB(*, bbox: list[float], bb_max_utm_zone_overlap: int = 50000) -> 
                         raise ValueError(
                             f"The bounding box overlaps UTM zones 32 and 33, and its a length over the"
                             f" 33 UTM zone is greater than {bb_max_utm_zone_overlap} meters: {length} meters!")
-            return min_utm
+            return int(min_utm)
     else:
         raise ValueError(f"The bounding box overlaps more than 2 UTM zones: {np.unique(utm_zones)}!")
