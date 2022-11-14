@@ -28,12 +28,13 @@ from datetime import datetime
 
 import pandas as pd
 import rasterio
+from rasterio.windows import from_bounds
 import urllib.request
 
 from pystac import Item
 from pystac_client import Client
 
-from .utils import saveRasterToDisk, validPixelsFromSCLBand, cloudMaskingFromSCLBand
+from .utils import saveRasterToDisk, validPixelsFromSCLBand, cloudMaskingFromSCLBand, getBoundsUTM
 from .config import Config
 
 
@@ -166,8 +167,6 @@ def s2DataDownloader(*, config_dict: dict):
         only_dates_no_data = result_settings['only_dates_no_data']
 
         result_dir = result_settings['results_dir']
-
-        save_to_uint16 = not result_settings["save_raster_dtype_float32"]
         cloudmasking = aoi_settings["apply_SCL_band_mask"]
 
         # search for Sentinel-2 data within the bounding box as defined in query_props.json (no data download yet)
@@ -210,17 +209,20 @@ def s2DataDownloader(*, config_dict: dict):
             print(f"Retrieving band: {band}")
             file_url = aws_item.assets[band].href
             print(file_url)
+            bounds_utm = getBoundsUTM(bounds=aoi_settings['bounding_box'],
+                                      utm_zone=aws_item.properties['sentinel:utm_zone'])
             with rasterio.open(file_url) as scl_src:
                 nonzero_pixels_per, valid_pixels_per = \
                     validPixelsFromSCLBand(
                         scl_src=scl_src,
-                        scl_filter_values=aoi_settings["SCL_filter_values"])
+                        scl_filter_values=aoi_settings["SCL_filter_values"],
+                        bounds_utm=bounds_utm)
 
                 if nonzero_pixels_per >= aoi_settings["SCL_mask_valid_pixels_min_percentage"]\
                    and valid_pixels_per >= aoi_settings["aoi_min_coverage"]:
                     if (download_thumbnails or download_overviews) or not only_dates_no_data:
                         msg = f"Getting {''.join(data_msg)} for: {aws_item.id}"
-                    print(msg)
+                        print(msg)
 
                     if download_thumbnails or download_overviews:
                         output_path = os.path.join(result_dir, current_year, current_month)
@@ -229,18 +231,21 @@ def s2DataDownloader(*, config_dict: dict):
                         if download_thumbnails:
                             file_url = aws_item.assets["thumbnail"].href
                             thumbnail_path = os.path.join(output_raster_directory_tile_date,
-                                                          f"_{aws_item.id}_{file_url.rsplit('/', 1)[1]}")
+                                                          f"{aws_item.id}_{file_url.rsplit('/', 1)[1]}")
                             urllib.request.urlretrieve(file_url, thumbnail_path)
                         if download_overviews:
                             file_url = aws_item.assets["overview"].href
                             overview_path = os.path.join(output_raster_directory_tile_date,
-                                                         f"_{aws_item.id}_{file_url.rsplit('/', 1)[1]}")
+                                                         f"{aws_item.id}_{file_url.rsplit('/', 1)[1]}")
                             urllib.request.urlretrieve(file_url, overview_path)
                     if only_dates_no_data:
                         item = aws_items[idx_scene]
                         date_str = date_list[idx_scene]
                         date = datetime(year=int(date_str[0:4]), month=int(date_str[4:6]), day=int(date_str[6:8]))
-                        scenes_info[date.strftime("%Y-%m-%d")] = {"id": item.to_dict()["id"]}
+                        if date.strftime("%Y-%m-%d") not in scenes_info:
+                            scenes_info[date.strftime("%Y-%m-%d")] = list()
+                        scenes_info[date.strftime("%Y-%m-%d")].append({"id": item.to_dict()["id"]})
+
                     else:
                         # Download all other bands
                         bands = tile_settings["bands"]
@@ -268,36 +273,45 @@ def s2DataDownloader(*, config_dict: dict):
                                     raster_band = cloudMaskingFromSCLBand(
                                         band_src=band_src,
                                         scl_src=scl_src,
-                                        scl_filter_values=aoi_settings["SCL_filter_values"]
+                                        scl_filter_values=aoi_settings["SCL_filter_values"],
+                                        bounds_utm=bounds_utm
                                     )
                                 else:
-                                    raster_band = band_src.read()
+                                    raster_band = band_src.read(
+                                        window=from_bounds(left=bounds_utm[0],
+                                                           bottom=bounds_utm[1],
+                                                           right=bounds_utm[2],
+                                                           top=bounds_utm[3],
+                                                           transform=band_src.transform))
 
                                 output_band_path = os.path.join(output_raster_path,
                                                                 f"{band}.tif")
                                 saveRasterToDisk(out_image=raster_band,
                                                  raster_crs=band_src.crs,
                                                  out_transform=band_src.transform,
-                                                 output_raster_path=output_band_path,
-                                                 save_to_uint16=save_to_uint16)
+                                                 output_raster_path=output_band_path)
 
                         # Save the SCL band
                         output_scl_path = os.path.join(output_raster_directory_tile_date,
                                                        f"{file_url.split('/')[-2]}_SCL.tif")
-                        saveRasterToDisk(out_image=scl_src.read(),
+                        saveRasterToDisk(out_image=scl_src.read(window=from_bounds(left=bounds_utm[0],
+                                                                                   bottom=bounds_utm[1],
+                                                                                   right=bounds_utm[2],
+                                                                                   top=bounds_utm[3],
+                                                                                   transform=scl_src.transform)
+                                                                ),
                                          raster_crs=scl_src.crs,
                                          out_transform=scl_src.transform,
-                                         output_raster_path=output_scl_path,
-                                         save_to_uint16=save_to_uint16)
+                                         output_raster_path=output_scl_path)
 
-                    if only_dates_no_data:
-                        scenes_info_path = os.path.join(result_dir,
-                                                        f"scenes_info_"
-                                                        f"{tile_settings['time'].replace('/', '_')}.json")
-                        if os.path.exists(scenes_info_path):
-                            raise IOError(f"The scenes_info file: {scenes_info_path} already exists.")
-                        else:
-                            with open(scenes_info_path, "w") as write_file:
-                                json.dump(scenes_info, write_file, indent=4)
+        if only_dates_no_data:
+            scenes_info_path = os.path.join(result_dir,
+                                            f"scenes_info_"
+                                            f"{tile_settings['time'].replace('/', '_')}.json")
+            if os.path.exists(scenes_info_path):
+                raise IOError(f"The scenes_info file: {scenes_info_path} already exists.")
+            else:
+                with open(scenes_info_path, "w") as write_file:
+                    json.dump(scenes_info, write_file, indent=4)
     except Exception as e:
         raise Exception(f"Failed to run S2DataPortal main process => {e}")

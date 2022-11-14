@@ -20,6 +20,7 @@ dependencies:
   - rtree
   - python-dateutil
   - pydantic
+  - geopy
 
   - pip:
     # setup requirements

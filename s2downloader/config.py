@@ -24,6 +24,7 @@
 import os
 import json
 import re
+import geopy.distance
 from datetime import datetime
 from enum import Enum
 from json import JSONDecodeError
@@ -83,9 +84,9 @@ class TileSettings(BaseModel):
     def check_bands(cls, v):
         """Check if bands is set correctly."""
         if len(v) == 0 or not set(v).issubset(["B01", "B02", "B03", "B04", "B05", "B06", "B07", "B08", "B8A",
-                                               "B09", "B10", "B11", "B12"]):
+                                               "B09", "B11", "B12"]):
             raise ValueError("Only the following band names are supported: B01, B02, B03, B04, B05, B06, B07,"
-                             " B08, B8A, B09, B10, B11, B12.")
+                             " B08, B8A, B09, B11, B12.")
         if len(v) != len(set(v)):
             raise ValueError("Remove duplicates.")
         return v
@@ -152,6 +153,15 @@ class AoiSettings(BaseModel, extra=Extra.forbid):
             raise ValueError("Bounding Box needs two pairs of lat/lon coordinates.")
         if v[0] >= v[2] or v[1] >= v[3]:
             raise ValueError("Bounding Box coordinates are not valid.")
+        coords_nw = (v[3], v[0])
+        coords_ne = (v[3], v[2])
+        coords_sw = (v[1], v[0])
+
+        ew_dist = geopy.distance.geodesic(coords_nw, coords_ne).km
+        ns_dist = geopy.distance.geodesic(coords_nw, coords_sw).km
+
+        if ew_dist > 50 or ns_dist > 50:
+            raise ValueError("Bounding Box is too large. It should be max 50*50km.")
 
         return v
 
@@ -195,10 +205,6 @@ class ResultsSettings(BaseModel, extra=Extra.forbid):
         description="Downloads only the most recent scene from the available scenes.",
         default=False
     )
-    save_raster_dtype_float32: Optional[StrictBool] = Field(
-        title="Save raster with data type float32.",
-        description="Save raster without rounding and with the data type float32.",
-        default=False)
 
     @validator('results_dir')
     def check_folder(cls, v):
