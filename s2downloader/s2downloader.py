@@ -70,7 +70,6 @@ def searchDataAtAWS(*, s2_collection: list[str],
     try:
         # search AWS collection
         catalogue = Client.open(stac_catalog_url)
-
         item_search = catalogue.search(
             collections=s2_collection,  # sentinel-s2-l2a-cogs
             bbox=bb,  # bounding box
@@ -79,7 +78,6 @@ def searchDataAtAWS(*, s2_collection: list[str],
             datetime=date_range,  # time period
             sortby="-properties.datetime"  # sort by data descending (minus sign)
         )
-
         # proceed if items are found
         if len(list(item_search.items())) == 0:
             raise ValueError("For these settings there is no data to be found at AWS. \n"
@@ -253,7 +251,7 @@ def s2DataDownloader(*, config_dict: dict):
         if only_dates_no_data:
             scenes_info_path = os.path.join(result_dir,
                                             f"scenes_info_"
-                                            f"{tile_settings['time'].replace('/', '_')}.json")
+                                            f"{'_'.join(aoi_settings['date_range'])}.json")
             if os.path.exists(scenes_info_path):
                 raise IOError(f"The scenes_info file: {scenes_info_path} already exists.")
             else:
