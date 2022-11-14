@@ -70,7 +70,6 @@ def searchDataAtAWS(*, s2_collection: list[str],
     try:
         # search AWS collection
         catalogue = Client.open(stac_catalog_url)
-        props_json['sentinel:utm_zone'] = {}
         item_search = catalogue.search(
             collections=s2_collection,  # sentinel-s2-l2a-cogs
             bbox=bb,  # bounding box
