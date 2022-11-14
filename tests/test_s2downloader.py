@@ -124,7 +124,7 @@ class TestSentinel2Downloader(unittest.TestCase):
 
         config = deepcopy(self.configuration)
         scenes_info_path = os.path.join(self.output_data_path, "scenes_info_2021-09-04_2021-09-05.json")
-        scene_tif_path = os.path.join(self.output_data_path, "2021/09/S2B_33UUU_20210905_0_L2A/B05.tif")
+        scene_tif_path = os.path.join(self.output_data_path, "S2B_33UUU_20210905_0_L2A/B05.tif")
 
         config["user_settings"]["result_settings"]["only_dates_no_data"] = True
         s2DataDownloader(config_dict=config)
