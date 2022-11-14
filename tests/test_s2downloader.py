@@ -54,14 +54,13 @@ class TestSentinel2Downloader(unittest.TestCase):
 
         cls.output_data_path = cls.configuration['user_settings']['result_settings']['results_dir']
 
-        if not os.path.exists(cls.output_data_path):
-            try:
-                os.mkdir(cls.output_data_path)
-            except OSError:
-                print(f"Creation of test data output directory {cls.output_data_path} failed")
-                raise
-        else:
-            raise Exception(f'Test directory {cls.output_data_path} already exists!')
+        try:
+            if os.path.exists(cls.output_data_path):
+                shutil.rmtree(cls.output_data_path)
+            os.mkdir(cls.output_data_path)
+        except OSError:
+            print(f"Creation of test data output directory {cls.output_data_path} failed")
+            raise
 
     @classmethod
     def tearDown(cls) -> None:
@@ -90,7 +89,7 @@ class TestSentinel2Downloader(unittest.TestCase):
 
         # features of two files:
         path = os.path.abspath(
-            os.path.join(self.output_data_path, "2021/09/S2B_32UQD_20210905_0_L2A_SCL.tif"))
+            os.path.join(self.output_data_path, "S2B_32UQD_20210905_0_L2A_SCL.tif"))
         self.assertEqual((str(path), os.path.isfile(path)), (str(path), True))
         with rasterio.open(path) as expected_res:
             assert expected_res.dtypes[0] == "uint8"
@@ -105,7 +104,7 @@ class TestSentinel2Downloader(unittest.TestCase):
                                  equal_nan=False).all()
 
         path = os.path.abspath(
-            os.path.join(self.output_data_path, "2021/09/S2B_32UQD_20210905_0_L2A/B02.tif"))
+            os.path.join(self.output_data_path, "S2B_32UQD_20210905_0_L2A/B02.tif"))
         self.assertEqual((str(path), os.path.isfile(path)), (str(path), True))
         with rasterio.open(path) as expected_res:
             assert expected_res.dtypes[0] == "uint16"
@@ -308,14 +307,14 @@ class TestSentinel2Downloader(unittest.TestCase):
 
         s2DataDownloader(config_dict=config)
 
-        scene_path = os.path.join(self.output_data_path, "2021/09/S2B_32UQD_20210905_0_L2A_L2A_PVI.tif")
+        scene_path = os.path.join(self.output_data_path, "S2B_32UQD_20210905_0_L2A_L2A_PVI.tif")
 
         if not os.path.exists(scene_path):
             assert False
 
         if not os.path.exists(
             os.path.join(
-                self.output_data_path, "2021/09/S2B_33UUU_20210905_0_L2A_preview.jpg")
+                self.output_data_path, "S2B_33UUU_20210905_0_L2A_preview.jpg")
         ):
             assert False
 
