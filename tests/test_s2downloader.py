@@ -179,37 +179,37 @@ class TestSentinel2Downloader(unittest.TestCase):
             message = exinfo.value.args[0]
             assert str(message).__contains__('Failed to find data at AWS server')
 
-    def testSentinel2TileSettingsTime(self):
+    def testSentinel2AOISettingsDateRange(self):
         """Test configuration to test time range for the tile settings"""
 
         config = deepcopy(self.configuration)
-        config['user_settings']['tile_settings']['time'] = "2020-06-01/2020-09-01"
+        config['user_settings']['aoi_settings']['date_range'] = ["2020-06-01", "2020-09-01"]
         Config(**config)
 
-        config['user_settings']['tile_settings']['time'] = "2020-06-01"
+        config['user_settings']['aoi_settings']['date_range'] = ["2020-06-01"]
         Config(**config)
 
-        config['user_settings']['tile_settings']['time'] = "2020/06/01"
+        config['user_settings']['aoi_settings']['date_range'] = ["2020/06/01"]
         with pytest.raises(ValueError):
             Config(**config)
 
-        config['user_settings']['tile_settings']['time'] = "2020/06-01"
+        config['user_settings']['aoi_settings']['date_range'] = ["2020/06-01"]
         with pytest.raises(ValueError):
             Config(**config)
 
-        config['user_settings']['tile_settings']['time'] = "2020-06-01-2020-09-01"
+        config['user_settings']['aoi_settings']['date_range'] = ["2020-06-01-2020-09-01"]
         with pytest.raises(ValueError):
             Config(**config)
 
-        config['user_settings']['tile_settings']['time'] = "2020/06-01/2020-09-01"
+        config['user_settings']['aoi_settings']['date_range'] = ["2020/06-01/2020-09-01"]
         with pytest.raises(ValueError):
             Config(**config)
 
-        config['user_settings']['tile_settings']['time'] = "2020-06-01/2020/09-01"
+        config['user_settings']['aoi_settings']['date_range'] = ["2020-06-01/2020/09-01"]
         with pytest.raises(ValueError):
             Config(**config)
 
-        config['user_settings']['tile_settings']['time'] = "2020-09-01/2020-06-01"
+        config['user_settings']['aoi_settings']['date_range'] = ["2020-09-01/2020-06-01"]
         with pytest.raises(ValueError):
             Config(**config)
 
