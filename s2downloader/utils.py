@@ -317,7 +317,7 @@ def getUTMZoneBB(*, bbox: list[float], bb_max_utm_zone_overlap: int = 50000) -> 
         For invalid Bounding Box.
     """
     bb_geom = sg.box(*bbox, ccw=True)
-    utm_df = geopandas.read_file(os.path.abspath("../data/World_UTM_Grid.zip"))
+    utm_df = geopandas.read_file(os.path.abspath("data/World_UTM_Grid.zip"))
     utm_intersections = utm_df.intersection(bb_geom)
     utm_indices = list(utm_intersections.loc[~utm_intersections.is_empty].index)
     utms = utm_intersections.iloc[utm_indices]

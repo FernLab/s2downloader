@@ -23,14 +23,13 @@
 # python native libraries
 import os
 import json
-import re
 import geopy.distance
 from datetime import datetime
 from enum import Enum
 from json import JSONDecodeError
 
 # third party packages
-from pydantic import BaseModel, Field, validator, StrictBool, Extra, HttpUrl, root_validator
+from pydantic import BaseModel, Field, validator, StrictBool, Extra, HttpUrl
 from typing import Optional, List, Dict
 
 from .utils import getUTMZoneBB
@@ -154,7 +153,7 @@ class AoiSettings(BaseModel, extra=Extra.forbid):
         title="Rasterio resampling method name.",
         description="Define the method to be used when resampling.",
         default=ResamplingMethodName.cubic)
-    date_range: List[datetime] = Field(
+    date_range: List[str] = Field(
         title="Date range.",
         description="List with the start and end date. If the same it is a single date request.",
         unique_items=False,
@@ -163,14 +162,14 @@ class AoiSettings(BaseModel, extra=Extra.forbid):
         default=["2021-09-01", "2021-09-05"]
     )
 
-    @root_validator
+    @validator("bounding_box")
     def validate_BB(cls, v):
         """Check if the Bounding Box is valid."""
-        bb = v["bounding_box"]
-        if len(bb) != 4:
+        if len(v) != 4:
             raise ValueError("Bounding Box needs two pairs of lat/lon coordinates.")
-        if bb[0] >= bb[2] or bb[1] >= bb[3]:
+        if v[0] >= v[2] or v[1] >= v[3]:
             raise ValueError("Bounding Box coordinates are not valid.")
+
         coords_nw = (v[3], v[0])
         coords_ne = (v[3], v[2])
         coords_sw = (v[1], v[0])
@@ -181,9 +180,6 @@ class AoiSettings(BaseModel, extra=Extra.forbid):
         if ew_dist > 50 or ns_dist > 50:
             raise ValueError("Bounding Box is too large. It should be max 50*50km.")
 
-        bb_max_utm_zone_overlap = v["bb_max_utm_zone_overlap"]
-        utm_zone = getUTMZoneBB(bbox=bb, bb_max_utm_zone_overlap=bb_max_utm_zone_overlap)
-        v["sentinel:utm_zone"] = {"eq": utm_zone}
         return v
 
     @validator("SCL_filter_values")
@@ -198,12 +194,13 @@ class AoiSettings(BaseModel, extra=Extra.forbid):
                              "set apply_SCL_band_mask to 'False'.")
         return v
 
-    @validator("date_range", pre=True)
+    @validator("date_range")
     def check_date_range(cls, v):
         """Check data range."""
-        if isinstance(v, str) and re.match(r"%Y-%m-%d", v):
-            return v
-        raise ValueError("Invalid format")
+        for d in v:
+            print(d)
+            datetime.strptime(d, "%Y-%m-%d")
+        return v
 
 
 class ResultsSettings(BaseModel, extra=Extra.forbid):
@@ -311,6 +308,10 @@ def loadConfiguration(*, path: str) -> dict:
         with open(path) as config_fp:
             config = json.load(config_fp)
             config = Config(**config).dict(by_alias=True)
+            bb = config["user_settings"]["aoi_settings"]["bounding_box"]
+            bb_max_utm_zone_overlap = config["user_settings"]["aoi_settings"]["bb_max_utm_zone_overlap"]
+            utm_zone = getUTMZoneBB(bbox=bb, bb_max_utm_zone_overlap=bb_max_utm_zone_overlap)
+            config["user_settings"]["tile_settings"]["sentinel:utm_zone"] = {"eq": utm_zone}
     except JSONDecodeError as e:
         raise IOError(f'Failed to load the configuration json file => {e}')
     return config

@@ -195,7 +195,7 @@ def s2DataDownloader(*, config_dict: dict):
                         date = datetime.strptime(aws_item.properties['datetime'], "%Y-%m-%dT%H:%M:%SZ")
                         if date.strftime("%Y-%m-%d") not in scenes_info:
                             scenes_info[date.strftime("%Y-%m-%d")] = list()
-                        scenes_info[date.strftime("%Y-%m-%d")].append({"id": item.to_dict()["id"]})
+                        scenes_info[date.strftime("%Y-%m-%d")].append({"id": aws_item.to_dict()["id"]})
                     else:
                         # Download all other bands
                         bands = tile_settings["bands"]

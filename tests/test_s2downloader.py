@@ -169,7 +169,7 @@ class TestSentinel2Downloader(unittest.TestCase):
         config['user_settings']['tile_settings']['bands'] = ["B01"]
         config['user_settings']['tile_settings']['eo:cloud_cover'] = {"eq": 0}
         config['user_settings']['tile_settings']['sentinel:data_coverage'] = {"eq": 100}
-        config['user_settings']['tile_settings']['time'] = "2021-09-01/2021-09-02"
+        config['user_settings']['aoi_settings']['date_range'] = ["2021-09-01", "2021-09-02"]
 
         Config(**config)
         with pytest.raises(Exception) as exinfo:
