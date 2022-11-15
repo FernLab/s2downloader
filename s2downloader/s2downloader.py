@@ -161,26 +161,22 @@ def s2DataDownloader(*, config_dict: dict):
             sensor_name = items[0].id[0:3]
             bounds_utm = getBoundsUTM(bounds=aoi_settings['bounding_box'],
                                       utm_zone=items[0].properties['sentinel:utm_zone'])
+            scl_crs = 32632
+            raster_crs = 32632
 
             if num_tiles > 1:
                 scl_mosaic = []
-                scl_meta = None
-                for item in items:
-                    scl_src = rasterio.open(item.assets["SCL"].href)
-                    scl_meta = scl_src.meta.copy()
+                for item_idx in range(len(items)):
+                    scl_src = rasterio.open(items[item_idx].assets["SCL"].href)
+                    if item_idx == 0:
+                        scl_crs = scl_src.crs
                     scl_mosaic.append(scl_src)
 
                 scl_band, scl_trans = merge(datasets=scl_mosaic,
                                             target_aligned_pixels=True,
                                             bounds=bounds_utm,
                                             res=target_resolution,
-                                            resampling=aoi_settings["resampling_method"])
-                scl_meta.update({
-                    "driver": "GTiff",
-                    "height": scl_band.shape[1],
-                    "width": scl_band.shape[2],
-                    "transform": scl_trans
-                })
+                                            resampling=Resampling[aoi_settings["resampling_method"]])
                 output_scl_path = os.path.join(result_dir, f"{sensor_name}_{items_date}_SCL.tif")
             elif len(items) == 1:
                 file_url = items[0].assets["SCL"].href
@@ -255,16 +251,17 @@ def s2DataDownloader(*, config_dict: dict):
                     for band in bands:
                         if num_tiles > 1:
                             srcs_to_mosaic = []
-                            for item in items:
-                                with rasterio.open(item.assets[band].href) as band_src:
+                            for item_idx in range(len(items)):
+                                band_src = rasterio.open(items[item_idx].assets[band].href)
+                                if item_idx == 0:
                                     raster_crs = band_src.crs
-                                    srcs_to_mosaic.append(band_src)
+                                srcs_to_mosaic.append(band_src)
 
                             raster_band, raster_trans = merge(datasets=srcs_to_mosaic,
                                                               target_aligned_pixels=True,
                                                               bounds=bounds_utm,
                                                               res=target_resolution,
-                                                              resampling=aoi_settings["resampling_method"])
+                                                              resampling=Resampling[aoi_settings["resampling_method"]])
                             output_band_path = os.path.join(result_dir, f"{sensor_name}_{items_date}_{band}.tif")
                         else:
                             file_url = items[0].assets[band].href

@@ -311,7 +311,7 @@ def loadConfiguration(*, path: str) -> dict:
             bb = config["user_settings"]["aoi_settings"]["bounding_box"]
             bb_max_utm_zone_overlap = config["user_settings"]["aoi_settings"]["bb_max_utm_zone_overlap"]
             utm_zone = getUTMZoneBB(bbox=bb, bb_max_utm_zone_overlap=bb_max_utm_zone_overlap)
-            config["user_settings"]["tile_settings"]["sentinel:utm_zone"] = {"eq": utm_zone}
+            config["user_settings"]["tile_settings"]["sentinel:utm_zone"] = {"eq": 32}
     except JSONDecodeError as e:
         raise IOError(f'Failed to load the configuration json file => {e}')
     return config
