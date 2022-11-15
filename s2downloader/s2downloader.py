@@ -22,16 +22,18 @@
 # python native libraries
 import json
 import os
-from datetime import datetime
 
+import numpy as np
 import rasterio
+from rasterio.merge import merge
 from rasterio.windows import from_bounds
+from rasterio.warp import Resampling
 import urllib.request
 
 from pystac import Item
 from pystac_client import Client
 
-from .utils import saveRasterToDisk, validPixelsFromSCLBand, cloudMaskingFromSCLBand, getBoundsUTM
+from .utils import saveRasterToDisk, validPixelsFromSCLBand, getBoundsUTM, groupItemsPerDate
 from .config import Config
 
 
@@ -119,6 +121,7 @@ def s2DataDownloader(*, config_dict: dict):
     """
     try:
         config_dict = Config(**config_dict).dict(by_alias=True)
+        target_resolution = 10
 
         # read the variables from the config:
         tile_settings = config_dict['user_settings']['tile_settings']
@@ -148,105 +151,158 @@ def s2DataDownloader(*, config_dict: dict):
         if not only_dates_no_data:
             data_msg.append("data")
 
-        # extract data for all scenes
+        items_per_date = groupItemsPerDate(items_list=aws_items)
+        scl_filter_values = aoi_settings["SCL_filter_values"]
+        scl_filter_values.append(0)
         scenes_info = {}
-        for aws_item in aws_items:
-            # get item for selected scene
-            print(f"Validating scene ID: {aws_item.id}")
-
-            # Download the SCL band
-            band = 'SCL'
-            print(f"Retrieving band: {band}")
-            file_url = aws_item.assets[band].href
-            print(file_url)
+        for items_date in items_per_date.keys():
+            items = items_per_date[items_date]
+            num_tiles = len(items)
+            sensor_name = items[0].id[0:3]
             bounds_utm = getBoundsUTM(bounds=aoi_settings['bounding_box'],
-                                      utm_zone=aws_item.properties['sentinel:utm_zone'])
-            with rasterio.open(file_url) as scl_src:
-                nonzero_pixels_per, valid_pixels_per = \
-                    validPixelsFromSCLBand(
-                        scl_src=scl_src,
-                        scl_filter_values=aoi_settings["SCL_filter_values"],
-                        bounds_utm=bounds_utm)
+                                      utm_zone=items[0].properties['sentinel:utm_zone'])
 
-                if nonzero_pixels_per >= aoi_settings["SCL_mask_valid_pixels_min_percentage"]\
-                   and valid_pixels_per >= aoi_settings["aoi_min_coverage"]:
-                    if (download_thumbnails or download_overviews) or not only_dates_no_data:
-                        msg = f"Getting {''.join(data_msg)} for: {aws_item.id}"
-                        print(msg)
+            if num_tiles > 1:
+                scl_mosaic = []
+                scl_meta = None
+                for item in items:
+                    scl_src = rasterio.open(item.assets["SCL"].href)
+                    scl_meta = scl_src.meta.copy()
+                    scl_mosaic.append(scl_src)
 
-                    # Create results directory
-                    if not os.path.isdir(result_dir):
-                        os.makedirs(result_dir)
+                scl_band, scl_trans = merge(datasets=scl_mosaic,
+                                            target_aligned_pixels=True,
+                                            bounds=bounds_utm,
+                                            res=target_resolution,
+                                            resampling=aoi_settings["resampling_method"])
+                scl_meta.update({
+                    "driver": "GTiff",
+                    "height": scl_band.shape[1],
+                    "width": scl_band.shape[2],
+                    "transform": scl_trans
+                })
+                output_scl_path = os.path.join(result_dir, f"{sensor_name}_{items_date}_SCL.tif")
+            elif len(items) == 1:
+                file_url = items[0].assets["SCL"].href
+                with rasterio.open(file_url) as scl_src:
+                    scl_scale_factor = scl_src.transform[0] / target_resolution
+                    bb_window = from_bounds(left=bounds_utm[0],
+                                            bottom=bounds_utm[1],
+                                            right=bounds_utm[2],
+                                            top=bounds_utm[3],
+                                            transform=scl_src.transform)
+                    if scl_scale_factor != 1.0:
+                        scl_band = scl_src.read(window=bb_window,
+                                                out_shape=(scl_src.count,
+                                                           int(bb_window.height * scl_scale_factor),
+                                                           int(bb_window.width * scl_scale_factor)
+                                                           ),
+                                                resampling=Resampling.nearest
+                                                )
+                    else:
+                        scl_band = scl_src.read(window=bb_window)
+                    scl_crs = scl_src.crs
+                    scl_trans = scl_src.transform
+                output_scl_path = os.path.join(result_dir,
+                                               f"{file_url.split('/')[-2]}_SCL.tif")
+            else:
+                raise Exception("Number of items per date is invalid.")
+            nonzero_pixels_per, valid_pixels_per = \
+                validPixelsFromSCLBand(
+                    scl_band=scl_band,
+                    scl_filter_values=scl_filter_values)
 
-                    if download_thumbnails or download_overviews:
+            if nonzero_pixels_per >= aoi_settings["SCL_mask_valid_pixels_min_percentage"] \
+               and valid_pixels_per >= aoi_settings["aoi_min_coverage"]:
+                if (download_thumbnails or download_overviews) or not only_dates_no_data:
+                    msg = f"Getting {''.join(data_msg)} for: {items[0].id}"
+                    print(msg)
+
+                # Create results directory
+                if not os.path.isdir(result_dir):
+                    os.makedirs(result_dir)
+
+                if download_thumbnails or download_overviews:
+                    if num_tiles != 1:
+                        raise Exception("Not yet possible to download overviews and thumbnails for mosaics.")
+                    else:
                         if download_thumbnails:
-                            file_url = aws_item.assets["thumbnail"].href
+                            file_url = items[0].assets["thumbnail"].href
                             thumbnail_path = os.path.join(result_dir,
-                                                          f"{aws_item.id}_{file_url.rsplit('/', 1)[1]}")
+                                                          f"{items[0].id}_{file_url.rsplit('/', 1)[1]}")
                             urllib.request.urlretrieve(file_url, thumbnail_path)
                         if download_overviews:
-                            file_url = aws_item.assets["overview"].href
+                            file_url = items[0].assets["overview"].href
                             overview_path = os.path.join(result_dir,
-                                                         f"{aws_item.id}_{file_url.rsplit('/', 1)[1]}")
+                                                         f"{items[0].id}_{file_url.rsplit('/', 1)[1]}")
                             urllib.request.urlretrieve(file_url, overview_path)
-                    if only_dates_no_data:
-                        date = datetime.strptime(aws_item.properties['datetime'], "%Y-%m-%dT%H:%M:%SZ")
-                        if date.strftime("%Y-%m-%d") not in scenes_info:
-                            scenes_info[date.strftime("%Y-%m-%d")] = list()
-                        scenes_info[date.strftime("%Y-%m-%d")].append({"id": aws_item.to_dict()["id"]})
-                    else:
-                        # Download all other bands
-                        bands = tile_settings["bands"]
-                        print(f"Bands to retrieve: {bands}")
+                if only_dates_no_data:
+                    if items_date not in scenes_info:
+                        scenes_info[items_date] = list()
+                    for item in items:
+                        scenes_info[items_date].append({"id": item.to_dict()["id"]})
+                else:
+                    # Save the SCL band
+                    saveRasterToDisk(out_image=scl_band,
+                                     raster_crs=scl_crs,
+                                     out_transform=scl_trans,
+                                     output_raster_path=output_scl_path)
 
-                        output_raster_path = os.path.join(result_dir,
-                                                          f"{file_url.split('/')[-2]}")
-                        if not os.path.isdir(output_raster_path):
-                            os.makedirs(output_raster_path)
+                    # Download all other bands
+                    bands = tile_settings["bands"]
+                    print(f"Bands to retrieve: {bands}")
 
-                        file_url = None
-                        for band in bands:
-                            print(f"Retrieving band: {band}")
+                    for band in bands:
+                        if num_tiles > 1:
+                            srcs_to_mosaic = []
+                            for item in items:
+                                with rasterio.open(item.assets[band].href) as band_src:
+                                    raster_crs = band_src.crs
+                                    srcs_to_mosaic.append(band_src)
 
-                            # Get file URL of each band
-                            file_url = aws_item.assets[band].href
-                            print(file_url)
-
+                            raster_band, raster_trans = merge(datasets=srcs_to_mosaic,
+                                                              target_aligned_pixels=True,
+                                                              bounds=bounds_utm,
+                                                              res=target_resolution,
+                                                              resampling=aoi_settings["resampling_method"])
+                            output_band_path = os.path.join(result_dir, f"{sensor_name}_{items_date}_{band}.tif")
+                        else:
+                            file_url = items[0].assets[band].href
                             with rasterio.open(file_url) as band_src:
-                                if cloudmasking:
-                                    raster_band = cloudMaskingFromSCLBand(
-                                        band_src=band_src,
-                                        scl_src=scl_src,
-                                        scl_filter_values=aoi_settings["SCL_filter_values"],
-                                        bounds_utm=bounds_utm
-                                    )
-                                else:
-                                    raster_band = band_src.read(
-                                        window=from_bounds(left=bounds_utm[0],
-                                                           bottom=bounds_utm[1],
-                                                           right=bounds_utm[2],
-                                                           top=bounds_utm[3],
-                                                           transform=band_src.transform))
+                                raster_trans = band_src.transform
+                                raster_crs = band_src.crs
+                                band_scale_factor = band_src.transform[0] / target_resolution
+                                bb_window = from_bounds(left=bounds_utm[0],
+                                                        bottom=bounds_utm[1],
+                                                        right=bounds_utm[2],
+                                                        top=bounds_utm[3],
+                                                        transform=band_src.transform)
+                                if band_scale_factor != 1.0:
+                                    raster_band = band_src.read(window=bb_window,
+                                                                out_shape=(band_src.count,
+                                                                           int(bb_window.height * band_scale_factor),
+                                                                           int(bb_window.width * band_scale_factor)
+                                                                           ),
+                                                                resampling=Resampling[aoi_settings["resampling_method"]]
+                                                                )
 
+                                else:
+                                    raster_band = band_src.read(window=bb_window)
+                                output_raster_path = os.path.join(result_dir,
+                                                                  f"{file_url.split('/')[-2]}")
+                                if not os.path.isdir(output_raster_path):
+                                    os.makedirs(output_raster_path)
                                 output_band_path = os.path.join(output_raster_path,
                                                                 f"{band}.tif")
-                                saveRasterToDisk(out_image=raster_band,
-                                                 raster_crs=band_src.crs,
-                                                 out_transform=band_src.transform,
-                                                 output_raster_path=output_band_path)
+                        if cloudmasking:
+                            # Mask out Clouds
+                            scl_band_mask = np.where(np.isin(scl_band, scl_filter_values), np.uint16(0), np.uint16(1))
+                            raster_band = raster_band * scl_band_mask
 
-                        # Save the SCL band
-                        output_scl_path = os.path.join(result_dir,
-                                                       f"{file_url.split('/')[-2]}_SCL.tif")
-                        saveRasterToDisk(out_image=scl_src.read(window=from_bounds(left=bounds_utm[0],
-                                                                                   bottom=bounds_utm[1],
-                                                                                   right=bounds_utm[2],
-                                                                                   top=bounds_utm[3],
-                                                                                   transform=scl_src.transform)
-                                                                ),
-                                         raster_crs=scl_src.crs,
-                                         out_transform=scl_src.transform,
-                                         output_raster_path=output_scl_path)
+                        saveRasterToDisk(out_image=raster_band,
+                                         raster_crs=raster_crs,
+                                         out_transform=raster_trans,
+                                         output_raster_path=output_band_path)
 
         if only_dates_no_data:
             scenes_info_path = os.path.join(result_dir,

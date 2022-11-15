@@ -29,9 +29,6 @@ import pyproj  # MIT
 import pystac
 import rasterio  # BSD License (BSD)
 import rasterio.io
-from rasterio.merge import merge
-from rasterio.warp import Resampling
-from rasterio.windows import from_bounds
 from shapely.geometry import box, Point
 import shapely.geometry as sg
 
@@ -92,19 +89,16 @@ def saveRasterToDisk(*, out_image: np.ndarray, raster_crs: pyproj.crs.crs.CRS, o
 
 
 def validPixelsFromSCLBand(*,
-                           scl_src: rasterio.io.DatasetReader,
-                           scl_filter_values: list[int],
-                           bounds_utm: tuple) -> tuple[float, float]:
+                           scl_band: np.ndarray,
+                           scl_filter_values: list[int]) -> tuple[float, float]:
     """Percentage of valid SCL band pixels.
 
     Parameters
     ----------
-    scl_src : rasterio.io.DatasetReader
-        A DatasetReader for the SCL band.
+    scl_band : np.ndarray
+        The SCL band.
     scl_filter_values: list
         List with the values of the SCL Band to filter out
-    bounds_utm: tuple
-        Bounds of the bounding box in UTM coordinates.
 
     Returns
     -------
@@ -119,11 +113,6 @@ def validPixelsFromSCLBand(*,
         Failed to calculate percentage of valid SCL band pixels.
     """
     try:
-        scl_band = scl_src.read(window=from_bounds(left=bounds_utm[0],
-                                                   bottom=bounds_utm[1],
-                                                   right=bounds_utm[2],
-                                                   top=bounds_utm[3],
-                                                   transform=scl_src.transform))
         scl_band_nonzero = np.count_nonzero(scl_band)
         nonzero_pixels_per = (float(scl_band_nonzero) / float(scl_band.size)) * 100
         print(f"Nonzero pixels: {nonzero_pixels_per} %")
@@ -136,75 +125,6 @@ def validPixelsFromSCLBand(*,
         return nonzero_pixels_per, valid_pixels_per
     except Exception as e:  # pragma: no cover
         raise Exception(f"Failed to count the number of valid pixels for the SCl band => {e}")
-
-
-def cloudMaskingFromSCLBand(*,
-                            band_src: rasterio.io.DatasetReader,
-                            scl_src: rasterio.io.DatasetReader,
-                            scl_filter_values: list[int],
-                            bounds_utm: tuple
-                            ) -> np.ndarray:
-    """Based on the SCL band categorization, the input data is masked (clouds, cloud shadow, snow).
-
-    Parameters
-    ----------
-    band_src : rasterio.io.DatasetReader
-        A DatasetReader for a raster band.
-    scl_src : rasterio.io.DatasetReader
-        A DatasetReader for the SCL band.
-    scl_filter_values: list
-        List with the values of the SCL Band to filter out
-    bounds_utm: tuple
-        Bounds of the bounding box in UTM coordinates.
-
-    Returns
-    -------
-    : np.ndarray
-        Masked image band.
-
-    Raises
-    ------
-    Exception
-        Failed to mask pixels from SCL band.
-    """
-    try:
-        scl_scale_factor = scl_src.transform[0] / band_src.transform[0]
-        if scl_scale_factor != 1.0:
-            bb_window = from_bounds(left=bounds_utm[0],
-                                    bottom=bounds_utm[1],
-                                    right=bounds_utm[2],
-                                    top=bounds_utm[3],
-                                    transform=scl_src.transform)
-            scl_band = scl_src.read(
-                window=bb_window,
-                out_shape=(
-                    scl_src.count,
-                    int(bb_window.height * scl_scale_factor),
-                    int(bb_window.width * scl_scale_factor)
-                ),
-                resampling=Resampling.nearest
-            )
-        else:
-            scl_band = scl_src.read(window=from_bounds(left=bounds_utm[0],
-                                                       bottom=bounds_utm[1],
-                                                       right=bounds_utm[2],
-                                                       top=bounds_utm[3],
-                                                       transform=scl_src.transform))
-
-        raster_band = band_src.read(window=from_bounds(left=bounds_utm[0],
-                                                       bottom=bounds_utm[1],
-                                                       right=bounds_utm[2],
-                                                       top=bounds_utm[3],
-                                                       transform=band_src.transform))
-
-        scl_filter_values.append(0)
-        scl_band_mask = np.where(np.isin(scl_band, scl_filter_values), np.uint16(0), np.uint16(1))
-
-        # Mask out Clouds
-        image_band_masked = raster_band * scl_band_mask
-        return image_band_masked
-    except Exception as e:  # pragma: no cover
-        raise Exception(f"Failed to mask pixels from SCl band => {e}")
 
 
 def groupItemsPerDate(*, items_list: list[pystac.item.Item]) -> dict:
@@ -222,7 +142,7 @@ def groupItemsPerDate(*, items_list: list[pystac.item.Item]) -> dict:
     """
     items_per_date = {}
     for item in items_list:
-        date = item.datetime.strftime("%Y%m%d")
+        date = item.datetime.strftime("%Y-%m-%d")
         if date in items_per_date.keys():
             items_per_date[date].append(item)
         else:
@@ -249,51 +169,6 @@ def getBoundsUTM(*, bounds: tuple, utm_zone: int) -> tuple:
     bbox = geopandas.GeoSeries([bounding_box], crs=4326)
     bbox = bbox.to_crs(crs=32600+utm_zone)
     return tuple(bbox.bounds.values[0])
-
-
-def mosaicBands(*,
-                bands: list[str],
-                mosaic_dates: dict,
-                output_dir: str,
-                bounds_utm: tuple,
-                resolution: tuple = None,
-                resampling_method: Resampling = Resampling.nearest):
-    """Create a mosaic for each band.
-
-    Parameters
-    ----------
-    bands : list[str]
-        A list of bands.
-    mosaic_dates : dict
-        A dictionary with STAC items grouped by date.
-    output_dir: str
-        Output directory.
-    bounds_utm: tuple
-        Bounds of the mosaic.
-    resolution: tuple, default=None, optional
-        Target resolution (x,y) in meters, if None keep original.
-    resampling_method: rasterio.wrap.Resampling
-        The resampling method for a raster band.
-    """
-    for date in mosaic_dates.keys():
-        for band in bands:
-            srcs_to_mosaic = []
-            sensor_name = mosaic_dates[date][0].id[0:3]
-            for item in mosaic_dates[date]:
-                srcs_to_mosaic.append(rasterio.open(item.assets[band].href))
-
-            mosaic_file_path = os.path.join(output_dir, f"{sensor_name}_{date}_{band}.tif")
-            arr, out_trans = merge(datasets=srcs_to_mosaic,
-                                   target_aligned_pixels=True,
-                                   bounds=bounds_utm,
-                                   res=resolution,
-                                   resampling=resampling_method)
-            output_meta = arr.meta.copy()
-            output_meta.update({
-                "driver": "GTiff"
-            })
-            with rasterio.open(mosaic_file_path, 'w', **output_meta) as m:
-                m.write(arr)
 
 
 def getUTMZoneBB(*, bbox: list[float], bb_max_utm_zone_overlap: int = 50000) -> int:
