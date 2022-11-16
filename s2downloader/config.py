@@ -29,7 +29,7 @@ from enum import Enum
 from json import JSONDecodeError
 
 # third party packages
-from pydantic import BaseModel, Field, validator, StrictBool, Extra, HttpUrl
+from pydantic import BaseModel, Field, validator, StrictBool, Extra, HttpUrl, root_validator
 from typing import Optional, List, Dict
 
 from .utils import getUTMZoneBB
@@ -251,6 +251,14 @@ class UserSettings(BaseModel, extra=Extra.forbid):
         title="Result Settings.", description=""
     )
 
+    @root_validator(skip_on_failure=True)
+    def set_bbox(cls, v):
+        bb = v["aoi_settings"].__dict__["bounding_box"]
+        bb_max_utm_zone_overlap = v["aoi_settings"].__dict__["bb_max_utm_zone_overlap"]
+        utm_zone = getUTMZoneBB(bbox=bb, bb_max_utm_zone_overlap=bb_max_utm_zone_overlap)
+        v["tile_settings"].__dict__["sentinel:utm_zone"] = {"eq": utm_zone}
+        return v
+
 
 class S2Settings(BaseModel, extra=Extra.forbid):
     """Template for S2 settings in config file."""
@@ -308,10 +316,6 @@ def loadConfiguration(*, path: str) -> dict:
         with open(path) as config_fp:
             config = json.load(config_fp)
             config = Config(**config).dict(by_alias=True)
-            bb = config["user_settings"]["aoi_settings"]["bounding_box"]
-            bb_max_utm_zone_overlap = config["user_settings"]["aoi_settings"]["bb_max_utm_zone_overlap"]
-            utm_zone = getUTMZoneBB(bbox=bb, bb_max_utm_zone_overlap=bb_max_utm_zone_overlap)
-            config["user_settings"]["tile_settings"]["sentinel:utm_zone"] = {"eq": 32}
     except JSONDecodeError as e:
         raise IOError(f'Failed to load the configuration json file => {e}')
     return config
