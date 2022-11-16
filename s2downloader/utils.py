@@ -21,13 +21,12 @@
 
 import os
 
-# third party packages
-import affine  # BSD
+import affine
 import geopandas
-import numpy as np  # BSD license
-import pyproj  # MIT
+import numpy as np
+import pyproj
 import pystac
-import rasterio  # BSD License (BSD)
+import rasterio
 import rasterio.io
 from shapely.geometry import box, Point
 import shapely.geometry as sg
