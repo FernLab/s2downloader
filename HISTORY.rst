@@ -2,6 +2,13 @@
 History
 =======
 
+0.1.2 (2022-11-16)
+------------------
+
+* Change default config file to filter data and cloud coverage only at AOI level.
+* Fix bug in AOI coverage query.
+* Add information to print if AWS cloud cover is valid.
+
 0.1.1 (2022-11-08)
 ------------------
 
