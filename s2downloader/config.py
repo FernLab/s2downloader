@@ -252,7 +252,8 @@ class UserSettings(BaseModel, extra=Extra.forbid):
     )
 
     @root_validator(skip_on_failure=True)
-    def set_bbox(cls, v):
+    def checkBboxAndSetUTMZone(cls, v):
+        """Check BBOX UTM zone coverage and set UTM zone."""
         bb = v["aoi_settings"].__dict__["bounding_box"]
         bb_max_utm_zone_overlap = v["aoi_settings"].__dict__["bb_max_utm_zone_overlap"]
         utm_zone = getUTMZoneBB(bbox=bb, bb_max_utm_zone_overlap=bb_max_utm_zone_overlap)
