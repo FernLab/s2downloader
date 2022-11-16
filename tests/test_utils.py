@@ -25,7 +25,7 @@ import shutil
 import unittest
 
 from s2downloader.utils import getUTMZoneBB
-from s2downloader.config import loadConfiguration, Config
+from s2downloader.config import loadConfiguration
 
 
 class TestUtils(unittest.TestCase):
