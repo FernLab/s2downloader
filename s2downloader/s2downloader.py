@@ -300,6 +300,8 @@ def s2DataDownloader(*, config_dict: dict):
                                          raster_crs=raster_crs,
                                          out_transform=raster_trans,
                                          output_raster_path=output_band_path)
+            else:
+                print(f"For date {items_date} there is not any available data for the current tile and AOI settings.")
 
         if only_dates_no_data:
             scenes_info_path = os.path.join(result_dir,
