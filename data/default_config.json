@@ -2,11 +2,11 @@
     "user_settings": {
         "tile_settings": {
             "platform" : {"in": ["sentinel-2b", "sentinel-2a"]},
-            "sentinel:data_coverage": {"ge": 70},
+            "sentinel:data_coverage": {"ge": 0},
             "sentinel:utm_zone": {},
             "sentinel:latitude_band": {},
             "sentinel:grid_square": {},
-            "eo:cloud_cover": {"le": 20},
+            "eo:cloud_cover": {"le": 100},
             "bands": ["B01","B02", "B05"]
         },
         "aoi_settings": {

@@ -208,6 +208,19 @@ class TestSentinel2Downloader(unittest.TestCase):
                                  atol=1e-4,
                                  equal_nan=False).all()
 
+    def testS2DownloaderNoDataCoverage(self):
+        """Test configuration for a case which the data coverage is not satisfied."""
+
+        config = deepcopy(self.configuration)
+        config['user_settings']['aoi_settings']['bounding_box'] = [14.8506420088255027, 52.2861358927904121,
+                                                                   14.9743949098159135, 52.3514856977076875]
+        config['user_settings']['aoi_settings']['date_range'] = ["2021-06-19"]
+        Config(**config)
+        s2DataDownloader(config_dict=config)
+
+        if len(os.listdir(self.output_data_path,)) != 0:
+            assert False
+
     def testS2DownloaderErrorNoItemsAtAWS(self):
         """Test configuration for error when search parameters do not yield a result"""
 

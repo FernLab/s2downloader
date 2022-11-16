@@ -94,11 +94,15 @@ def searchDataAtAWS(*, s2_collection: list[str],
         item_list_dict = [i.to_dict() for i in items_list]
 
         # print overview of found data
-        print("Date                    ID                          UTM Zone    Tile Cloud Cover    Tile Coverage")
-        [print(f"{i['properties']['datetime']}    {i['id']}    {i['properties']['sentinel:utm_zone']}"
-               f"          {i['properties']['eo:cloud_cover']}                "
-               f"{i['properties']['sentinel:data_coverage']}")
-         for i in item_list_dict]
+        print("{:<25} {:<25} {:<10} {:<20} {:<20} {:<15}".format('Date', 'ID', 'UTM Zone', 'Valid Cloud Cover',
+                                                                 'Tile Cloud Cover', 'Tile Coverage'))
+        for i in item_list_dict:
+            print("{:<25} {:<25} {:<10} {:<20} {:<20} {:<15}".format(i['properties']['datetime'],
+                                                                     i['id'],
+                                                                     i['properties']['sentinel:utm_zone'],
+                                                                     str(i['properties']['sentinel:valid_cloud_cover']),
+                                                                     i['properties']['eo:cloud_cover'],
+                                                                     i['properties']['sentinel:data_coverage']))
         print()
 
         return items_list
@@ -300,6 +304,8 @@ def s2DataDownloader(*, config_dict: dict):
                                          raster_crs=raster_crs,
                                          out_transform=raster_trans,
                                          output_raster_path=output_band_path)
+            else:
+                print(f"For date {items_date} there is not any available data for the current tile and AOI settings.")
 
         if only_dates_no_data:
             scenes_info_path = os.path.join(result_dir,
