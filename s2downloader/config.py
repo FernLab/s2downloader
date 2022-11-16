@@ -96,7 +96,7 @@ class TileSettings(BaseModel):
     )
 
     @validator("data_coverage", "cloud_cover")
-    def check_coverage(cls, v: dict):
+    def checkCoverage(cls, v: dict):
         """Check if coverage equations are set correctly."""
         if len(v.keys()) != 1:
             raise ValueError("It should be a dictionary with one key (operator) value (integer) pair.")
@@ -109,7 +109,7 @@ class TileSettings(BaseModel):
         return v
 
     @validator("bands")
-    def check_bands(cls, v):
+    def checkBands(cls, v):
         """Check if bands is set correctly."""
         if len(v) == 0 or not set(v).issubset(["B01", "B02", "B03", "B04", "B05", "B06", "B07", "B08", "B8A",
                                                "B09", "B11", "B12"]):
@@ -163,7 +163,7 @@ class AoiSettings(BaseModel, extra=Extra.forbid):
     )
 
     @validator("bounding_box")
-    def validate_BB(cls, v):
+    def validateBB(cls, v):
         """Check if the Bounding Box is valid."""
         if len(v) != 4:
             raise ValueError("Bounding Box needs two pairs of lat/lon coordinates.")
@@ -183,7 +183,7 @@ class AoiSettings(BaseModel, extra=Extra.forbid):
         return v
 
     @validator("SCL_filter_values")
-    def check_scl_filter_values(cls, v):
+    def checkSCLFilterValues(cls, v):
         """Check if SCL_filter_values is set correctly."""
         if not set(v).issubset([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]):
             raise ValueError("Only the following values are allowed: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11.")
@@ -195,7 +195,7 @@ class AoiSettings(BaseModel, extra=Extra.forbid):
         return v
 
     @validator("date_range")
-    def check_date_range(cls, v):
+    def checkDateRange(cls, v):
         """Check data range."""
         for d in v:
             print(d)
@@ -227,7 +227,7 @@ class ResultsSettings(BaseModel, extra=Extra.forbid):
     )
 
     @validator('results_dir')
-    def check_folder(cls, v):
+    def checkFolder(cls, v):
         """Check if output folder location is defined - string should not be empty."""
         if v == "":
             raise ValueError("Empty string is not allowed.")
