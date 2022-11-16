@@ -23,15 +23,16 @@
 # python native libraries
 import os
 import json
-import re
 import geopy.distance
 from datetime import datetime
 from enum import Enum
 from json import JSONDecodeError
 
 # third party packages
-from pydantic import BaseModel, Field, validator, StrictBool, Extra, HttpUrl
+from pydantic import BaseModel, Field, validator, StrictBool, Extra, HttpUrl, root_validator
 from typing import Optional, List, Dict
+
+from .utils import getUTMZoneBB
 
 
 class ResamplingMethodName(str, Enum):
@@ -42,14 +43,45 @@ class ResamplingMethodName(str, Enum):
     nearest = "nearest"
 
 
+class S2Platform(str, Enum):
+    """Enum for Sentinel-2 platform."""
+
+    S2A = "sentinel-2a"
+    S2B = "sentinel-2b"
+
+
 class TileSettings(BaseModel):
     """Template for Tile settings in config file."""
+
+    platform: Optional[Dict] = Field(
+        title="Sentinel-2 platform.",
+        description="For which Sentinel-2 platform data should be downloaded.",
+        default={"in": [S2Platform.S2A, S2Platform.S2B]}
+    )
 
     data_coverage: Dict = Field(
         title="Data coverage",
         description="Percentage of data coverage.",
         alias="sentinel:data_coverage",
         default={"gt": 10}
+    )
+    utm_zone: Optional[Dict] = Field(
+        title="UTM zone",
+        description="UTM zones for which to search data.",
+        alias="sentinel:utm_zone",
+        default={}
+    )
+    latitude_band: Optional[Dict] = Field(
+        title="Latitude band",
+        description="Latitude band for which to search data.",
+        alias="sentinel:latitude_band",
+        default={}
+    )
+    grid_square: Optional[Dict] = Field(
+        title="Grid square",
+        description="Grid square for which to search data.",
+        alias="sentinel:grid_square",
+        default={}
     )
     cloud_cover: Dict = Field(
         title="Cloud coverage",
@@ -62,13 +94,9 @@ class TileSettings(BaseModel):
         description="List of bands.",
         default=["B02", "B03", "B05"]
     )
-    time: str = Field(
-        title="Time range",
-        description="Time range expressed as two dates start/end."
-    )
 
     @validator("data_coverage", "cloud_cover")
-    def check_coverage(cls, v: dict):
+    def checkCoverage(cls, v: dict):
         """Check if coverage equations are set correctly."""
         if len(v.keys()) != 1:
             raise ValueError("It should be a dictionary with one key (operator) value (integer) pair.")
@@ -81,7 +109,7 @@ class TileSettings(BaseModel):
         return v
 
     @validator("bands")
-    def check_bands(cls, v):
+    def checkBands(cls, v):
         """Check if bands is set correctly."""
         if len(v) == 0 or not set(v).issubset(["B01", "B02", "B03", "B04", "B05", "B06", "B07", "B08", "B8A",
                                                "B09", "B11", "B12"]):
@@ -91,32 +119,6 @@ class TileSettings(BaseModel):
             raise ValueError("Remove duplicates.")
         return v
 
-    @validator("time")
-    def check_time(cls, v):
-        """Check if time parameter is a date or a date range (start/end)."""
-        if "/" in v:
-            try:
-                pattern = re.compile(r'^(\d{4}-\d{2}-\d{2})/(\d{4}-\d{2}-\d{2})$')
-                dates = pattern.search(v)
-                if dates is None:
-                    raise ValueError("It does not match the format yyyy-mm-dd/yyyy-mm-dd")
-                start = datetime.strptime(dates[1], '%Y-%m-%d')
-                end = datetime.strptime(dates[2], '%Y-%m-%d')
-                if start >= end:
-                    raise ValueError("start >= end.")
-            except Exception as err:
-                raise ValueError(f"The time range {v} is incorrect: {err}.")
-        else:
-            try:
-                pattern = re.compile(r'^(\d{4}-\d{2}-\d{2})$')
-                dates = pattern.search(v)
-                if dates is None:
-                    raise ValueError("It does not match the format yyyy-mm-dd")
-                datetime.strptime(dates[1], '%Y-%m-%d')
-            except Exception as err:
-                raise ValueError(f"The time {v} is incorrect: {err}.")
-        return v
-
 
 class AoiSettings(BaseModel, extra=Extra.forbid):
     """Template for AOI settings in config file."""
@@ -124,6 +126,12 @@ class AoiSettings(BaseModel, extra=Extra.forbid):
     bounding_box: List[float] = Field(
         title="Bounding Box for AOI.",
         description="SW and NE corner coordinates of AOI Bounding Box.")
+    bb_max_utm_zone_overlap: int = Field(
+        title="Max overlap of the BB over a second UTM zone.",
+        description="Max overlap of the BB over a second UTM zone in meters. It's upper bound is 100km.",
+        default=50000,
+        gt=0, lt=100000
+    )
     apply_SCL_band_mask: Optional[StrictBool] = Field(
         title="Apply a filter mask from SCL.",
         description="Define if SCL masking should be applied.",
@@ -145,14 +153,23 @@ class AoiSettings(BaseModel, extra=Extra.forbid):
         title="Rasterio resampling method name.",
         description="Define the method to be used when resampling.",
         default=ResamplingMethodName.cubic)
+    date_range: List[str] = Field(
+        title="Date range.",
+        description="List with the start and end date. If the same it is a single date request.",
+        unique_items=False,
+        min_items=1,
+        max_items=2,
+        default=["2021-09-01", "2021-09-05"]
+    )
 
-    @validator('bounding_box')
-    def validate_BB(cls, v):
-        """Check BoundingBox coordinates."""
+    @validator("bounding_box")
+    def validateBB(cls, v):
+        """Check if the Bounding Box is valid."""
         if len(v) != 4:
             raise ValueError("Bounding Box needs two pairs of lat/lon coordinates.")
         if v[0] >= v[2] or v[1] >= v[3]:
             raise ValueError("Bounding Box coordinates are not valid.")
+
         coords_nw = (v[3], v[0])
         coords_ne = (v[3], v[2])
         coords_sw = (v[1], v[0])
@@ -166,7 +183,7 @@ class AoiSettings(BaseModel, extra=Extra.forbid):
         return v
 
     @validator("SCL_filter_values")
-    def check_scl_filter_values(cls, v):
+    def checkSCLFilterValues(cls, v):
         """Check if SCL_filter_values is set correctly."""
         if not set(v).issubset([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]):
             raise ValueError("Only the following values are allowed: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11.")
@@ -175,6 +192,14 @@ class AoiSettings(BaseModel, extra=Extra.forbid):
         if len(v) == 0:
             raise ValueError("Provide a SCL class for filtering. If no filtering is wanted keep default values and "
                              "set apply_SCL_band_mask to 'False'.")
+        return v
+
+    @validator("date_range")
+    def checkDateRange(cls, v):
+        """Check data range."""
+        for d in v:
+            print(d)
+            datetime.strptime(d, "%Y-%m-%d")
         return v
 
 
@@ -200,14 +225,9 @@ class ResultsSettings(BaseModel, extra=Extra.forbid):
         description="For each scene download the provided preview.",
         default=False
     )
-    download_only_one_scene: Optional[StrictBool] = Field(
-        title="Download only one scene.",
-        description="Downloads only the most recent scene from the available scenes.",
-        default=False
-    )
 
     @validator('results_dir')
-    def check_folder(cls, v):
+    def checkFolder(cls, v):
         """Check if output folder location is defined - string should not be empty."""
         if v == "":
             raise ValueError("Empty string is not allowed.")
@@ -230,6 +250,15 @@ class UserSettings(BaseModel, extra=Extra.forbid):
     result_settings: ResultsSettings = Field(
         title="Result Settings.", description=""
     )
+
+    @root_validator(skip_on_failure=True)
+    def checkBboxAndSetUTMZone(cls, v):
+        """Check BBOX UTM zone coverage and set UTM zone."""
+        bb = v["aoi_settings"].__dict__["bounding_box"]
+        bb_max_utm_zone_overlap = v["aoi_settings"].__dict__["bb_max_utm_zone_overlap"]
+        utm_zone = getUTMZoneBB(bbox=bb, bb_max_utm_zone_overlap=bb_max_utm_zone_overlap)
+        v["tile_settings"].__dict__["sentinel:utm_zone"] = {"eq": utm_zone}
+        return v
 
 
 class S2Settings(BaseModel, extra=Extra.forbid):
