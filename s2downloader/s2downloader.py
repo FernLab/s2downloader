@@ -189,7 +189,7 @@ def s2DataDownloader(*, config_dict: dict):
                                             bottom=bounds_utm[1],
                                             right=bounds_utm[2],
                                             top=bounds_utm[3],
-                                            transform=scl_src.transform)
+                                            transform=scl_src.transform).round_offsets()
                     if scl_scale_factor != 1.0:
                         scl_band = scl_src.read(window=bb_window,
                                                 out_shape=(scl_src.count,
@@ -201,12 +201,13 @@ def s2DataDownloader(*, config_dict: dict):
                     else:
                         scl_band = scl_src.read(window=bb_window)
                     scl_crs = scl_src.crs
+                    scl_trans_win = scl_src.window_transform(bb_window)
                     scl_trans = rasterio.Affine(scl_src.transform[0] / scl_scale_factor,
                                                 0,
-                                                bounds_utm[0],
+                                                scl_trans_win[2],
                                                 0,
                                                 scl_src.transform[4] / scl_scale_factor,
-                                                bounds_utm[3])
+                                                scl_trans_win[5])
                 output_scl_path = os.path.join(result_dir,
                                                f"{file_url.split('/')[-2]}_SCL.tif")
             else:
@@ -273,6 +274,7 @@ def s2DataDownloader(*, config_dict: dict):
                             output_band_path = os.path.join(result_dir, f"{sensor_name}_{items_date}_{band}.tif")
                         else:
                             file_url = items[0].assets[band].href
+                            print(file_url)
                             with rasterio.open(file_url) as band_src:
                                 raster_crs = band_src.crs
                                 band_scale_factor = band_src.transform[0] / target_resolution
@@ -280,7 +282,7 @@ def s2DataDownloader(*, config_dict: dict):
                                                         bottom=bounds_utm[1],
                                                         right=bounds_utm[2],
                                                         top=bounds_utm[3],
-                                                        transform=band_src.transform)
+                                                        transform=band_src.transform).round_offsets()
                                 if band_scale_factor != 1.0:
                                     raster_band = band_src.read(window=bb_window,
                                                                 out_shape=(band_src.count,
@@ -296,12 +298,13 @@ def s2DataDownloader(*, config_dict: dict):
                                                                   f"{file_url.split('/')[-2]}")
                                 if not os.path.isdir(output_raster_path):
                                     os.makedirs(output_raster_path)
+                                raster_trans_win = band_src.window_transform(bb_window)
                                 raster_trans = rasterio.Affine(band_src.transform[0] / band_scale_factor,
                                                                0,
-                                                               bounds_utm[0],
+                                                               raster_trans_win[2],
                                                                0,
                                                                band_src.transform[4] / band_scale_factor,
-                                                               bounds_utm[3])
+                                                               raster_trans_win[5])
                                 output_band_path = os.path.join(output_raster_path,
                                                                 f"{band}.tif")
                         if cloudmasking:
