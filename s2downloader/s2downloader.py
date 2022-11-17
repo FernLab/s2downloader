@@ -201,7 +201,12 @@ def s2DataDownloader(*, config_dict: dict):
                     else:
                         scl_band = scl_src.read(window=bb_window)
                     scl_crs = scl_src.crs
-                    scl_trans = scl_src.transform
+                    scl_trans = rasterio.Affine(scl_src.transform[0] / scl_scale_factor,
+                                                0,
+                                                bounds_utm[0],
+                                                0,
+                                                scl_src.transform[4] / scl_scale_factor,
+                                                bounds_utm[3])
                 output_scl_path = os.path.join(result_dir,
                                                f"{file_url.split('/')[-2]}_SCL.tif")
             else:
@@ -269,7 +274,6 @@ def s2DataDownloader(*, config_dict: dict):
                         else:
                             file_url = items[0].assets[band].href
                             with rasterio.open(file_url) as band_src:
-                                raster_trans = band_src.transform
                                 raster_crs = band_src.crs
                                 band_scale_factor = band_src.transform[0] / target_resolution
                                 bb_window = from_bounds(left=bounds_utm[0],
@@ -292,6 +296,12 @@ def s2DataDownloader(*, config_dict: dict):
                                                                   f"{file_url.split('/')[-2]}")
                                 if not os.path.isdir(output_raster_path):
                                     os.makedirs(output_raster_path)
+                                raster_trans = rasterio.Affine(band_src.transform[0] / band_scale_factor,
+                                                               0,
+                                                               bounds_utm[0],
+                                                               0,
+                                                               band_src.transform[4] / band_scale_factor,
+                                                               bounds_utm[3])
                                 output_band_path = os.path.join(output_raster_path,
                                                                 f"{band}.tif")
                         if cloudmasking:
