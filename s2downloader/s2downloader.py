@@ -25,7 +25,7 @@ import os
 import numpy as np
 import rasterio
 from rasterio.merge import merge
-from rasterio.windows import from_bounds
+from rasterio.windows import from_bounds, Window
 from rasterio.warp import Resampling
 import urllib.request
 
@@ -164,6 +164,7 @@ def s2DataDownloader(*, config_dict: dict):
             sensor_name = items[0].id[0:3]
             bounds_utm = getBoundsUTM(bounds=aoi_settings['bounding_box'],
                                       utm_zone=items[0].properties['sentinel:utm_zone'])
+            scl_src = None
             scl_crs = 32632
             raster_crs = 32632
 
@@ -185,23 +186,23 @@ def s2DataDownloader(*, config_dict: dict):
                 file_url = items[0].assets["SCL"].href
                 with rasterio.open(file_url) as scl_src:
                     scl_scale_factor = scl_src.transform[0] / target_resolution
-                    bb_window = from_bounds(left=bounds_utm[0],
-                                            bottom=bounds_utm[1],
-                                            right=bounds_utm[2],
-                                            top=bounds_utm[3],
-                                            transform=scl_src.transform).round_offsets()
+                    scl_bb_window = from_bounds(left=bounds_utm[0],
+                                                bottom=bounds_utm[1],
+                                                right=bounds_utm[2],
+                                                top=bounds_utm[3],
+                                                transform=scl_src.transform).round_lengths().round_offsets()
+                    dst_height = int(scl_bb_window.height * scl_scale_factor)
+                    dst_width = int(scl_bb_window.width * scl_scale_factor)
                     if scl_scale_factor != 1.0:
-                        scl_band = scl_src.read(window=bb_window,
+                        scl_band = scl_src.read(window=scl_bb_window,
                                                 out_shape=(scl_src.count,
-                                                           int(bb_window.height * scl_scale_factor),
-                                                           int(bb_window.width * scl_scale_factor)
-                                                           ),
-                                                resampling=Resampling.nearest
-                                                )
+                                                           dst_height,
+                                                           dst_width),
+                                                resampling=Resampling.nearest)
                     else:
-                        scl_band = scl_src.read(window=bb_window)
+                        scl_band = scl_src.read(window=scl_bb_window)
                     scl_crs = scl_src.crs
-                    scl_trans_win = scl_src.window_transform(bb_window)
+                    scl_trans_win = scl_src.window_transform(scl_bb_window)
                     scl_trans = rasterio.Affine(scl_src.transform[0] / scl_scale_factor,
                                                 0,
                                                 scl_trans_win[2],
@@ -278,20 +279,18 @@ def s2DataDownloader(*, config_dict: dict):
                             with rasterio.open(file_url) as band_src:
                                 raster_crs = band_src.crs
                                 band_scale_factor = band_src.transform[0] / target_resolution
-                                bb_window = from_bounds(left=bounds_utm[0],
-                                                        bottom=bounds_utm[1],
-                                                        right=bounds_utm[2],
-                                                        top=bounds_utm[3],
-                                                        transform=band_src.transform).round_offsets()
+                                win_scale_factor = band_src.transform[0] / scl_src.transform[0]
+                                bb_window = Window(scl_bb_window.col_off/win_scale_factor,
+                                                   scl_bb_window.row_off/win_scale_factor,
+                                                   scl_bb_window.width/win_scale_factor,
+                                                   scl_bb_window.height/win_scale_factor)
                                 if band_scale_factor != 1.0:
                                     raster_band = band_src.read(window=bb_window,
                                                                 out_shape=(band_src.count,
-                                                                           int(bb_window.height * band_scale_factor),
-                                                                           int(bb_window.width * band_scale_factor)
-                                                                           ),
+                                                                           dst_height,
+                                                                           dst_width),
                                                                 resampling=Resampling[aoi_settings["resampling_method"]]
                                                                 )
-
                                 else:
                                     raster_band = band_src.read(window=bb_window)
                                 output_raster_path = os.path.join(result_dir,
