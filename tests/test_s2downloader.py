@@ -94,12 +94,12 @@ class TestSentinel2Downloader(unittest.TestCase):
         with rasterio.open(path) as expected_res:
             assert expected_res.dtypes[0] == "uint8"
             assert expected_res.shape == (82, 101)
-            assert expected_res.bounds == rasterio.coords.BoundingBox(left=367835.7999223173,
-                                                                      bottom=5804684.666411409,
-                                                                      right=368845.7999223173,
-                                                                      top=5805504.666411409)
+            assert expected_res.bounds == rasterio.coords.BoundingBox(left=367820.0,
+                                                                      bottom=5804700.0,
+                                                                      right=368830.0,
+                                                                      top=5805520.0)
             assert expected_res.read_crs() == CRS.from_epsg(32633)
-            assert numpy.isclose([367835.7999223173, 10.0, 0.0, 5805504.666411409, 0.0, -10.0],
+            assert numpy.isclose([367820.0, 10.0, 0.0, 5805520.0, 0.0, -10.0],
                                  expected_res.read_transform(),
                                  rtol=0,
                                  atol=1e-4,
@@ -111,12 +111,12 @@ class TestSentinel2Downloader(unittest.TestCase):
         with rasterio.open(path) as expected_res:
             assert expected_res.dtypes[0] == "uint16"
             assert expected_res.shape == (82, 101)
-            assert expected_res.bounds == rasterio.coords.BoundingBox(left=367835.7999223173,
-                                                                      bottom=5804684.666411409,
-                                                                      right=368845.7999223173,
-                                                                      top=5805504.666411409)
+            assert expected_res.bounds == rasterio.coords.BoundingBox(left=367820.0,
+                                                                      bottom=5804700.0,
+                                                                      right=368830.0,
+                                                                      top=5805520.0)
             assert expected_res.read_crs() == CRS.from_epsg(32633)
-            assert numpy.isclose([367835.7999223173, 10.0, 0.0, 5805504.666411409, 0.0, -10.0],
+            assert numpy.isclose([367820.0, 10.0, 0.0, 5805520.0, 0.0, -10.0],
                                  expected_res.read_transform(),
                                  rtol=0,
                                  atol=1e-4,
@@ -148,12 +148,12 @@ class TestSentinel2Downloader(unittest.TestCase):
         with rasterio.open(path) as expected_res:
             assert expected_res.dtypes[0] == "uint8"
             assert expected_res.shape == (2827, 3742)
-            assert expected_res.bounds == rasterio.coords.BoundingBox(left=448353.0988253984833136,
-                                                                      bottom=6043220.2978502959012985,
-                                                                      right=485773.0988253984833136,
-                                                                      top=6071490.2978502959012985)
+            assert expected_res.bounds == rasterio.coords.BoundingBox(left=448340.0,
+                                                                      bottom=6043230.0,
+                                                                      right=485760.0,
+                                                                      top=6071500.0)
             assert expected_res.read_crs() == CRS.from_epsg(32632)
-            assert numpy.isclose([448353.0988253984833136, 10.0, 0.0, 6071490.2978502959012985, 0.0, -10.0],
+            assert numpy.isclose([448340.0, 10.0, 0.0, 6071500.0, 0.0, -10.0],
                                  expected_res.read_transform(),
                                  rtol=0,
                                  atol=1e-4,
@@ -165,12 +165,12 @@ class TestSentinel2Downloader(unittest.TestCase):
         with rasterio.open(path) as expected_res:
             assert expected_res.dtypes[0] == "uint16"
             assert expected_res.shape == (2827, 3742)
-            assert expected_res.bounds == rasterio.coords.BoundingBox(left=448353.0988253984833136,
-                                                                      bottom=6043220.2978502959012985,
-                                                                      right=485773.0988253984833136,
-                                                                      top=6071490.2978502959012985)
+            assert expected_res.bounds == rasterio.coords.BoundingBox(left=448340.0,
+                                                                      bottom=6043230.0,
+                                                                      right=485760.0,
+                                                                      top=6071500.0)
             assert expected_res.read_crs() == CRS.from_epsg(32632)
-            assert numpy.isclose([448353.0988253984833136, 10.0, 0.0, 6071490.2978502959012985, 0.0, -10.0],
+            assert numpy.isclose([448340.0, 10.0, 0.0, 6071500.0, 0.0, -10.0],
                                  expected_res.read_transform(),
                                  rtol=0,
                                  atol=1e-4,
@@ -257,12 +257,12 @@ class TestSentinel2Downloader(unittest.TestCase):
         with rasterio.open(scene_tif_path) as expected_res:
             assert expected_res.dtypes[0] == "uint16"
             assert expected_res.shape == (82, 101)
-            assert expected_res.bounds == rasterio.coords.BoundingBox(left=367835.7999223173,
-                                                                      bottom=5804684.666411409,
-                                                                      right=368845.7999223173,
-                                                                      top=5805504.666411409)
+            assert expected_res.bounds == rasterio.coords.BoundingBox(left=367820.0,
+                                                                      bottom=5804700.0,
+                                                                      right=368830.0,
+                                                                      top=5805520.0)
             assert expected_res.read_crs() == CRS.from_epsg(32633)
-            assert numpy.isclose([367835.7999223173, 10.0, 0.0, 5805504.666411409, 0.0, -10.0],
+            assert numpy.isclose([367820.0, 10.0, 0.0, 5805520.0, 0.0, -10.0],
                                  expected_res.read_transform(),
                                  rtol=0,
                                  atol=1e-4,
