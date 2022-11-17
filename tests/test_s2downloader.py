@@ -118,6 +118,60 @@ class TestSentinel2Downloader(unittest.TestCase):
                                  atol=1e-4,
                                  equal_nan=False).all()
 
+    def testS2DownloaderCenterUTM(self):
+        """Test within a single tile in the center."""
+
+        config = deepcopy(self.configuration)
+        config["user_settings"]["aoi_settings"]["bounding_box"] = [8.201791423733251,
+                                                                   54.536254520651106,
+                                                                   8.778773634098867,
+                                                                   54.78797740272492]
+        config["user_settings"]["aoi_settings"]["date_range"] = ["2021-04-27"]
+        config["user_settings"]["aoi_settings"]["SCL_filter_values"] = [3]
+
+        Config(**config)
+        s2DataDownloader(config_dict=config)
+
+        # check output
+        # number of files:
+        filecount = sum([len(files) for r, d, files in os.walk(self.output_data_path)])
+        assert filecount == 4
+
+        # features of two files:
+        path = os.path.abspath(
+            os.path.join(self.output_data_path, "S2B_32UMF_20210427_0_L2A_SCL.tif"))
+        self.assertEqual((str(path), os.path.isfile(path)), (str(path), True))
+        with rasterio.open(path) as expected_res:
+            assert expected_res.dtypes[0] == "uint8"
+            assert expected_res.shape == (2827, 3742)
+            assert expected_res.bounds == rasterio.coords.BoundingBox(left=448353.0988253984833136,
+                                                                      bottom=6043220.2978502959012985,
+                                                                      right=485773.0988253984833136,
+                                                                      top=6071490.2978502959012985)
+            assert expected_res.read_crs() == CRS.from_epsg(32632)
+            assert numpy.isclose([448353.0988253984833136, 10.0, 0.0, 6071490.2978502959012985, 0.0, -10.0],
+                                 expected_res.read_transform(),
+                                 rtol=0,
+                                 atol=1e-4,
+                                 equal_nan=False).all()
+
+        path = os.path.abspath(
+            os.path.join(self.output_data_path, "S2B_32UMF_20210427_0_L2A/B02.tif"))
+        self.assertEqual((str(path), os.path.isfile(path)), (str(path), True))
+        with rasterio.open(path) as expected_res:
+            assert expected_res.dtypes[0] == "uint16"
+            assert expected_res.shape == (2827, 3742)
+            assert expected_res.bounds == rasterio.coords.BoundingBox(left=448353.0988253984833136,
+                                                                      bottom=6043220.2978502959012985,
+                                                                      right=485773.0988253984833136,
+                                                                      top=6071490.2978502959012985)
+            assert expected_res.read_crs() == CRS.from_epsg(32632)
+            assert numpy.isclose([448353.0988253984833136, 10.0, 0.0, 6071490.2978502959012985, 0.0, -10.0],
+                                 expected_res.read_transform(),
+                                 rtol=0,
+                                 atol=1e-4,
+                                 equal_nan=False).all()
+
     def testS2Downloader2UTMs(self):
         """Test downloader for 2 UTMs."""
 
