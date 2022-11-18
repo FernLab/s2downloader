@@ -167,6 +167,7 @@ def s2DataDownloader(*, config_dict: dict):
             scl_src = None
             scl_crs = 32632
             raster_crs = 32632
+            output_scl_path = os.path.join(result_dir, f"{sensor_name}_{items_date.replace('-', '')}_SCL.tif")
 
             if num_tiles > 1:
                 scl_mosaic = []
@@ -181,7 +182,6 @@ def s2DataDownloader(*, config_dict: dict):
                                             bounds=bounds_utm,
                                             res=target_resolution,
                                             resampling=Resampling[aoi_settings["resampling_method"]])
-                output_scl_path = os.path.join(result_dir, f"{sensor_name}_{items_date}_SCL.tif")
             elif len(items) == 1:
                 file_url = items[0].assets["SCL"].href
                 with rasterio.open(file_url) as scl_src:
@@ -209,8 +209,6 @@ def s2DataDownloader(*, config_dict: dict):
                                                 0,
                                                 scl_src.transform[4] / scl_scale_factor,
                                                 scl_trans_win[5])
-                output_scl_path = os.path.join(result_dir,
-                                               f"{file_url.split('/')[-2]}_SCL.tif")
             else:
                 raise Exception("Number of items per date is invalid.")
             nonzero_pixels_per, valid_pixels_per = \
@@ -259,6 +257,8 @@ def s2DataDownloader(*, config_dict: dict):
                     print(f"Bands to retrieve: {bands}")
 
                     for band in bands:
+                        output_band_path = os.path.join(result_dir,
+                                                        f"{sensor_name}_{items_date.replace('-','')}_{band}.tif")
                         if num_tiles > 1:
                             srcs_to_mosaic = []
                             for item_idx in range(len(items)):
@@ -266,13 +266,11 @@ def s2DataDownloader(*, config_dict: dict):
                                 if item_idx == 0:
                                     raster_crs = band_src.crs
                                 srcs_to_mosaic.append(band_src)
-
                             raster_band, raster_trans = merge(datasets=srcs_to_mosaic,
                                                               target_aligned_pixels=True,
                                                               bounds=bounds_utm,
                                                               res=target_resolution,
                                                               resampling=Resampling[aoi_settings["resampling_method"]])
-                            output_band_path = os.path.join(result_dir, f"{sensor_name}_{items_date}_{band}.tif")
                         else:
                             file_url = items[0].assets[band].href
                             print(file_url)
@@ -293,10 +291,6 @@ def s2DataDownloader(*, config_dict: dict):
                                                                 )
                                 else:
                                     raster_band = band_src.read(window=bb_window)
-                                output_raster_path = os.path.join(result_dir,
-                                                                  f"{file_url.split('/')[-2]}")
-                                if not os.path.isdir(output_raster_path):
-                                    os.makedirs(output_raster_path)
                                 raster_trans_win = band_src.window_transform(bb_window)
                                 raster_trans = rasterio.Affine(band_src.transform[0] / band_scale_factor,
                                                                0,
@@ -304,8 +298,6 @@ def s2DataDownloader(*, config_dict: dict):
                                                                0,
                                                                band_src.transform[4] / band_scale_factor,
                                                                raster_trans_win[5])
-                                output_band_path = os.path.join(output_raster_path,
-                                                                f"{band}.tif")
                         if cloudmasking:
                             # Mask out Clouds
                             scl_band_mask = np.where(np.isin(scl_band, scl_filter_values), np.uint16(0), np.uint16(1))
