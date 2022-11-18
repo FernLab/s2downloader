@@ -89,7 +89,7 @@ class TestSentinel2Downloader(unittest.TestCase):
 
         # features of two files:
         path = os.path.abspath(
-            os.path.join(self.output_data_path, "S2B_33UUU_20210905_0_L2A_SCL.tif"))
+            os.path.join(self.output_data_path, "S2B_20210905_SCL.tif"))
         self.assertEqual((str(path), os.path.isfile(path)), (str(path), True))
         with rasterio.open(path) as expected_res:
             assert expected_res.dtypes[0] == "uint8"
@@ -106,7 +106,7 @@ class TestSentinel2Downloader(unittest.TestCase):
                                  equal_nan=False).all()
 
         path = os.path.abspath(
-            os.path.join(self.output_data_path, "S2B_33UUU_20210905_0_L2A/B02.tif"))
+            os.path.join(self.output_data_path, "S2B_20210905_B02.tif"))
         self.assertEqual((str(path), os.path.isfile(path)), (str(path), True))
         with rasterio.open(path) as expected_res:
             assert expected_res.dtypes[0] == "uint16"
@@ -123,7 +123,7 @@ class TestSentinel2Downloader(unittest.TestCase):
                                  equal_nan=False).all()
 
         path = os.path.abspath(
-            os.path.join(self.output_data_path, "S2B_33UUU_20210905_0_L2A/B01.tif"))
+            os.path.join(self.output_data_path, "S2B_20210905_B01.tif"))
         self.assertEqual((str(path), os.path.isfile(path)), (str(path), True))
         with rasterio.open(path) as expected_res:
             assert expected_res.dtypes[0] == "uint16"
@@ -140,7 +140,7 @@ class TestSentinel2Downloader(unittest.TestCase):
                                  equal_nan=False).all()
 
         path = os.path.abspath(
-            os.path.join(self.output_data_path, "S2B_33UUU_20210905_0_L2A/B05.tif"))
+            os.path.join(self.output_data_path, "S2B_20210905_B05.tif"))
         self.assertEqual((str(path), os.path.isfile(path)), (str(path), True))
         with rasterio.open(path) as expected_res:
             assert expected_res.dtypes[0] == "uint16"
@@ -177,7 +177,7 @@ class TestSentinel2Downloader(unittest.TestCase):
 
         # features of two files:
         path = os.path.abspath(
-            os.path.join(self.output_data_path, "S2B_32UMF_20210427_0_L2A_SCL.tif"))
+            os.path.join(self.output_data_path, "S2B_20210427_SCL.tif"))
         self.assertEqual((str(path), os.path.isfile(path)), (str(path), True))
         with rasterio.open(path) as expected_res:
             assert expected_res.dtypes[0] == "uint8"
@@ -194,7 +194,7 @@ class TestSentinel2Downloader(unittest.TestCase):
                                  equal_nan=False).all()
 
         path = os.path.abspath(
-            os.path.join(self.output_data_path, "S2B_32UMF_20210427_0_L2A/B02.tif"))
+            os.path.join(self.output_data_path, "S2B_20210427_B02.tif"))
         self.assertEqual((str(path), os.path.isfile(path)), (str(path), True))
         with rasterio.open(path) as expected_res:
             assert expected_res.dtypes[0] == "uint16"
@@ -211,7 +211,7 @@ class TestSentinel2Downloader(unittest.TestCase):
                                  equal_nan=False).all()
 
         path = os.path.abspath(
-            os.path.join(self.output_data_path, "S2B_32UMF_20210427_0_L2A/B01.tif"))
+            os.path.join(self.output_data_path, "S2B_20210427_B01.tif"))
         self.assertEqual((str(path), os.path.isfile(path)), (str(path), True))
         with rasterio.open(path) as expected_res:
             assert expected_res.dtypes[0] == "uint16"
@@ -228,7 +228,7 @@ class TestSentinel2Downloader(unittest.TestCase):
                                  equal_nan=False).all()
 
         path = os.path.abspath(
-            os.path.join(self.output_data_path, "S2B_32UMF_20210427_0_L2A/B05.tif"))
+            os.path.join(self.output_data_path, "S2B_20210427_B05.tif"))
         self.assertEqual((str(path), os.path.isfile(path)), (str(path), True))
         with rasterio.open(path) as expected_res:
             assert expected_res.dtypes[0] == "uint16"
@@ -263,7 +263,7 @@ class TestSentinel2Downloader(unittest.TestCase):
 
         # features of two files:
         path = os.path.abspath(
-            os.path.join(self.output_data_path, "S2A_2021-09-03_SCL.tif"))
+            os.path.join(self.output_data_path, "S2A_20210903_SCL.tif"))
         self.assertEqual((str(path), os.path.isfile(path)), (str(path), True))
         with rasterio.open(path) as expected_res:
             assert expected_res.dtypes[0] == "uint8"
@@ -278,7 +278,7 @@ class TestSentinel2Downloader(unittest.TestCase):
                                  equal_nan=False).all()
 
         path = os.path.abspath(
-            os.path.join(self.output_data_path, "S2A_2021-09-03_B02.tif"))
+            os.path.join(self.output_data_path, "S2A_20210903_B02.tif"))
         self.assertEqual((str(path), os.path.isfile(path)), (str(path), True))
         with rasterio.open(path) as expected_res:
             assert expected_res.dtypes[0] == "uint16"
@@ -297,7 +297,7 @@ class TestSentinel2Downloader(unittest.TestCase):
 
         config = deepcopy(self.configuration)
         scenes_info_path = os.path.join(self.output_data_path, "scenes_info_2021-09-04_2021-09-05.json")
-        scene_tif_path = os.path.join(self.output_data_path, "S2B_33UUU_20210905_0_L2A/B05.tif")
+        scene_tif_path = os.path.join(self.output_data_path, "S2B_20210905_B05.tif")
 
         config["user_settings"]["result_settings"]["only_dates_no_data"] = True
         s2DataDownloader(config_dict=config)
