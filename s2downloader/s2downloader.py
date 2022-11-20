@@ -149,7 +149,7 @@ def s2DataDownloader(*, config_dict: dict):
         logging_level = logging.getLevelName(result_settings['logging_level'])
 
         logFormatter = logging.Formatter("[%(levelname)-5.5s]  %(message)s")
-        logger = logging.getLogger()
+        logger = logging.getLogger(__name__)
 
         fileHandler = logging.FileHandler("{0}/{1}.log".format(result_dir, request_id))
         fileHandler.setFormatter(logFormatter)
