@@ -85,7 +85,7 @@ class TestSentinel2Downloader(unittest.TestCase):
         # check output
         # number of files:
         filecount = sum([len(files) for r, d, files in os.walk(self.output_data_path)])
-        assert filecount == 4
+        assert filecount == 5
 
         # features of two files:
         path = os.path.abspath(
@@ -173,7 +173,7 @@ class TestSentinel2Downloader(unittest.TestCase):
         # check output
         # number of files:
         filecount = sum([len(files) for r, d, files in os.walk(self.output_data_path)])
-        assert filecount == 4
+        assert filecount == 5
 
         # features of two files:
         path = os.path.abspath(
@@ -259,7 +259,7 @@ class TestSentinel2Downloader(unittest.TestCase):
         # check output
         # number of files:
         filecount = sum([len(files) for r, d, files in os.walk(self.output_data_path)])
-        assert filecount == 4
+        assert filecount == 5
 
         # features of two files:
         path = os.path.abspath(
@@ -346,7 +346,7 @@ class TestSentinel2Downloader(unittest.TestCase):
         Config(**config)
         s2DataDownloader(config_dict=config)
 
-        if len(os.listdir(self.output_data_path,)) != 0:
+        if len(os.listdir(self.output_data_path,)) != 1:
             assert False
 
     def testS2DownloaderErrorNoItemsAtAWS(self):
