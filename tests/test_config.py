@@ -234,3 +234,29 @@ class TestConfig(unittest.TestCase):
         config['user_settings']['aoi_settings']['bounding_box'] = []
         with pytest.raises(ValueError):
             Config(**config)
+
+    def testTargetResolution(self):
+        """Test configuration for results target_resolution Parameter."""
+
+        config = deepcopy(self.configuration)
+
+        config['user_settings']['result_settings']['target_resolution'] = 20
+        Config(**config)
+
+        config['user_settings']['result_settings']['target_resolution'] = 60
+        Config(**config)
+
+        config['user_settings']['result_settings']['target_resolution'] = 10.0
+        Config(**config)
+
+        config['user_settings']['result_settings']['target_resolution'] = 12.1
+        with pytest.raises(ValueError):
+            Config(**config)
+
+        config['user_settings']['result_settings']['target_resolution'] = 15
+        with pytest.raises(ValueError):
+            Config(**config)
+
+        config['user_settings']['result_settings']['target_resolution'] = "asas"
+        with pytest.raises(ValueError):
+            Config(**config)
