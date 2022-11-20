@@ -21,6 +21,7 @@
         "result_settings": {
             "results_dir": "data/data_output/",
             "only_dates_no_data": false,
+            "target_resolution": 10,
             "download_thumbnails": false,
             "download_overviews": false
         }

@@ -124,7 +124,6 @@ def s2DataDownloader(*, config_dict: dict):
     """
     try:
         config_dict = Config(**config_dict).dict(by_alias=True)
-        target_resolution = 10
 
         # read the variables from the config:
         tile_settings = config_dict['user_settings']['tile_settings']
@@ -135,6 +134,7 @@ def s2DataDownloader(*, config_dict: dict):
         download_thumbnails = result_settings['download_thumbnails']
         download_overviews = result_settings['download_overviews']
         only_dates_no_data = result_settings['only_dates_no_data']
+        target_resolution = result_settings['target_resolution']
 
         result_dir = result_settings['results_dir']
         cloudmasking = aoi_settings["apply_SCL_band_mask"]
