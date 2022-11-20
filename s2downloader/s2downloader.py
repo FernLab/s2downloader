@@ -150,7 +150,7 @@ def s2DataDownloader(*, config_dict: dict):
         logFormatter = logging.Formatter("[%(levelname)-5.5s]  %(message)s")
         logger = logging.getLogger(__name__)
 
-        fileHandler = logging.FileHandler("{0}/{1}.log".format(result_dir, __name__), mode='w')
+        fileHandler = logging.FileHandler("{0}/{1}.log".format(result_dir, "s2DataDownloader"), mode='w')
         fileHandler.setFormatter(logFormatter)
         logger.addHandler(fileHandler)
 
@@ -190,7 +190,7 @@ def s2DataDownloader(*, config_dict: dict):
             scl_src = None
             scl_crs = 32632
             raster_crs = 32632
-            output_scl_path = os.path.join(result_dir, f"{sensor_name}_{items_date.replace('-', '')}_SCL.tif")
+            output_scl_path = os.path.join(result_dir, f"{items_date.replace('-', '')}_{sensor_name}_SCL.tif")
 
             if num_tiles > 1:
                 scl_mosaic = []
@@ -240,7 +240,7 @@ def s2DataDownloader(*, config_dict: dict):
                     scl_filter_values=scl_filter_values,
                     logger=logger)
 
-            scenes_info[items_date] = {
+            scenes_info[items_date.replace('-', '')] = {
                 "item_ids": list(),
                 "nonzero_pixels": nonzero_pixels_per,
                 "valid_pixels": valid_pixels_per,
@@ -286,7 +286,7 @@ def s2DataDownloader(*, config_dict: dict):
 
                         for band in bands:
                             output_band_path = os.path.join(result_dir,
-                                                            f"{sensor_name}_{items_date.replace('-','')}_{band}.tif")
+                                                            f"{items_date.replace('-','')}_{sensor_name}_{band}.tif")
                             if num_tiles > 1:
                                 srcs_to_mosaic = []
                                 for item_idx in range(len(items)):
@@ -338,11 +338,11 @@ def s2DataDownloader(*, config_dict: dict):
                                              out_transform=raster_trans,
                                              output_raster_path=output_band_path)
                 except Exception as err:
-                    scenes_info[items_date]["error_info"] = f"Failed to download scenes:{err}."
+                    scenes_info[items_date.replace('-', '')]["error_info"] = f"Failed to download scenes:{err}."
                 else:
-                    scenes_info[items_date]["data_available"] = True
+                    scenes_info[items_date.replace('-', '')]["data_available"] = True
                     for item in items:
-                        scenes_info[items_date]["item_ids"].append({"id": item.to_dict()["id"]})
+                        scenes_info[items_date.replace('-', '')]["item_ids"].append({"id": item.to_dict()["id"]})
             else:
                 logger.error(f"For date {items_date} there is not any"
                              f" available data for the current tile and AOI settings.")
