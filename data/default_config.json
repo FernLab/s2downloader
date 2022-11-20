@@ -23,7 +23,8 @@
             "only_dates_no_data": false,
             "target_resolution": 10,
             "download_thumbnails": false,
-            "download_overviews": false
+            "download_overviews": false,
+            "logging_level": "INFO"
         }
     },
     "s2_settings": {

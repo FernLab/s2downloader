@@ -20,6 +20,9 @@
 # limitations under the License.
 
 import json
+import logging
+import sys
+from logging import Logger
 import os
 
 import numpy as np
@@ -36,11 +39,13 @@ from .utils import saveRasterToDisk, validPixelsFromSCLBand, getBoundsUTM, group
 from .config import Config
 
 
-def searchDataAtAWS(*, s2_collection: list[str],
+def searchDataAtAWS(*,
+                    s2_collection: list[str],
                     bb: list[float],
                     date_range: list[str],
                     props_json: dict,
-                    stac_catalog_url: str) -> list[Item]:
+                    stac_catalog_url: str,
+                    logger: Logger = None) -> list[Item]:
     """Search for Sentinel-2 data in given bounding box as defined in query_props.json (no data download yet).
 
     Parameters
@@ -55,6 +60,8 @@ def searchDataAtAWS(*, s2_collection: list[str],
         Dictionary of all search parameters retrieved from json file.
     stac_catalog_url : str
         STAC catalog URL.
+    logger: Logger
+        Logger handler.
 
     Returns
     -------
@@ -68,6 +75,8 @@ def searchDataAtAWS(*, s2_collection: list[str],
     Exception
         Failed to find data at AWS server.
     """
+    if logger is None:
+        logger = logging.getLogger(__name__)
     try:
         # search AWS collection
         catalogue = Client.open(stac_catalog_url)
@@ -93,16 +102,16 @@ def searchDataAtAWS(*, s2_collection: list[str],
         item_list_dict = [i.to_dict() for i in items_list]
 
         # print overview of found data
-        print("{:<25} {:<25} {:<10} {:<20} {:<20} {:<15}".format('Date', 'ID', 'UTM Zone', 'Valid Cloud Cover',
-                                                                 'Tile Cloud Cover', 'Tile Coverage'))
+        logger.info("{:<25} {:<25} {:<10} {:<20} {:<20} {:<15}".format('Date', 'ID', 'UTM Zone', 'Valid Cloud Cover',
+                                                                       'Tile Cloud Cover', 'Tile Coverage'))
         for i in item_list_dict:
-            print("{:<25} {:<25} {:<10} {:<20} {:<20} {:<15}".format(i['properties']['datetime'],
-                                                                     i['id'],
-                                                                     i['properties']['sentinel:utm_zone'],
-                                                                     str(i['properties']['sentinel:valid_cloud_cover']),
-                                                                     i['properties']['eo:cloud_cover'],
-                                                                     i['properties']['sentinel:data_coverage']))
-        print()
+            logger.info("{:<25} {:<25} {:<10} {:<20} {:<20} {:<15}\n".format(
+                i['properties']['datetime'],
+                i['id'],
+                i['properties']['sentinel:utm_zone'],
+                str(i['properties']['sentinel:valid_cloud_cover']),
+                i['properties']['eo:cloud_cover'],
+                i['properties']['sentinel:data_coverage']))
 
         return items_list
     except Exception as e:  # pragma: no cover
@@ -131,12 +140,26 @@ def s2DataDownloader(*, config_dict: dict):
         result_settings = config_dict['user_settings']['result_settings']
         s2_settings = config_dict['s2_settings']
 
+        request_id = result_settings['request_id']
+        result_dir = result_settings['results_dir']
         download_thumbnails = result_settings['download_thumbnails']
         download_overviews = result_settings['download_overviews']
         only_dates_no_data = result_settings['only_dates_no_data']
         target_resolution = result_settings['target_resolution']
+        logging_level = logging.getLevelName(result_settings['logging_level'])
 
-        result_dir = result_settings['results_dir']
+        logFormatter = logging.Formatter("[%(levelname)-5.5s]  %(message)s")
+        logger = logging.getLogger()
+
+        fileHandler = logging.FileHandler("{0}/{1}.log".format(result_dir, request_id))
+        fileHandler.setFormatter(logFormatter)
+        logger.addHandler(fileHandler)
+
+        consoleHandler = logging.StreamHandler(sys.stdout)
+        consoleHandler.setFormatter(logFormatter)
+        logger.addHandler(consoleHandler)
+        logger.setLevel(logging_level)
+
         cloudmasking = aoi_settings["apply_SCL_band_mask"]
 
         # search for Sentinel-2 data within the bounding box as defined in query_props.json (no data download yet)
@@ -144,7 +167,8 @@ def s2DataDownloader(*, config_dict: dict):
                                     bb=aoi_settings['bounding_box'],
                                     date_range=aoi_settings['date_range'],
                                     props_json=tile_settings,
-                                    stac_catalog_url=s2_settings['stac_catalog_url'])
+                                    stac_catalog_url=s2_settings['stac_catalog_url'],
+                                    logger=logger)
 
         data_msg = []
         if download_thumbnails:
@@ -214,13 +238,14 @@ def s2DataDownloader(*, config_dict: dict):
             nonzero_pixels_per, valid_pixels_per = \
                 validPixelsFromSCLBand(
                     scl_band=scl_band,
-                    scl_filter_values=scl_filter_values)
+                    scl_filter_values=scl_filter_values,
+                    logger=logger)
 
             if nonzero_pixels_per >= aoi_settings["SCL_mask_valid_pixels_min_percentage"] \
                and valid_pixels_per >= aoi_settings["aoi_min_coverage"]:
                 if (download_thumbnails or download_overviews) or not only_dates_no_data:
                     msg = f"Getting {''.join(data_msg)} for: {items[0].id}"
-                    print(msg)
+                    logger.info(msg)
 
                 # Create results directory
                 if not os.path.isdir(result_dir):
@@ -254,7 +279,7 @@ def s2DataDownloader(*, config_dict: dict):
 
                     # Download all other bands
                     bands = tile_settings["bands"]
-                    print(f"Bands to retrieve: {bands}")
+                    logger.info(f"Bands to retrieve: {bands}")
 
                     for band in bands:
                         output_band_path = os.path.join(result_dir,
@@ -273,7 +298,7 @@ def s2DataDownloader(*, config_dict: dict):
                                                               resampling=Resampling[aoi_settings["resampling_method"]])
                         else:
                             file_url = items[0].assets[band].href
-                            print(file_url)
+                            logger.info(file_url)
                             with rasterio.open(file_url) as band_src:
                                 raster_crs = band_src.crs
                                 band_scale_factor = band_src.transform[0] / target_resolution
@@ -308,7 +333,8 @@ def s2DataDownloader(*, config_dict: dict):
                                          out_transform=raster_trans,
                                          output_raster_path=output_band_path)
             else:
-                print(f"For date {items_date} there is not any available data for the current tile and AOI settings.")
+                logger.error(f"For date {items_date} there is not any"
+                             f" available data for the current tile and AOI settings.")
 
         if only_dates_no_data:
             scenes_info_path = os.path.join(result_dir,

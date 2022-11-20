@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 """Utils module for S2Downloader."""
-
 # S2Downloader, Python Boilerplate contains all the boilerplate you need to create a Python package.
 #
 # Copyright (c) 2022, FernLab (GFZ Potsdam, fernlab@gfz-potsdam.de)
@@ -23,6 +22,8 @@ import os
 
 import affine
 import geopandas
+import logging
+from logging import Logger
 import numpy as np
 import pyproj
 import pystac
@@ -53,7 +54,6 @@ def saveRasterToDisk(*, out_image: np.ndarray, raster_crs: pyproj.crs.crs.CRS, o
         Failed to save raster to disk.
     """
     try:
-
         img_height = None
         img_width = None
         img_count = None
@@ -89,7 +89,8 @@ def saveRasterToDisk(*, out_image: np.ndarray, raster_crs: pyproj.crs.crs.CRS, o
 
 def validPixelsFromSCLBand(*,
                            scl_band: np.ndarray,
-                           scl_filter_values: list[int]) -> tuple[float, float]:
+                           scl_filter_values: list[int],
+                           logger: Logger = None) -> tuple[float, float]:
     """Percentage of valid SCL band pixels.
 
     Parameters
@@ -98,6 +99,8 @@ def validPixelsFromSCLBand(*,
         The SCL band.
     scl_filter_values: list
         List with the values of the SCL Band to filter out
+    logger: Logger
+        Logger handler.
 
     Returns
     -------
@@ -111,14 +114,16 @@ def validPixelsFromSCLBand(*,
     Exception
         Failed to calculate percentage of valid SCL band pixels.
     """
+    if logger is None:
+        logger = logging.getLogger(__name__)
     try:
         scl_band_nonzero = np.count_nonzero(scl_band)
         nonzero_pixels_per = (float(scl_band_nonzero) / float(scl_band.size)) * 100
-        print(f"Nonzero pixels: {nonzero_pixels_per} %")
+        logger.info(f"Nonzero pixels: {nonzero_pixels_per} %")
 
         scl_band_mask = np.where(np.isin(scl_band, scl_filter_values), 0, 1)
         valid_pixels_per = (float(np.count_nonzero(scl_band_mask)) / float(scl_band.size)) * 100
-        print(f"Valid pixels: {valid_pixels_per} %")
+        logger.info(f"Valid pixels: {valid_pixels_per} %")
 
         return nonzero_pixels_per, valid_pixels_per
     except Exception as e:  # pragma: no cover

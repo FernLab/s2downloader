@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 """Input data module for S2Downloader."""
-
 # S2Downloader, Python Boilerplate contains all the boilerplate you need to create a Python package.
 #
 # Copyright (c) 2022, FernLab (GFZ Potsdam, fernlab@gfz-potsdam.de)
@@ -23,6 +22,8 @@
 # python native libraries
 import os
 import json
+import time
+
 import geopy.distance
 from datetime import datetime
 from enum import Enum
@@ -198,7 +199,6 @@ class AoiSettings(BaseModel, extra=Extra.forbid):
     def checkDateRange(cls, v):
         """Check data range."""
         for d in v:
-            print(d)
             datetime.strptime(d, "%Y-%m-%d")
         return v
 
@@ -206,6 +206,11 @@ class AoiSettings(BaseModel, extra=Extra.forbid):
 class ResultsSettings(BaseModel, extra=Extra.forbid):
     """Template for raster_saving_settings in config file."""
 
+    request_id: Optional[int] = Field(
+        title="Request ID.",
+        description="Request ID to identify the request.",
+        default=round(time.time() * 1000)
+    )
     results_dir: str = Field(
         title="Location of the output directory.",
         description="Define folder where all output data should be stored."
@@ -230,6 +235,17 @@ class ResultsSettings(BaseModel, extra=Extra.forbid):
         description="For each scene download the provided preview.",
         default=False
     )
+    logging_level: Optional[str] = Field(
+        title="Logging level.",
+        description="Logging level, it should be one of: DEBUG, INFO, WARN, or ERROR.",
+        default="INFO"
+    )
+
+    @validator('logging_level')
+    def checkLogLevel(cls, v):
+        if v not in ["DEBUG", "INFO", "WARN", "ERROR"]:
+            raise ValueError("Logging level, it should be one of: DEBUG, INFO, WARN, or ERROR.")
+        return v
 
     @validator('results_dir')
     def checkFolder(cls, v):

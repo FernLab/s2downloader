@@ -260,3 +260,29 @@ class TestConfig(unittest.TestCase):
         config['user_settings']['result_settings']['target_resolution'] = "asas"
         with pytest.raises(ValueError):
             Config(**config)
+
+    def testLoggingLevel(self):
+        """Test configuration for results logging_level Parameter."""
+
+        config = deepcopy(self.configuration)
+
+        config['user_settings']['result_settings']['logging_level'] = "DEBUG"
+        Config(**config)
+
+        config['user_settings']['result_settings']['logging_level'] = "WARN"
+        Config(**config)
+
+        config['user_settings']['result_settings']['logging_level'] = "ERROR"
+        Config(**config)
+
+        config['user_settings']['result_settings']['logging_level'] = "Error"
+        with pytest.raises(ValueError):
+            Config(**config)
+
+        config['user_settings']['result_settings']['logging_level'] = "Something"
+        with pytest.raises(ValueError):
+            Config(**config)
+
+        config['user_settings']['result_settings']['logging_level'] = 10
+        with pytest.raises(ValueError):
+            Config(**config)
