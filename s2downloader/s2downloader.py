@@ -140,7 +140,6 @@ def s2DataDownloader(*, config_dict: dict):
         result_settings = config_dict['user_settings']['result_settings']
         s2_settings = config_dict['s2_settings']
 
-        request_id = result_settings['request_id']
         result_dir = result_settings['results_dir']
         download_thumbnails = result_settings['download_thumbnails']
         download_overviews = result_settings['download_overviews']
