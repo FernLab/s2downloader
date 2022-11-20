@@ -215,15 +215,15 @@ class ResultsSettings(BaseModel, extra=Extra.forbid):
         title="Location of the output directory.",
         description="Define folder where all output data should be stored."
     )
-    only_dates_no_data: Optional[StrictBool] = Field(
-        title="Download Dates.",
-        description="Get only list of dates for all available scenes without downloading the scenes.",
-        default=False
-    )
     target_resolution: Optional[int] = Field(
         title="Target resolution.",
         description="Target resolution in meters, it should be either 60, 20 or 10 meters.",
         default=10, ge=10, le=60
+    )
+    download_data: Optional[StrictBool] = Field(
+        title="Download Data.",
+        description="For each scene download the data.",
+        default=True
     )
     download_thumbnails: Optional[StrictBool] = Field(
         title="Download thumbnails.",
@@ -243,6 +243,7 @@ class ResultsSettings(BaseModel, extra=Extra.forbid):
 
     @validator('logging_level')
     def checkLogLevel(cls, v):
+        """Check if logging level is correct."""
         if v not in ["DEBUG", "INFO", "WARN", "ERROR"]:
             raise ValueError("Logging level, it should be one of: DEBUG, INFO, WARN, or ERROR.")
         return v
