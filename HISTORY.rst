@@ -5,6 +5,7 @@ History
 0.2.0 (coming soon)
 -------------------
 
+* The .tif files have the following nomenclature: <date>_<sentinel_platform>_<band>.tif
 * Scenes information saved into a JSON file.
 * Provide logging.
 * Split tests per module.
