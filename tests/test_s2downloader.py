@@ -292,7 +292,7 @@ class TestSentinel2Downloader(unittest.TestCase):
                                  atol=1e-4,
                                  equal_nan=False).all()
 
-    def testS2downloaderOnlyDates(self):
+    def testS2DownloaderOnlyDates(self):
         """Test configuration to test only dates download for the tile settings"""
 
         config = deepcopy(self.configuration)
@@ -367,125 +367,6 @@ class TestSentinel2Downloader(unittest.TestCase):
             message = exinfo.value.args[0]
             assert str(message).__contains__('Failed to find data at AWS server')
 
-    def testSentinel2AOISettingsDateRange(self):
-        """Test configuration to test time range for the tile settings"""
-
-        config = deepcopy(self.configuration)
-        config['user_settings']['aoi_settings']['date_range'] = ["2020-06-01", "2020-09-01"]
-        Config(**config)
-
-        config['user_settings']['aoi_settings']['date_range'] = ["2020-06-01"]
-        Config(**config)
-
-        config['user_settings']['aoi_settings']['date_range'] = ["2020/06/01"]
-        with pytest.raises(ValueError):
-            Config(**config)
-
-        config['user_settings']['aoi_settings']['date_range'] = ["2020/06-01"]
-        with pytest.raises(ValueError):
-            Config(**config)
-
-        config['user_settings']['aoi_settings']['date_range'] = ["2020-06-01-2020-09-01"]
-        with pytest.raises(ValueError):
-            Config(**config)
-
-        config['user_settings']['aoi_settings']['date_range'] = ["2020/06-01/2020-09-01"]
-        with pytest.raises(ValueError):
-            Config(**config)
-
-        config['user_settings']['aoi_settings']['date_range'] = ["2020-06-01/2020/09-01"]
-        with pytest.raises(ValueError):
-            Config(**config)
-
-        config['user_settings']['aoi_settings']['date_range'] = ["2020-09-01/2020-06-01"]
-        with pytest.raises(ValueError):
-            Config(**config)
-
-    def testSentinel2dataCoverage(self):
-        """Test configuration to test coverage for the tile settings"""
-
-        config = deepcopy(self.configuration)
-        config['user_settings']['tile_settings']['sentinel:data_coverage'] = {"lt": 80}
-        Config(**config)
-
-        config['user_settings']['tile_settings']['sentinel:data_coverage'] = {"xx": 25}
-        with pytest.raises(ValueError):
-            Config(**config)
-
-        config['user_settings']['tile_settings']['sentinel:data_coverage'] = {"gt": 25, "lt": 70}
-        with pytest.raises(ValueError):
-            Config(**config)
-
-        config['user_settings']['tile_settings']['sentinel:data_coverage'] = {"gt": -25}
-        with pytest.raises(ValueError):
-            Config(**config)
-
-        config['user_settings']['tile_settings']['sentinel:data_coverage'] = {"gt": "err"}
-        with pytest.raises(ValueError):
-            Config(**config)
-
-        config['user_settings']['tile_settings']['sentinel:data_coverage'] = {}
-        with pytest.raises(ValueError):
-            Config(**config)
-
-    def testSentinel2cloudCoverage(self):
-        """Test configuration to test coverage for the tile settings"""
-
-        config = deepcopy(self.configuration)
-        config['user_settings']['tile_settings']['eo:cloud_cover'] = {"lt": 80}
-        Config(**config)
-
-        config['user_settings']['tile_settings']['eo:cloud_cover'] = {"xx": 25}
-        with pytest.raises(ValueError):
-            Config(**config)
-
-        config['user_settings']['tile_settings']['eo:cloud_cover'] = {"gt": 25, 'lt': 70}
-        with pytest.raises(ValueError):
-            Config(**config)
-
-        config['user_settings']['tile_settings']['eo:cloud_cover'] = {"gt": -25}
-        with pytest.raises(ValueError):
-            Config(**config)
-
-        config['user_settings']['tile_settings']['eo:cloud_cover'] = {"gt": 'err'}
-        with pytest.raises(ValueError):
-            Config(**config)
-
-        config['user_settings']['tile_settings']['eo:cloud_cover'] = {}
-        with pytest.raises(ValueError):
-            Config(**config)
-
-    def testSentinel2TileSettingsBands(self):
-        """Test configuration to test bands for the tile settings"""
-
-        config = deepcopy(self.configuration)
-        config['user_settings']['tile_settings']['bands'] = \
-            ["B01", "B02", "B03", "B04", "B05", "B06", "B07", "B08", "B8A", "B09", "B11", "B12"]
-        Config(**config)
-
-        config['user_settings']['tile_settings']['bands'] = \
-            ["B01", "B02", "B07", "B08", "B8A", "B09", "B11", "B12"]
-        Config(**config)
-
-        config['user_settings']['tile_settings']['bands'] = \
-            ["B01"]
-        Config(**config)
-
-        config['user_settings']['tile_settings']['bands'] = \
-            []
-        with pytest.raises(ValueError):
-            Config(**config)
-
-        config['user_settings']['tile_settings']['bands'] = \
-            ["B01", "B02", "B03", "B02"]
-        with pytest.raises(ValueError):
-            Config(**config)
-
-        config['user_settings']['tile_settings']['bands'] = \
-            ["B01", "B34"]
-        with pytest.raises(ValueError):
-            Config(**config)
-
     def testS2DownloaderThumbnailsOverviews(self):
         """Test configuration to download thumbnails and overviews for the tile settings"""
 
@@ -518,51 +399,3 @@ class TestSentinel2Downloader(unittest.TestCase):
                                  rtol=0,
                                  atol=1e-4,
                                  equal_nan=False).all()
-
-    def testSentinel2SCLFilterValues(self):
-        """Test configuration to test SCL filter values for mask"""
-
-        config = deepcopy(self.configuration)
-        config['user_settings']['aoi_settings']['SCL_filter_values'] = \
-            [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
-        Config(**config)
-
-        config['user_settings']['aoi_settings']['SCL_filter_values'] = \
-            [3, 7, 8, 9, 10]
-        Config(**config)
-
-        config['user_settings']['aoi_settings']['SCL_filter_values'] = \
-            [0]
-        Config(**config)
-
-        config['user_settings']['aoi_settings']['SCL_filter_values'] = \
-            []
-        with pytest.raises(ValueError):
-            Config(**config)
-
-        config['user_settings']['aoi_settings']['SCL_filter_values'] = \
-            [3, 7, 8, 9, 10, 3]
-        with pytest.raises(ValueError):
-            Config(**config)
-
-        config['user_settings']['aoi_settings']['SCL_filter_values'] = \
-            [3, 33]
-        with pytest.raises(ValueError):
-            Config(**config)
-
-    def testS2BoundingBox(self):
-        """Test configuration and output for BoundingBox Parameter."""
-
-        config = deepcopy(self.configuration)
-
-        config['user_settings']['aoi_settings']['bounding_box'] = [12.1439, 52.3832, 13.4204, 53.0389]
-        with pytest.raises(ValueError):
-            Config(**config)
-
-        config['user_settings']['aoi_settings']['bounding_box'] = [13.4204, 53.0389]
-        with pytest.raises(ValueError):
-            Config(**config)
-
-        config['user_settings']['aoi_settings']['bounding_box'] = []
-        with pytest.raises(ValueError):
-            Config(**config)

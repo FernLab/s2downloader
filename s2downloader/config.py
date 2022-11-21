@@ -215,6 +215,11 @@ class ResultsSettings(BaseModel, extra=Extra.forbid):
         description="Get only list of dates for all available scenes without downloading the scenes.",
         default=False
     )
+    target_resolution: Optional[int] = Field(
+        title="Target resolution.",
+        description="Target resolution in meters, it should be either 60, 20 or 10 meters.",
+        default=10, ge=10, le=60
+    )
     download_thumbnails: Optional[StrictBool] = Field(
         title="Download thumbnails.",
         description="For each scene download the provided thumbnail.",
@@ -233,6 +238,13 @@ class ResultsSettings(BaseModel, extra=Extra.forbid):
             raise ValueError("Empty string is not allowed.")
         if os.path.isabs(v) is False:
             v = os.path.realpath(v)
+        return v
+
+    @validator('target_resolution')
+    def checkTargeResolution(cls, v):
+        """Check if the target resolution is either 60, 20 or 10 meters."""
+        if not (v == 60 or v == 20 or v == 10):
+            raise ValueError(f"The target resolution {v} should either be 60, 20 or 10 meters")
         return v
 
 
