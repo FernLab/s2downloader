@@ -2,6 +2,13 @@
 History
 =======
 
+0.2.0 (coming soon)
+-------------------
+
+* Split tests per module.
+* It is possible to define the target resolution.
+* Align the pixels and the extent of each band.
+
 0.1.2 (2022-11-16)
 ------------------
 
