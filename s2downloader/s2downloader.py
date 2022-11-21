@@ -25,7 +25,7 @@ import os
 import numpy as np
 import rasterio
 from rasterio.merge import merge
-from rasterio.windows import from_bounds
+from rasterio.windows import from_bounds, Window
 from rasterio.warp import Resampling
 import urllib.request
 
@@ -164,8 +164,10 @@ def s2DataDownloader(*, config_dict: dict):
             sensor_name = items[0].id[0:3]
             bounds_utm = getBoundsUTM(bounds=aoi_settings['bounding_box'],
                                       utm_zone=items[0].properties['sentinel:utm_zone'])
+            scl_src = None
             scl_crs = 32632
             raster_crs = 32632
+            output_scl_path = os.path.join(result_dir, f"{sensor_name}_{items_date.replace('-', '')}_SCL.tif")
 
             if num_tiles > 1:
                 scl_mosaic = []
@@ -180,35 +182,33 @@ def s2DataDownloader(*, config_dict: dict):
                                             bounds=bounds_utm,
                                             res=target_resolution,
                                             resampling=Resampling[aoi_settings["resampling_method"]])
-                output_scl_path = os.path.join(result_dir, f"{sensor_name}_{items_date}_SCL.tif")
             elif len(items) == 1:
                 file_url = items[0].assets["SCL"].href
                 with rasterio.open(file_url) as scl_src:
                     scl_scale_factor = scl_src.transform[0] / target_resolution
-                    bb_window = from_bounds(left=bounds_utm[0],
-                                            bottom=bounds_utm[1],
-                                            right=bounds_utm[2],
-                                            top=bounds_utm[3],
-                                            transform=scl_src.transform)
+                    scl_bb_window = from_bounds(left=bounds_utm[0],
+                                                bottom=bounds_utm[1],
+                                                right=bounds_utm[2],
+                                                top=bounds_utm[3],
+                                                transform=scl_src.transform).round_lengths().round_offsets()
+                    dst_height = int(scl_bb_window.height * scl_scale_factor)
+                    dst_width = int(scl_bb_window.width * scl_scale_factor)
                     if scl_scale_factor != 1.0:
-                        scl_band = scl_src.read(window=bb_window,
+                        scl_band = scl_src.read(window=scl_bb_window,
                                                 out_shape=(scl_src.count,
-                                                           int(bb_window.height * scl_scale_factor),
-                                                           int(bb_window.width * scl_scale_factor)
-                                                           ),
-                                                resampling=Resampling.nearest
-                                                )
+                                                           dst_height,
+                                                           dst_width),
+                                                resampling=Resampling.nearest)
                     else:
-                        scl_band = scl_src.read(window=bb_window)
+                        scl_band = scl_src.read(window=scl_bb_window)
                     scl_crs = scl_src.crs
+                    scl_trans_win = scl_src.window_transform(scl_bb_window)
                     scl_trans = rasterio.Affine(scl_src.transform[0] / scl_scale_factor,
                                                 0,
-                                                bounds_utm[0],
+                                                scl_trans_win[2],
                                                 0,
                                                 scl_src.transform[4] / scl_scale_factor,
-                                                bounds_utm[3])
-                output_scl_path = os.path.join(result_dir,
-                                               f"{file_url.split('/')[-2]}_SCL.tif")
+                                                scl_trans_win[5])
             else:
                 raise Exception("Number of items per date is invalid.")
             nonzero_pixels_per, valid_pixels_per = \
@@ -257,6 +257,8 @@ def s2DataDownloader(*, config_dict: dict):
                     print(f"Bands to retrieve: {bands}")
 
                     for band in bands:
+                        output_band_path = os.path.join(result_dir,
+                                                        f"{sensor_name}_{items_date.replace('-','')}_{band}.tif")
                         if num_tiles > 1:
                             srcs_to_mosaic = []
                             for item_idx in range(len(items)):
@@ -264,46 +266,38 @@ def s2DataDownloader(*, config_dict: dict):
                                 if item_idx == 0:
                                     raster_crs = band_src.crs
                                 srcs_to_mosaic.append(band_src)
-
                             raster_band, raster_trans = merge(datasets=srcs_to_mosaic,
                                                               target_aligned_pixels=True,
                                                               bounds=bounds_utm,
                                                               res=target_resolution,
                                                               resampling=Resampling[aoi_settings["resampling_method"]])
-                            output_band_path = os.path.join(result_dir, f"{sensor_name}_{items_date}_{band}.tif")
                         else:
                             file_url = items[0].assets[band].href
+                            print(file_url)
                             with rasterio.open(file_url) as band_src:
                                 raster_crs = band_src.crs
                                 band_scale_factor = band_src.transform[0] / target_resolution
-                                bb_window = from_bounds(left=bounds_utm[0],
-                                                        bottom=bounds_utm[1],
-                                                        right=bounds_utm[2],
-                                                        top=bounds_utm[3],
-                                                        transform=band_src.transform)
+                                win_scale_factor = band_src.transform[0] / scl_src.transform[0]
+                                bb_window = Window(scl_bb_window.col_off/win_scale_factor,
+                                                   scl_bb_window.row_off/win_scale_factor,
+                                                   scl_bb_window.width/win_scale_factor,
+                                                   scl_bb_window.height/win_scale_factor)
                                 if band_scale_factor != 1.0:
                                     raster_band = band_src.read(window=bb_window,
                                                                 out_shape=(band_src.count,
-                                                                           int(bb_window.height * band_scale_factor),
-                                                                           int(bb_window.width * band_scale_factor)
-                                                                           ),
+                                                                           dst_height,
+                                                                           dst_width),
                                                                 resampling=Resampling[aoi_settings["resampling_method"]]
                                                                 )
-
                                 else:
                                     raster_band = band_src.read(window=bb_window)
-                                output_raster_path = os.path.join(result_dir,
-                                                                  f"{file_url.split('/')[-2]}")
-                                if not os.path.isdir(output_raster_path):
-                                    os.makedirs(output_raster_path)
+                                raster_trans_win = band_src.window_transform(bb_window)
                                 raster_trans = rasterio.Affine(band_src.transform[0] / band_scale_factor,
                                                                0,
-                                                               bounds_utm[0],
+                                                               raster_trans_win[2],
                                                                0,
                                                                band_src.transform[4] / band_scale_factor,
-                                                               bounds_utm[3])
-                                output_band_path = os.path.join(output_raster_path,
-                                                                f"{band}.tif")
+                                                               raster_trans_win[5])
                         if cloudmasking:
                             # Mask out Clouds
                             scl_band_mask = np.where(np.isin(scl_band, scl_filter_values), np.uint16(0), np.uint16(1))
