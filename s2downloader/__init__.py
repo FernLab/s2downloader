@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Top-level package for S2Downloader."""
 
-# S2Downloader, Python Boilerplate contains all the boilerplate you need to create a Python package.
+# Downloader for Sentinel-2 data.
 #
 # Copyright (c) 2022, FernLab (GFZ Potsdam, fernlab@gfz-potsdam.de)
 #
