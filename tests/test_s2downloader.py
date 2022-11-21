@@ -85,7 +85,7 @@ class TestSentinel2Downloader(unittest.TestCase):
         # check output
         # number of files:
         filecount = sum([len(files) for r, d, files in os.walk(self.output_data_path)])
-        assert filecount == 4
+        assert filecount == 6
 
         # features of two files:
         path = os.path.abspath(
@@ -173,7 +173,7 @@ class TestSentinel2Downloader(unittest.TestCase):
         # check output
         # number of files:
         filecount = sum([len(files) for r, d, files in os.walk(self.output_data_path)])
-        assert filecount == 4
+        assert filecount == 6
 
         # features of two files:
         path = os.path.abspath(
@@ -259,7 +259,7 @@ class TestSentinel2Downloader(unittest.TestCase):
         # check output
         # number of files:
         filecount = sum([len(files) for r, d, files in os.walk(self.output_data_path)])
-        assert filecount == 4
+        assert filecount == 6
 
         # features of two files:
         path = os.path.abspath(
@@ -299,7 +299,7 @@ class TestSentinel2Downloader(unittest.TestCase):
         scenes_info_path = os.path.join(self.output_data_path, "scenes_info_2021-09-04_2021-09-05.json")
         scene_tif_path = os.path.join(self.output_data_path, "S2B_20210905_B05.tif")
 
-        config["user_settings"]["result_settings"]["only_dates_no_data"] = True
+        config["user_settings"]["result_settings"]["download_data"] = False
         s2DataDownloader(config_dict=config)
         with open(scenes_info_path) as json_file:
             data = json.load(json_file)
@@ -316,11 +316,9 @@ class TestSentinel2Downloader(unittest.TestCase):
             assert str(message).__contains__('.json already exists.')
 
         os.remove(scenes_info_path)
-        config["user_settings"]["result_settings"]["only_dates_no_data"] = False
+        config["user_settings"]["result_settings"]["download_data"] = True
         s2DataDownloader(config_dict=config)
         if not os.path.exists(scene_tif_path):
-            assert False
-        if os.path.exists(scenes_info_path):
             assert False
         with rasterio.open(scene_tif_path) as expected_res:
             assert expected_res.dtypes[0] == "uint16"
@@ -346,7 +344,7 @@ class TestSentinel2Downloader(unittest.TestCase):
         Config(**config)
         s2DataDownloader(config_dict=config)
 
-        if len(os.listdir(self.output_data_path,)) != 0:
+        if len(os.listdir(self.output_data_path,)) != 2:
             assert False
 
     def testS2DownloaderErrorNoItemsAtAWS(self):
@@ -373,7 +371,7 @@ class TestSentinel2Downloader(unittest.TestCase):
         config = deepcopy(self.configuration)
         config["user_settings"]["result_settings"]["download_overviews"] = True
         config["user_settings"]["result_settings"]["download_thumbnails"] = True
-        config["user_settings"]["result_settings"]["only_dates_no_data"] = True
+        config["user_settings"]["result_settings"]["download_data"] = False
 
         s2DataDownloader(config_dict=config)
 
