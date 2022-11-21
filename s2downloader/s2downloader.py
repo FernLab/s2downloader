@@ -188,8 +188,8 @@ def s2DataDownloader(*, config_dict: dict):
             bounds_utm = getBoundsUTM(bounds=aoi_settings['bounding_box'],
                                       utm_zone=items[0].properties['sentinel:utm_zone'])
             scl_src = None
-            scl_crs = 32632
-            raster_crs = 32632
+            scl_crs = 0
+            raster_crs = 0
             output_scl_path = os.path.join(result_dir, f"{items_date.replace('-', '')}_{sensor_name}_SCL.tif")
 
             if num_tiles > 1:

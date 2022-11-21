@@ -210,7 +210,7 @@ def getUTMZoneBB(*, bbox: list[float], bb_max_utm_zone_overlap: int = 50000) -> 
             raise ValueError("The bounding box does not overlap over two consecutive UTM zones.")
         else:
             for utm_id in utms.index:
-                if 32 in utm_zones and utm_df.iloc[utm_id]['ZONE'] == 33:
+                if min_utm in utm_zones and utm_df.iloc[utm_id]['ZONE'] == max_utm:
                     bb_box = geopandas.GeoSeries(utms.loc[utm_id], crs=4326)
                     bb_box_utm = bb_box.to_crs(32600 + utm_df.iloc[utm_id]['ZONE'])[0]
 
@@ -226,8 +226,8 @@ def getUTMZoneBB(*, bbox: list[float], bb_max_utm_zone_overlap: int = 50000) -> 
 
                     if length > bb_max_utm_zone_overlap:
                         raise ValueError(
-                            f"The bounding box overlaps UTM zones 32 and 33, and its a length over the"
-                            f" 33 UTM zone is greater than {bb_max_utm_zone_overlap} meters: {length} meters!")
+                            f"The bounding box overlaps UTM zones {min_utm} and {max_utm}, and its a length over the"
+                            f" {max_utm} UTM zone is greater than {bb_max_utm_zone_overlap} meters: {length} meters!")
             return int(min_utm)
     else:
         raise ValueError(f"The bounding box overlaps more than 2 UTM zones: {np.unique(utm_zones)}!")
