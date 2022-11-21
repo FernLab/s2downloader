@@ -2,6 +2,11 @@
 History
 =======
 
+0.2.0 (coming soon)
+-------------------
+
+* Align the pixels and the extent of each band.
+
 0.1.2 (2022-11-16)
 ------------------
 
