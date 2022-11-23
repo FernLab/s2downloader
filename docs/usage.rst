@@ -3,6 +3,39 @@
 Usage
 =====
 
+Usage of the Python API
+***********************
+
+To use S2Downloader in a project::
+
+    import os
+    import s2downloader
+    from s2downloader.s2downloader import s2DataDownloader
+    from s2downloader.config import loadConfiguration, Config
+
+    config_file = os.path.abspath("data/default_config.json")
+    config = loadConfiguration(path=config_file)
+
+    Config(**config)
+    s2DataDownloader(config_dict=config)
+----
+
+Command line utilities
+**********************
+
+s2downloader_cli.py
+-------------------
+
+At the command line, S2Downloader provides the **s2downloader_cli.py**. Run with relative or absolute path to config json file:
+::
+
+    S2DataPortal --filepath "path/to/config.json"
+
+
+Input and Output
+****************
+
+
 Expected Input Configuration
 ----------------------------
 
@@ -50,10 +83,10 @@ The package expects a configuration file in ``json`` format, like the `default_c
 In the following, the parameter configuration is described in detail:
 
 User Settings
-#############
+-------------
 
 Tile Settings
-=============
+#############
 
 .. list-table::
     :header-rows: 1
@@ -86,7 +119,7 @@ Tile Settings
 
 
 AOI Settings
-============
+############
 
 .. list-table::
     :header-rows: 1
@@ -118,7 +151,7 @@ AOI Settings
       - ``"date_range": ["2021-09-04", "2021-09-05"]``
 
 Result Settings
-===============
+###############
 
 .. list-table::
     :header-rows: 1
@@ -148,7 +181,7 @@ Result Settings
 
 
 S2 Settings
-###########
+-----------
 
 **Note:** The S2 settings are not to be altered by the user!
 
