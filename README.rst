@@ -310,12 +310,6 @@ You can find the protocol of recent changes in the S2Downloader package
 `here <https://git.gfz-potsdam.de/fernlab/products/misac/misac-2/s2downloader/-/blob/main/HISTORY.rst>`__.
 
 
-License
--------
-
-Licensed under the `Apache License  <http://www.apache.org/licenses/LICENSE-2.0>`__, Version 2.0 (the "License").
-
-
 Contribution
 ------------
 
