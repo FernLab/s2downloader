@@ -35,6 +35,8 @@ class TestSentinel2Downloader(unittest.TestCase):
         cls.configuration['user_settings']['result_settings']['results_dir'] = "tests/temp_results"
 
         cls.output_data_path = cls.configuration['user_settings']['result_settings']['results_dir']
+        cls.configuration['user_settings']['aoi_settings']['SCL_filter_values'] = [3, 6]
+        cls.configuration['user_settings']['aoi_settings']['date_range'] = ["2021-09-04", "2021-09-05"]
 
         try:
             if os.path.exists(cls.output_data_path):
