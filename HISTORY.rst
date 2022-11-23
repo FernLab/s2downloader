@@ -2,7 +2,7 @@
 History
 =======
 
-0.2.0 (coming soon)
+0.2.0 (2022-11-23)
 -------------------
 
 * The .tif files have the following nomenclature: <date>_<sentinel_platform>_<band>.tif
