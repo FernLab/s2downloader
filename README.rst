@@ -140,10 +140,10 @@ Tile Settings
       - Preferred UTM zone. Can be an integer from 1 to 60 or empty if no preference is desired.
       - ``"sentinel:utm_zone": {}``
     * - Latitude Band
-      -
+      - The latitude band of a preferred UTM zone or tile. Example: "U" for tile 32UQC.
       - ``"sentinel:latitude_band": {}``
     * - Grid Square
-      -
+      - The grid square if only a certain tile should be downloaded. Example: "QC" for tile 32UQC.
       - ``"sentinel:grid_square": {}``
     * - ``eo:cloud_cover``
       - The amount of clouds that are allowed at the **entire** Sentinel-2 scene. Leave empty to only validate the AOI for cloud coverage.
@@ -313,6 +313,7 @@ You can find the protocol of recent changes in the S2Downloader package
 License
 -------
 
+Licensed under the `Apache License  <http://www.apache.org/licenses/LICENSE-2.0>`__, Version 2.0 (the "License").
 
 
 Contribution
