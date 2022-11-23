@@ -300,7 +300,7 @@ For each date the following information is saved:
 
 **data_available:** If false no data for this date was found.
 
-**error_info:** If any error occured during the download the error message will be saved here.
+**error_info:** If any error occurred during the download the error message will be saved here.
 
 
 History / Changelog
