@@ -2,24 +2,6 @@
 
 """Tests for `s2downloader` package."""
 
-# S2Downloader, Python Boilerplate contains all the boilerplate you need to create a Python package.
-#
-# Copyright (c) 2022, FernLab (GFZ Potsdam, fernlab@gfz-potsdam.de)
-#
-# This software was developed within the context [...]
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-# http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 import json
 import os
 import shutil
@@ -53,6 +35,8 @@ class TestSentinel2Downloader(unittest.TestCase):
         cls.configuration['user_settings']['result_settings']['results_dir'] = "tests/temp_results"
 
         cls.output_data_path = cls.configuration['user_settings']['result_settings']['results_dir']
+        cls.configuration['user_settings']['aoi_settings']['SCL_filter_values'] = [3, 6]
+        cls.configuration['user_settings']['aoi_settings']['date_range'] = ["2021-09-04", "2021-09-05"]
 
         try:
             if os.path.exists(cls.output_data_path):
