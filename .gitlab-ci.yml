@@ -123,4 +123,5 @@ pages:  # this job must be called 'pages' to advise GitLab to upload content to 
       - public
     expire_in: 30 days
   only:
+    - documentation
     - main
