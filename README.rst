@@ -179,8 +179,8 @@ AOI Settings
       - User defined threshold for noData values inside the AOI. It may happen due to Sentinel-2 data tile structure that parts of the AOI have noData values. Here the user can define a percentage value of minimum valid pixels inside the AOI.
       - ``"aoi_min_coverage": 90``
     * - ``resampling_method``
-      - User definition of the resampling method that should be used. Currently, these options are supported: NearestNeighbour, bilinear, cubic.
-      - ``"resampling_method": "NearestNeighbour"``, ``"raster_resampling_method": "bilinear"``, ``"raster_resampling_method": "cubic"``
+      - User definition of the resampling method that should be used. Currently, these options are supported: nearest, bilinear, cubic.
+      - ``"resampling_method": "nearest"``, ``"resampling_method": "bilinear"``, ``"resampling_method": "cubic"``
     * - ``date_range``
       - The period of time data should be looked for, defined by starting and end date. It is also possible to provide just a single day.
       - ``"date_range": ["2021-09-04", "2021-09-05"]``
