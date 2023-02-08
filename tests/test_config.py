@@ -92,6 +92,10 @@ class TestConfig(unittest.TestCase):
         with pytest.raises(ValueError):
             Config(**config)
 
+        config['user_settings']['aoi_settings']['date_range'] = ["2022-09-01, 2024-06-01"]
+        with pytest.raises(ValueError):
+            Config(**config)
+
     def testS2DownloaderdataCoverage(self):
         """Test configuration to test coverage for the tile settings"""
 
