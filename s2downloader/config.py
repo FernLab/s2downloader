@@ -180,8 +180,16 @@ class AoiSettings(BaseModel, extra=Extra.forbid):
     @validator("date_range")
     def checkDateRange(cls, v):
         """Check data range."""
+        limit_date = datetime(2017, 4, 1)
         for d in v:
-            datetime.strptime(d, "%Y-%m-%d")
+            d_date = datetime.strptime(d, "%Y-%m-%d")
+            if d_date < limit_date:
+                raise ValueError(f"Invalid date range: {d} should equal or greater than 2017-04-01.")
+        if len(v) == 2:
+            start_date = datetime.strptime(v[0], "%Y-%m-%d")
+            end_date = datetime.strptime(v[1], "%Y-%m-%d")
+            if start_date > end_date:
+                raise ValueError(f"Invalid date range: {v[0]} should not be greater than {v[1]}.")
         return v
 
 
