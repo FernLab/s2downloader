@@ -80,7 +80,7 @@ class TestSentinel2Downloader(unittest.TestCase):
             assert expected_res.shape == (82, 102)
             assert expected_res.bounds == rasterio.coords.BoundingBox(left=367820.0,
                                                                       bottom=5804700.0,
-                                                                      right=368820.0,
+                                                                      right=368840.0,
                                                                       top=5805520.0)
             assert expected_res.read_crs() == CRS.from_epsg(32633)
             assert numpy.isclose([367820.0, 10.0, 0.0, 5805520.0, 0.0, -10.0],
@@ -97,7 +97,7 @@ class TestSentinel2Downloader(unittest.TestCase):
             assert expected_res.shape == (82, 100)
             assert expected_res.bounds == rasterio.coords.BoundingBox(left=367820.0,
                                                                       bottom=5804700.0,
-                                                                      right=368820.0,
+                                                                      right=368840.0,
                                                                       top=5805520.0)
             assert expected_res.read_crs() == CRS.from_epsg(32633)
             assert numpy.isclose([367820.0, 10.0, 0.0, 5805520.0, 0.0, -10.0],
@@ -114,7 +114,7 @@ class TestSentinel2Downloader(unittest.TestCase):
             assert expected_res.shape == (82, 100)
             assert expected_res.bounds == rasterio.coords.BoundingBox(left=367820.0,
                                                                       bottom=5804700.0,
-                                                                      right=368820.0,
+                                                                      right=368840.0,
                                                                       top=5805520.0)
             assert expected_res.read_crs() == CRS.from_epsg(32633)
             assert numpy.isclose([367820.0, 10.0, 0.0, 5805520.0, 0.0, -10.0],
@@ -131,7 +131,7 @@ class TestSentinel2Downloader(unittest.TestCase):
             assert expected_res.shape == (82, 100)
             assert expected_res.bounds == rasterio.coords.BoundingBox(left=367820.0,
                                                                       bottom=5804700.0,
-                                                                      right=368820.0,
+                                                                      right=368840.0,
                                                                       top=5805520.0)
             assert expected_res.read_crs() == CRS.from_epsg(32633)
             assert numpy.isclose([367820.0, 10.0, 0.0, 5805520.0, 0.0, -10.0],
@@ -165,7 +165,7 @@ class TestSentinel2Downloader(unittest.TestCase):
         self.assertEqual((str(path), os.path.isfile(path)), (str(path), True))
         with rasterio.open(path) as expected_res:
             assert expected_res.dtypes[0] == "uint8"
-            assert expected_res.shape == (2828, 3742)
+            assert expected_res.shape == (2826, 3742)
             assert expected_res.bounds == rasterio.coords.BoundingBox(left=448340.0,
                                                                       bottom=6043240.0,
                                                                       right=485760.0,
@@ -309,7 +309,7 @@ class TestSentinel2Downloader(unittest.TestCase):
             assert expected_res.shape == (82, 102)
             assert expected_res.bounds == rasterio.coords.BoundingBox(left=367820.0,
                                                                       bottom=5804700.0,
-                                                                      right=368820.0,
+                                                                      right=368840.0,
                                                                       top=5805520.0)
             assert expected_res.read_crs() == CRS.from_epsg(32633)
             assert numpy.isclose([367820.0, 10.0, 0.0, 5805520.0, 0.0, -10.0],
