@@ -165,7 +165,7 @@ class TestSentinel2Downloader(unittest.TestCase):
         self.assertEqual((str(path), os.path.isfile(path)), (str(path), True))
         with rasterio.open(path) as expected_res:
             assert expected_res.dtypes[0] == "uint8"
-            assert expected_res.shape == (2826, 3742)
+            assert expected_res.shape == (2828, 3742)
             assert expected_res.bounds == rasterio.coords.BoundingBox(left=448340.0,
                                                                       bottom=6043240.0,
                                                                       right=485760.0,
@@ -182,7 +182,7 @@ class TestSentinel2Downloader(unittest.TestCase):
         self.assertEqual((str(path), os.path.isfile(path)), (str(path), True))
         with rasterio.open(path) as expected_res:
             assert expected_res.dtypes[0] == "uint16"
-            assert expected_res.shape == (2826, 3742)
+            assert expected_res.shape == (2828, 3742)
             assert expected_res.bounds == rasterio.coords.BoundingBox(left=448340.0,
                                                                       bottom=6043240.0,
                                                                       right=485760.0,
@@ -199,7 +199,7 @@ class TestSentinel2Downloader(unittest.TestCase):
         self.assertEqual((str(path), os.path.isfile(path)), (str(path), True))
         with rasterio.open(path) as expected_res:
             assert expected_res.dtypes[0] == "uint16"
-            assert expected_res.shape == (2826, 3742)
+            assert expected_res.shape == (2828, 3742)
             assert expected_res.bounds == rasterio.coords.BoundingBox(left=448340.0,
                                                                       bottom=6043240.0,
                                                                       right=485760.0,
@@ -216,7 +216,7 @@ class TestSentinel2Downloader(unittest.TestCase):
         self.assertEqual((str(path), os.path.isfile(path)), (str(path), True))
         with rasterio.open(path) as expected_res:
             assert expected_res.dtypes[0] == "uint16"
-            assert expected_res.shape == (2826, 3742)
+            assert expected_res.shape == (2828, 3742)
             assert expected_res.bounds == rasterio.coords.BoundingBox(left=448340.0,
                                                                       bottom=6043240.0,
                                                                       right=485760.0,
