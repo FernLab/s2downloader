@@ -3,9 +3,9 @@
         "tile_settings": {
             "platform" : {"in": ["sentinel-2b", "sentinel-2a"]},
             "sentinel:data_coverage": {"ge": 0},
-            "sentinel:utm_zone": {},
-            "sentinel:latitude_band": {},
-            "sentinel:grid_square": {},
+            "sentinel:utm_zone": { "eq": "32"},
+            "sentinel:latitude_band": { "in":  ["U"]},
+            "sentinel:grid_square": { "eq":  "QC"},
             "eo:cloud_cover": {"le": 100},
             "bands": ["B01","B02", "B05"]
         },
