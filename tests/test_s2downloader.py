@@ -167,7 +167,7 @@ class TestSentinel2Downloader(unittest.TestCase):
             assert expected_res.dtypes[0] == "uint8"
             assert expected_res.shape == (2828, 3742)
             assert expected_res.bounds == rasterio.coords.BoundingBox(left=448340.0,
-                                                                      bottom=6043240.0,
+                                                                      bottom=6043220.0,
                                                                       right=485760.0,
                                                                       top=6071500.0)
             assert expected_res.read_crs() == CRS.from_epsg(32632)
@@ -184,7 +184,7 @@ class TestSentinel2Downloader(unittest.TestCase):
             assert expected_res.dtypes[0] == "uint16"
             assert expected_res.shape == (2828, 3742)
             assert expected_res.bounds == rasterio.coords.BoundingBox(left=448340.0,
-                                                                      bottom=6043240.0,
+                                                                      bottom=6043220.0,
                                                                       right=485760.0,
                                                                       top=6071500.0)
             assert expected_res.read_crs() == CRS.from_epsg(32632)
@@ -201,7 +201,7 @@ class TestSentinel2Downloader(unittest.TestCase):
             assert expected_res.dtypes[0] == "uint16"
             assert expected_res.shape == (2828, 3742)
             assert expected_res.bounds == rasterio.coords.BoundingBox(left=448340.0,
-                                                                      bottom=6043240.0,
+                                                                      bottom=6043220.0,
                                                                       right=485760.0,
                                                                       top=6071500.0)
             assert expected_res.read_crs() == CRS.from_epsg(32632)
@@ -218,7 +218,7 @@ class TestSentinel2Downloader(unittest.TestCase):
             assert expected_res.dtypes[0] == "uint16"
             assert expected_res.shape == (2828, 3742)
             assert expected_res.bounds == rasterio.coords.BoundingBox(left=448340.0,
-                                                                      bottom=6043240.0,
+                                                                      bottom=6043220.0,
                                                                       right=485760.0,
                                                                       top=6071500.0)
             assert expected_res.read_crs() == CRS.from_epsg(32632)
