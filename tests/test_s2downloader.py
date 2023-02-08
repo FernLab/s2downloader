@@ -17,7 +17,7 @@ from s2downloader.config import loadConfiguration, Config
 from copy import deepcopy
 
 
-class TestSentinel2Downloader(unittest.TestCase):
+class TestS2Downloader(unittest.TestCase):
     root_path = None
     config_file = None
     configuration = None
