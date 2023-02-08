@@ -100,7 +100,7 @@ def searchDataAtAWS(*,
         raise Exception(f"Failed to find data at AWS server => {e}")
 
 
-def s2DataDownloader(*, config_dict: dict):
+def s2Downloader(*, config_dict: dict):
     """s2DataDownloader.
 
     Parameters
