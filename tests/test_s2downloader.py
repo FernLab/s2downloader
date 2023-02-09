@@ -251,11 +251,11 @@ class TestS2Downloader(unittest.TestCase):
         self.assertEqual((str(path), os.path.isfile(path)), (str(path), True))
         with rasterio.open(path) as expected_res:
             assert expected_res.dtypes[0] == "uint8"
-            assert expected_res.shape == (4315, 4874)
-            assert expected_res.bounds == rasterio.coords.BoundingBox(left=672920.0, bottom=5762900.0,
-                                                                      right=721660.0, top=5806050.0)
+            assert expected_res.shape == (4314, 4872)
+            assert expected_res.bounds == rasterio.coords.BoundingBox(left=672920.0, bottom=5762920.0,
+                                                                      right=721640.0, top=5806060.0)
             assert expected_res.read_crs() == CRS().from_epsg(code=32632)
-            assert numpy.isclose([672920.0, 10.0, 0.0, 5806050.0, 0.0, -10.0],
+            assert numpy.isclose([672920.0, 10.0, 0.0, 5806060.0, 0.0, -10.0],
                                  expected_res.read_transform(),
                                  rtol=0,
                                  atol=1e-4,
@@ -266,11 +266,11 @@ class TestS2Downloader(unittest.TestCase):
         self.assertEqual((str(path), os.path.isfile(path)), (str(path), True))
         with rasterio.open(path) as expected_res:
             assert expected_res.dtypes[0] == "uint16"
-            assert expected_res.shape == (4315, 4874)
-            assert expected_res.bounds == rasterio.coords.BoundingBox(left=672920.0, bottom=5762900.0,
-                                                                      right=721660.0, top=5806050.0)
+            assert expected_res.shape == (4314, 4872)
+            assert expected_res.bounds == rasterio.coords.BoundingBox(left=672920.0, bottom=5762920.0,
+                                                                      right=721640.0, top=5806060.0)
             assert expected_res.read_crs() == CRS().from_epsg(code=32632)
-            assert numpy.isclose([672920.0, 10.0, 0.0, 5806050.0, 0.0, -10.0],
+            assert numpy.isclose([672920.0, 10.0, 0.0, 5806060.0, 0.0, -10.0],
                                  expected_res.read_transform(),
                                  rtol=0,
                                  atol=1e-4,
