@@ -322,6 +322,7 @@ def s2Downloader(*, config_dict: dict):
                                              out_transform=raster_trans,
                                              output_raster_path=output_band_path)
                 except Exception as err:
+                    logger.error(f"For date {items_date} there was an exception: {err}")
                     scenes_info[items_date.replace('-', '')]["error_info"] = f"Failed to download scenes:{err}."
                 else:
                     scenes_info[items_date.replace('-', '')]["data_available"] = True
