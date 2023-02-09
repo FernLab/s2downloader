@@ -272,7 +272,9 @@ def s2Downloader(*, config_dict: dict):
                             if num_tiles > 1:
                                 srcs_to_mosaic = []
                                 for item_idx in range(len(items)):
-                                    band_src = rasterio.open(items[item_idx].assets[band].href)
+                                    file_url = items[item_idx].assets[band].href
+                                    logger.info(file_url)
+                                    band_src = rasterio.open(file_url)
                                     if item_idx == 0:
                                         raster_crs = band_src.crs
                                     srcs_to_mosaic.append(band_src)
