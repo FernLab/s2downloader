@@ -12,12 +12,12 @@ import pytest
 import rasterio
 
 from rasterio.crs import CRS
-from s2downloader.s2downloader import s2DataDownloader
+from s2downloader.s2downloader import s2Downloader
 from s2downloader.config import loadConfiguration, Config
 from copy import deepcopy
 
 
-class TestSentinel2Downloader(unittest.TestCase):
+class TestS2Downloader(unittest.TestCase):
     root_path = None
     config_file = None
     configuration = None
@@ -64,7 +64,7 @@ class TestSentinel2Downloader(unittest.TestCase):
         config = deepcopy(self.configuration)
 
         Config(**config)
-        s2DataDownloader(config_dict=config)
+        s2Downloader(config_dict=config)
 
         # check output
         # number of files:
@@ -152,7 +152,7 @@ class TestSentinel2Downloader(unittest.TestCase):
         config["user_settings"]["aoi_settings"]["SCL_filter_values"] = [3]
 
         Config(**config)
-        s2DataDownloader(config_dict=config)
+        s2Downloader(config_dict=config)
 
         # check output
         # number of files:
@@ -238,7 +238,7 @@ class TestSentinel2Downloader(unittest.TestCase):
                                                                    52.36055456486244]
         config["user_settings"]["aoi_settings"]["date_range"] = ['2021-09-02', '2021-09-03']
         Config(**config)
-        s2DataDownloader(config_dict=config)
+        s2Downloader(config_dict=config)
 
         # check output
         # number of files:
@@ -284,7 +284,7 @@ class TestSentinel2Downloader(unittest.TestCase):
         scene_tif_path = os.path.join(self.output_data_path, "20210905_S2B_B05.tif")
 
         config["user_settings"]["result_settings"]["download_data"] = False
-        s2DataDownloader(config_dict=config)
+        s2Downloader(config_dict=config)
         with open(scenes_info_path) as json_file:
             data = json.load(json_file)
             assert list(data.keys())[0] == "20210905"
@@ -293,7 +293,7 @@ class TestSentinel2Downloader(unittest.TestCase):
             assert False
 
         with pytest.raises(Exception) as exinfo:
-            s2DataDownloader(config_dict=config)
+            s2Downloader(config_dict=config)
 
         if exinfo.value.args is not None:
             message = exinfo.value.args[0]
@@ -301,7 +301,7 @@ class TestSentinel2Downloader(unittest.TestCase):
 
         os.remove(scenes_info_path)
         config["user_settings"]["result_settings"]["download_data"] = True
-        s2DataDownloader(config_dict=config)
+        s2Downloader(config_dict=config)
         if not os.path.exists(scene_tif_path):
             assert False
         with rasterio.open(scene_tif_path) as expected_res:
@@ -326,7 +326,7 @@ class TestSentinel2Downloader(unittest.TestCase):
                                                                    14.9743949098159135, 52.3514856977076875]
         config['user_settings']['aoi_settings']['date_range'] = ["2021-06-19"]
         Config(**config)
-        s2DataDownloader(config_dict=config)
+        s2Downloader(config_dict=config)
 
         if len(os.listdir(self.output_data_path,)) != 2:
             assert False
@@ -343,7 +343,7 @@ class TestSentinel2Downloader(unittest.TestCase):
 
         Config(**config)
         with pytest.raises(Exception) as exinfo:
-            s2DataDownloader(config_dict=config)
+            s2Downloader(config_dict=config)
 
         if exinfo.value.args is not None:
             message = exinfo.value.args[0]
@@ -357,7 +357,7 @@ class TestSentinel2Downloader(unittest.TestCase):
         config["user_settings"]["result_settings"]["download_thumbnails"] = True
         config["user_settings"]["result_settings"]["download_data"] = False
 
-        s2DataDownloader(config_dict=config)
+        s2Downloader(config_dict=config)
 
         scene_path = os.path.join(self.output_data_path, "S2B_33UUU_20210905_0_L2A_L2A_PVI.tif")
 

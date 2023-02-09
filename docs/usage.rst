@@ -29,7 +29,7 @@ s2downloader_cli.py
 At the command line, S2Downloader provides the **s2downloader_cli.py**. Run with relative or absolute path to config json file:
 ::
 
-    S2DataPortal --filepath "path/to/config.json"
+    S2Downloader --filepath "path/to/config.json"
 
 
 Input and Output

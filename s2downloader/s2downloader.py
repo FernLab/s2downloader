@@ -100,7 +100,7 @@ def searchDataAtAWS(*,
         raise Exception(f"Failed to find data at AWS server => {e}")
 
 
-def s2DataDownloader(*, config_dict: dict):
+def s2Downloader(*, config_dict: dict):
     """s2DataDownloader.
 
     Parameters
@@ -336,4 +336,4 @@ def s2DataDownloader(*, config_dict: dict):
             with open(scenes_info_path, "w") as write_file:
                 json.dump(scenes_info, write_file, indent=4)
     except Exception as e:
-        raise Exception(f"Failed to run S2DataPortal main process => {e}")
+        raise Exception(f"Failed to run S2Downloader main process => {e}")

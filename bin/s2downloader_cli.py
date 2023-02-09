@@ -8,7 +8,7 @@ import argparse
 import json
 from json import JSONDecodeError
 
-from s2downloader.s2downloader import s2DataDownloader
+from s2downloader.s2downloader import s2Downloader
 from s2downloader.config import Config
 
 
@@ -63,7 +63,7 @@ def main(prog_name="S2Downloader"):
             raise IOError(f'Failed to load the configuration json file => {e}')
 
         # call main function for retrieving Sentinel 2 data from AWS server
-        s2DataDownloader(config_dict=config)
+        s2Downloader(config_dict=config)
     except Exception as e:
         raise SystemExit(f'Exit in {prog_name} function\n'
                          f'{e}')

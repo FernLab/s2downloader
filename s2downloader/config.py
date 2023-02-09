@@ -38,7 +38,7 @@ class TileSettings(BaseModel):
 
     platform: Optional[Dict] = Field(
         title="Sentinel-2 platform.",
-        description="For which Sentinel-2 platform data should be downloaded.",
+        description="For which Sentinel-2 platform should data be downloaded.",
         default={"in": [S2Platform.S2A, S2Platform.S2B]}
     )
 

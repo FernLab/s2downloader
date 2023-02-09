@@ -50,7 +50,7 @@ class TestConfig(unittest.TestCase):
         else:
             print("Successfully deleted the directory %s" % cls.output_data_path)
 
-    def testSentinel2AOISettingsDateRange(self):
+    def testS2DownloaderAOISettingsDateRange(self):
         """Test configuration to test time range for the tile settings"""
 
         config = deepcopy(self.configuration)
@@ -84,7 +84,7 @@ class TestConfig(unittest.TestCase):
         with pytest.raises(ValueError):
             Config(**config)
 
-    def testSentinel2dataCoverage(self):
+    def testS2DownloaderdataCoverage(self):
         """Test configuration to test coverage for the tile settings"""
 
         config = deepcopy(self.configuration)
@@ -111,7 +111,7 @@ class TestConfig(unittest.TestCase):
         with pytest.raises(ValueError):
             Config(**config)
 
-    def testSentinel2cloudCoverage(self):
+    def testS2DownloadercloudCoverage(self):
         """Test configuration to test coverage for the tile settings"""
 
         config = deepcopy(self.configuration)
@@ -138,7 +138,7 @@ class TestConfig(unittest.TestCase):
         with pytest.raises(ValueError):
             Config(**config)
 
-    def testSentinel2TileSettingsBands(self):
+    def testS2DownloaderTileSettingsBands(self):
         """Test configuration to test bands for the tile settings"""
 
         config = deepcopy(self.configuration)
@@ -169,7 +169,7 @@ class TestConfig(unittest.TestCase):
         with pytest.raises(ValueError):
             Config(**config)
 
-    def testSentinel2SCLFilterValues(self):
+    def testS2DownloaderSCLFilterValues(self):
         """Test configuration to test SCL filter values for mask"""
 
         config = deepcopy(self.configuration)
