@@ -12,10 +12,8 @@ from enum import Enum
 from json import JSONDecodeError
 
 # third party packages
-from pydantic import BaseModel, Field, validator, StrictBool, Extra, HttpUrl, root_validator
+from pydantic import BaseModel, Field, validator, StrictBool, Extra, HttpUrl
 from typing import Optional, List, Dict
-
-from .utils import getUTMZoneBB
 
 
 class ResamplingMethodName(str, Enum):
