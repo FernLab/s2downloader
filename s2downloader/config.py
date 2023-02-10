@@ -295,6 +295,18 @@ class S2Settings(BaseModel, extra=Extra.forbid):
         default="https://earth-search.aws.element84.com/v0"
     )
 
+    tiles_definition_path: str = Field(
+        title="Tiles definition path.",
+        description="Path to a shapefile.zip describing the tiles and its projections.",
+        default="data/sentinel_2_index_shapefile_attr.zip"
+    )
+
+    @validator('tiles_definition_path')
+    def check_tiles_definition(cls, v):
+        if not os.path.exists(os.path.abspath(v)):
+            raise ValueError(f"Tiles definition path is invalid: {v}")
+        return v
+
 
 class Config(BaseModel):
     """Template for the Sentinel 2 portal configuration file."""
