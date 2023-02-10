@@ -7,6 +7,7 @@ History
 
 * Fix the a bug with the mosaic, the bounds should come from the new window for the SCL band.
 * Schema validation for date_range in the aoi settings.
+* Pin Python version to 3.10 for consistent results between C/I and development environments.
 
 0.2.0 (2022-11-23)
 ------------------
