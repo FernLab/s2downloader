@@ -133,14 +133,14 @@ def groupItemsPerDate(*, items_list: list[pystac.item.Item]) -> dict:
     return items_per_date
 
 
-def getBoundsUTM(*, bounds: tuple, utm_zone: int) -> tuple:
+def getBoundsUTM(*, bounds: tuple, bb_crs: int) -> tuple:
     """Get the bounds of a bounding box in UTM coordinates.
 
     Parameters
     ----------
     bounds : tuple
         Bounds defined as lat/long.
-    utm_zone : int
+    bb_crs : int
         UTM zone number.
 
     Returns
@@ -150,5 +150,63 @@ def getBoundsUTM(*, bounds: tuple, utm_zone: int) -> tuple:
     """
     bounding_box = box(*bounds)
     bbox = geopandas.GeoSeries([bounding_box], crs=4326)
-    bbox = bbox.to_crs(crs=32600+utm_zone)
+    bbox = bbox.to_crs(crs=bb_crs)
     return tuple(bbox.bounds.values[0])
+
+
+def getUTMZoneBB(*, tiles_gpd: geopandas.GeoDataFrame, bbox: list[float], logger: Logger = None) -> int:
+    """Get the UTM zone for the bounding box.
+
+    Parameters
+    ----------
+    tiles_gpd : geopandas.GeoDataFrame
+        Path to the tiles shapefile.
+    bbox : list[float]
+        The bounds defined as lat/long.
+    logger: Logger
+        Logger handler.
+
+    Returns
+    -------
+    : tuple
+        Bounds reprojected to the UTM zone.
+
+    """
+    if logger is None:
+        logger = logging.getLogger(__name__)
+
+    bb_crs = 0
+    bounding_box = box(*bbox)
+
+    tiles_intersections = tiles_gpd.intersection(bounding_box)
+    s2_indices = list(tiles_intersections.loc[~tiles_intersections.is_empty].index)
+    s2_tiles = tiles_gpd.iloc[s2_indices]
+
+    # group tiles per EPSG code
+    s2_tiles_g = s2_tiles.groupby(by="EPSG")
+
+    # check if the polygon fits within one EPGS code
+    fits_one_epgs = False
+    if len(s2_tiles_g) != 1:
+        f = ""
+        for f in s2_tiles_g['EPSG']:
+            tiles_polygon = s2_tiles.loc[s2_tiles.EPSG == f[0]].geometry.unary_union
+            if tiles_polygon.contains(bounding_box):
+                fits_one_epgs = True
+                break
+
+        # Remove the polygon and add the intersections
+        if fits_one_epgs:
+            bb_crs = int(f[0])
+        else:
+            logger.warning("The bounding box it is not contained by a single UTM zone")
+    else:
+        bb_crs = int(list(s2_tiles_g.groups)[0])
+
+    utm_zone = bb_crs
+    if bb_crs != 0:
+        utm_zone = bb_crs - 32600
+        if (bb_crs - 32600) > 100:
+            utm_zone = bb_crs - 32700
+
+    return utm_zone
