@@ -147,12 +147,12 @@ def s2Downloader(*, config_dict: dict):
         cloudmasking = aoi_settings["apply_SCL_band_mask"]
         tiles_path = config_dict['s2_settings']['tiles_definition_path']
 
-        s2_settings["sentinel:utm_zone"] = {}
+        tile_settings["sentinel:utm_zone"] = {}
         try:
             tiles_gpd = geopandas.read_file(tiles_path)
             utm_zone = getUTMZoneBB(tiles_gpd=tiles_gpd, bbox=aoi_settings['bounding_box'])
             if utm_zone != 0:
-                s2_settings["sentinel:utm_zone"] = {"eq": utm_zone}
+                tile_settings["sentinel:utm_zone"] = {"eq": utm_zone}
         except (IOError, FileNotFoundError) as err:
             logger.warning(f"It is not possible to determine in which UTM zone is the bounding-box: {err}")
 
@@ -267,11 +267,13 @@ def s2Downloader(*, config_dict: dict):
                         else:
                             if download_thumbnails:
                                 file_url = items[0].assets["thumbnail"].href
+                                logger.info(file_url)
                                 thumbnail_path = os.path.join(result_dir,
                                                               f"{items[0].id}_{file_url.rsplit('/', 1)[1]}")
                                 urllib.request.urlretrieve(file_url, thumbnail_path)
                             if download_overviews:
                                 file_url = items[0].assets["overview"].href
+                                logger.info(file_url)
                                 overview_path = os.path.join(result_dir,
                                                              f"{items[0].id}_{file_url.rsplit('/', 1)[1]}")
                                 urllib.request.urlretrieve(file_url, overview_path)
