@@ -2,8 +2,14 @@
 History
 =======
 
+0.3.0 (2023-02-10)
+------------------
+
+* Fix the a bug with the mosaic, the bounds should come from the new window for the SCL band.
+* Schema validation for date_range in the aoi settings.
+
 0.2.0 (2022-11-23)
--------------------
+------------------
 
 * The .tif files have the following nomenclature: <date>_<sentinel_platform>_<band>.tif
 * Scenes information saved into a JSON file.

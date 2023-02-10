@@ -10,7 +10,7 @@ import os
 import numpy as np
 import rasterio
 from rasterio.merge import merge
-from rasterio.windows import from_bounds, Window
+from rasterio.windows import from_bounds, Window, bounds
 from rasterio.warp import Resampling
 import urllib.request
 
@@ -172,19 +172,27 @@ def s2Downloader(*, config_dict: dict):
             scl_src = None
             scl_crs = 0
             raster_crs = 0
+            scl_bb_window = None
             output_scl_path = os.path.join(result_dir, f"{items_date.replace('-', '')}_{sensor_name}_SCL.tif")
 
             if num_tiles > 1:
                 scl_mosaic = []
+                new_bounds = None
                 for item_idx in range(len(items)):
                     scl_src = rasterio.open(items[item_idx].assets["SCL"].href)
                     if item_idx == 0:
                         scl_crs = scl_src.crs
+                        scl_bb_window = from_bounds(left=bounds_utm[0],
+                                                    bottom=bounds_utm[1],
+                                                    right=bounds_utm[2],
+                                                    top=bounds_utm[3],
+                                                    transform=scl_src.transform).round_lengths().round_offsets()
+                        new_bounds = bounds(scl_bb_window, scl_src.transform)
                     scl_mosaic.append(scl_src)
 
                 scl_band, scl_trans = merge(datasets=scl_mosaic,
                                             target_aligned_pixels=True,
-                                            bounds=bounds_utm,
+                                            bounds=new_bounds,
                                             res=target_resolution,
                                             resampling=Resampling[aoi_settings["resampling_method"]])
             elif len(items) == 1:
@@ -271,15 +279,24 @@ def s2Downloader(*, config_dict: dict):
                                                             f"{items_date.replace('-','')}_{sensor_name}_{band}.tif")
                             if num_tiles > 1:
                                 srcs_to_mosaic = []
+                                bounds_window = None
                                 for item_idx in range(len(items)):
-                                    band_src = rasterio.open(items[item_idx].assets[band].href)
+                                    file_url = items[item_idx].assets[band].href
+                                    logger.info(file_url)
+                                    band_src = rasterio.open(file_url)
                                     if item_idx == 0:
                                         raster_crs = band_src.crs
+                                        win_scale_factor = band_src.transform[0] / scl_src.transform[0]
+                                        bb_window = Window(scl_bb_window.col_off / win_scale_factor,
+                                                           scl_bb_window.row_off / win_scale_factor,
+                                                           scl_bb_window.width / win_scale_factor,
+                                                           scl_bb_window.height / win_scale_factor)
+                                        bounds_window = bounds(bb_window, band_src.transform)
                                     srcs_to_mosaic.append(band_src)
                                 raster_band, raster_trans = \
                                     merge(datasets=srcs_to_mosaic,
                                           target_aligned_pixels=True,
-                                          bounds=bounds_utm,
+                                          bounds=bounds_window,
                                           res=target_resolution,
                                           resampling=Resampling[aoi_settings["resampling_method"]])
                             else:
@@ -320,6 +337,7 @@ def s2Downloader(*, config_dict: dict):
                                              out_transform=raster_trans,
                                              output_raster_path=output_band_path)
                 except Exception as err:
+                    logger.error(f"For date {items_date} there was an exception: {err}")
                     scenes_info[items_date.replace('-', '')]["error_info"] = f"Failed to download scenes:{err}."
                 else:
                     scenes_info[items_date.replace('-', '')]["data_available"] = True
