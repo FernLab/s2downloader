@@ -7,7 +7,7 @@ import json
 import time
 
 import geopy.distance
-from datetime import datetime
+from datetime import datetime, date
 from enum import Enum
 from json import JSONDecodeError
 
@@ -180,9 +180,28 @@ class AoiSettings(BaseModel, extra=Extra.forbid):
     @validator("date_range")
     def checkDateRange(cls, v):
         """Check data range."""
+        limit_date = datetime(2017, 4, 1)
+        today = datetime.strptime(date.today().strftime("%Y-%m-%d"), "%Y-%m-%d")
+        error_msg = "Invalid date range:"
         for d in v:
-            datetime.strptime(d, "%Y-%m-%d")
-        return v
+            try:
+                d_date = datetime.strptime(d, "%Y-%m-%d")
+                if d_date < limit_date:
+                    error_msg = f"{error_msg} {d} should equal or greater than 2017-04-01"
+                if d_date > today:
+                    error_msg = f"{error_msg} {d} should not be in the future"
+            except Exception as err:
+                error_msg = f"{error_msg} {err}"
+
+        if error_msg == "Invalid date range:":
+            if len(v) == 2:
+                start_date = datetime.strptime(v[0], "%Y-%m-%d")
+                end_date = datetime.strptime(v[1], "%Y-%m-%d")
+                if start_date > end_date:
+                    raise ValueError(f"{error_msg} {v[0]} should not be greater than {v[1]}.")
+            return v
+        else:
+            raise ValueError(f"{error_msg}.")
 
 
 class ResultsSettings(BaseModel, extra=Extra.forbid):

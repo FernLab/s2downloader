@@ -82,7 +82,7 @@ class TestS2Downloader(unittest.TestCase):
                                                                       bottom=5804700.0,
                                                                       right=368840.0,
                                                                       top=5805520.0)
-            assert expected_res.read_crs() == CRS.from_epsg(32633)
+            assert expected_res.read_crs() == CRS().from_epsg(code=32633)
             assert numpy.isclose([367820.0, 10.0, 0.0, 5805520.0, 0.0, -10.0],
                                  expected_res.read_transform(),
                                  rtol=0,
@@ -99,7 +99,7 @@ class TestS2Downloader(unittest.TestCase):
                                                                       bottom=5804700.0,
                                                                       right=368840.0,
                                                                       top=5805520.0)
-            assert expected_res.read_crs() == CRS.from_epsg(32633)
+            assert expected_res.read_crs() == CRS().from_epsg(code=32633)
             assert numpy.isclose([367820.0, 10.0, 0.0, 5805520.0, 0.0, -10.0],
                                  expected_res.read_transform(),
                                  rtol=0,
@@ -116,7 +116,7 @@ class TestS2Downloader(unittest.TestCase):
                                                                       bottom=5804700.0,
                                                                       right=368840.0,
                                                                       top=5805520.0)
-            assert expected_res.read_crs() == CRS.from_epsg(32633)
+            assert expected_res.read_crs() == CRS().from_epsg(code=32633)
             assert numpy.isclose([367820.0, 10.0, 0.0, 5805520.0, 0.0, -10.0],
                                  expected_res.read_transform(),
                                  rtol=0,
@@ -133,7 +133,7 @@ class TestS2Downloader(unittest.TestCase):
                                                                       bottom=5804700.0,
                                                                       right=368840.0,
                                                                       top=5805520.0)
-            assert expected_res.read_crs() == CRS.from_epsg(32633)
+            assert expected_res.read_crs() == CRS().from_epsg(code=32633)
             assert numpy.isclose([367820.0, 10.0, 0.0, 5805520.0, 0.0, -10.0],
                                  expected_res.read_transform(),
                                  rtol=0,
@@ -170,7 +170,7 @@ class TestS2Downloader(unittest.TestCase):
                                                                       bottom=6043220.0,
                                                                       right=485760.0,
                                                                       top=6071500.0)
-            assert expected_res.read_crs() == CRS.from_epsg(32632)
+            assert expected_res.read_crs() == CRS().from_epsg(code=32632)
             assert numpy.isclose([448340.0, 10.0, 0.0, 6071500.0, 0.0, -10.0],
                                  expected_res.read_transform(),
                                  rtol=0,
@@ -187,7 +187,7 @@ class TestS2Downloader(unittest.TestCase):
                                                                       bottom=6043220.0,
                                                                       right=485760.0,
                                                                       top=6071500.0)
-            assert expected_res.read_crs() == CRS.from_epsg(32632)
+            assert expected_res.read_crs() == CRS().from_epsg(code=32632)
             assert numpy.isclose([448340.0, 10.0, 0.0, 6071500.0, 0.0, -10.0],
                                  expected_res.read_transform(),
                                  rtol=0,
@@ -204,7 +204,7 @@ class TestS2Downloader(unittest.TestCase):
                                                                       bottom=6043220.0,
                                                                       right=485760.0,
                                                                       top=6071500.0)
-            assert expected_res.read_crs() == CRS.from_epsg(32632)
+            assert expected_res.read_crs() == CRS().from_epsg(code=32632)
             assert numpy.isclose([448340.0, 10.0, 0.0, 6071500.0, 0.0, -10.0],
                                  expected_res.read_transform(),
                                  rtol=0,
@@ -221,7 +221,7 @@ class TestS2Downloader(unittest.TestCase):
                                                                       bottom=6043220.0,
                                                                       right=485760.0,
                                                                       top=6071500.0)
-            assert expected_res.read_crs() == CRS.from_epsg(32632)
+            assert expected_res.read_crs() == CRS().from_epsg(code=32632)
             assert numpy.isclose([448340.0, 10.0, 0.0, 6071500.0, 0.0, -10.0],
                                  expected_res.read_transform(),
                                  rtol=0,
@@ -254,7 +254,7 @@ class TestS2Downloader(unittest.TestCase):
             assert expected_res.shape == (4315, 4874)
             assert expected_res.bounds == rasterio.coords.BoundingBox(left=672920.0, bottom=5762900.0,
                                                                       right=721660.0, top=5806050.0)
-            assert expected_res.read_crs() == CRS.from_epsg(32632)
+            assert expected_res.read_crs() == CRS().from_epsg(code=32632)
             assert numpy.isclose([672920.0, 10.0, 0.0, 5806050.0, 0.0, -10.0],
                                  expected_res.read_transform(),
                                  rtol=0,
@@ -269,7 +269,7 @@ class TestS2Downloader(unittest.TestCase):
             assert expected_res.shape == (4315, 4874)
             assert expected_res.bounds == rasterio.coords.BoundingBox(left=672920.0, bottom=5762900.0,
                                                                       right=721660.0, top=5806050.0)
-            assert expected_res.read_crs() == CRS.from_epsg(32632)
+            assert expected_res.read_crs() == CRS().from_epsg(code=32632)
             assert numpy.isclose([672920.0, 10.0, 0.0, 5806050.0, 0.0, -10.0],
                                  expected_res.read_transform(),
                                  rtol=0,
@@ -311,7 +311,7 @@ class TestS2Downloader(unittest.TestCase):
                                                                       bottom=5804700.0,
                                                                       right=368840.0,
                                                                       top=5805520.0)
-            assert expected_res.read_crs() == CRS.from_epsg(32633)
+            assert expected_res.read_crs() == CRS().from_epsg(code=32633)
             assert numpy.isclose([367820.0, 10.0, 0.0, 5805520.0, 0.0, -10.0],
                                  expected_res.read_transform(),
                                  rtol=0,
@@ -375,7 +375,7 @@ class TestS2Downloader(unittest.TestCase):
             assert expected_res.shape == (343, 343)
             assert expected_res.bounds == rasterio.coords.BoundingBox(left=300000.0, bottom=5790280.0,
                                                                       right=409760.0, top=5900040.0)
-            assert expected_res.read_crs() == CRS.from_epsg(32633)
+            assert expected_res.read_crs() == CRS().from_epsg(code=32633)
             assert numpy.isclose([300000.0, 320.0, 0.0, 5900040.0, 0.0, -320.0],
                                  expected_res.read_transform(),
                                  rtol=0,
