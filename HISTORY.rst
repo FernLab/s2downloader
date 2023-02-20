@@ -2,6 +2,12 @@
 History
 =======
 
+0.4.0 (coming soon)
+-------------------
+
+* The AOI width and height upper limit is 500 km.
+* Possible to download data for any UTM zone.
+
 0.3.0 (2023-02-10)
 ------------------
 

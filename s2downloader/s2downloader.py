@@ -7,6 +7,7 @@ import sys
 from logging import Logger
 import os
 
+import geopandas
 import numpy as np
 import rasterio
 from rasterio.merge import merge
@@ -17,7 +18,7 @@ import urllib.request
 from pystac import Item
 from pystac_client import Client
 
-from .utils import saveRasterToDisk, validPixelsFromSCLBand, getBoundsUTM, groupItemsPerDate
+from .utils import saveRasterToDisk, validPixelsFromSCLBand, getBoundsUTM, groupItemsPerDate, getUTMZoneBB
 from .config import Config
 
 
@@ -84,13 +85,15 @@ def searchDataAtAWS(*,
         item_list_dict = [i.to_dict() for i in items_list]
 
         # print overview of found data
-        logger.info("{:<25} {:<25} {:<10} {:<20} {:<20} {:<15}".format('Date', 'ID', 'UTM Zone', 'Valid Cloud Cover',
-                                                                       'Tile Cloud Cover', 'Tile Coverage'))
+        logger.info("{:<25} {:<25} {:<10} {:<10} {:<20} {:<20} {:<15}".format('Date', 'ID', 'UTM Zone', 'EPSG',
+                                                                              'Valid Cloud Cover', 'Tile Cloud Cover',
+                                                                              'Tile Coverage'))
         for i in item_list_dict:
-            logger.info("{:<25} {:<25} {:<10} {:<20} {:<20} {:<15}\n".format(
+            logger.info("{:<25} {:<25} {:<10} {:<10} {:<20} {:<20} {:<15}\n".format(
                 i['properties']['datetime'],
                 i['id'],
                 i['properties']['sentinel:utm_zone'],
+                i['properties']['proj:epsg'],
                 str(i['properties']['sentinel:valid_cloud_cover']),
                 i['properties']['eo:cloud_cover'],
                 i['properties']['sentinel:data_coverage']))
@@ -142,6 +145,16 @@ def s2Downloader(*, config_dict: dict):
         logger.setLevel(logging_level)
 
         cloudmasking = aoi_settings["apply_SCL_band_mask"]
+        tiles_path = config_dict['s2_settings']['tiles_definition_path']
+
+        tile_settings["sentinel:utm_zone"] = {}
+        try:
+            tiles_gpd = geopandas.read_file(tiles_path)
+            utm_zone = getUTMZoneBB(tiles_gpd=tiles_gpd, bbox=aoi_settings['bounding_box'])
+            if utm_zone != 0:
+                tile_settings["sentinel:utm_zone"] = {"eq": utm_zone}
+        except (IOError, FileNotFoundError) as err:
+            logger.warning(f"It is not possible to determine in which UTM zone is the bounding-box: {err}")
 
         # search for Sentinel-2 data within the bounding box as defined in query_props.json (no data download yet)
         aws_items = searchDataAtAWS(s2_collection=s2_settings['collections'],
@@ -168,7 +181,7 @@ def s2Downloader(*, config_dict: dict):
             num_tiles = len(items)
             sensor_name = items[0].id[0:3]
             bounds_utm = getBoundsUTM(bounds=aoi_settings['bounding_box'],
-                                      utm_zone=items[0].properties['sentinel:utm_zone'])
+                                      bb_crs=items[0].properties['proj:epsg'])
             scl_src = None
             scl_crs = 0
             raster_crs = 0
@@ -254,11 +267,13 @@ def s2Downloader(*, config_dict: dict):
                         else:
                             if download_thumbnails:
                                 file_url = items[0].assets["thumbnail"].href
+                                logger.info(file_url)
                                 thumbnail_path = os.path.join(result_dir,
                                                               f"{items[0].id}_{file_url.rsplit('/', 1)[1]}")
                                 urllib.request.urlretrieve(file_url, thumbnail_path)
                             if download_overviews:
                                 file_url = items[0].assets["overview"].href
+                                logger.info(file_url)
                                 overview_path = os.path.join(result_dir,
                                                              f"{items[0].id}_{file_url.rsplit('/', 1)[1]}")
                                 urllib.request.urlretrieve(file_url, overview_path)

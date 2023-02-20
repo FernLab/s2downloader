@@ -12,10 +12,8 @@ from enum import Enum
 from json import JSONDecodeError
 
 # third party packages
-from pydantic import BaseModel, Field, validator, StrictBool, Extra, HttpUrl, root_validator
+from pydantic import BaseModel, Field, validator, StrictBool, Extra, HttpUrl
 from typing import Optional, List, Dict
-
-from .utils import getUTMZoneBB
 
 
 class ResamplingMethodName(str, Enum):
@@ -160,8 +158,8 @@ class AoiSettings(BaseModel, extra=Extra.forbid):
         ew_dist = geopy.distance.geodesic(coords_nw, coords_ne).km
         ns_dist = geopy.distance.geodesic(coords_nw, coords_sw).km
 
-        if ew_dist > 50 or ns_dist > 50:
-            raise ValueError("Bounding Box is too large. It should be max 50*50km.")
+        if ew_dist > 500 or ns_dist > 500:
+            raise ValueError("Bounding Box is too large. It should be max 500*500km.")
 
         return v
 
@@ -281,15 +279,6 @@ class UserSettings(BaseModel, extra=Extra.forbid):
         title="Result Settings.", description=""
     )
 
-    @root_validator(skip_on_failure=True)
-    def checkBboxAndSetUTMZone(cls, v):
-        """Check BBOX UTM zone coverage and set UTM zone."""
-        bb = v["aoi_settings"].__dict__["bounding_box"]
-        bb_max_utm_zone_overlap = v["aoi_settings"].__dict__["bb_max_utm_zone_overlap"]
-        utm_zone = getUTMZoneBB(bbox=bb, bb_max_utm_zone_overlap=bb_max_utm_zone_overlap)
-        v["tile_settings"].__dict__["sentinel:utm_zone"] = {"eq": utm_zone}
-        return v
-
 
 class S2Settings(BaseModel, extra=Extra.forbid):
     """Template for S2 settings in config file."""
@@ -305,6 +294,19 @@ class S2Settings(BaseModel, extra=Extra.forbid):
         description="URL to access the STAC catalog.",
         default="https://earth-search.aws.element84.com/v0"
     )
+
+    tiles_definition_path: str = Field(
+        title="Tiles definition path.",
+        description="Path to a shapefile.zip describing the tiles and its projections.",
+        default="data/sentinel_2_index_shapefile_attr.zip"
+    )
+
+    @validator('tiles_definition_path')
+    def check_tiles_definition(cls, v):
+        """Check if the tiles definition path is exists."""
+        if not os.path.exists(os.path.abspath(v)):
+            raise ValueError(f"Tiles definition path is invalid: {v}")
+        return v
 
 
 class Config(BaseModel):

@@ -77,13 +77,13 @@ class TestS2Downloader(unittest.TestCase):
         self.assertEqual((str(path), os.path.isfile(path)), (str(path), True))
         with rasterio.open(path) as expected_res:
             assert expected_res.dtypes[0] == "uint8"
-            assert expected_res.shape == (82, 102)
-            assert expected_res.bounds == rasterio.coords.BoundingBox(left=367820.0,
-                                                                      bottom=5804700.0,
-                                                                      right=368840.0,
-                                                                      top=5805520.0)
-            assert expected_res.read_crs() == CRS().from_epsg(code=32633)
-            assert numpy.isclose([367820.0, 10.0, 0.0, 5805520.0, 0.0, -10.0],
+            assert expected_res.shape == (86, 104)
+            assert expected_res.bounds == rasterio.coords.BoundingBox(left=776160.0,
+                                                                      bottom=5810700.0,
+                                                                      right=777200.0,
+                                                                      top=5811560.0)
+            assert expected_res.read_crs() == CRS().from_epsg(code=32632)
+            assert numpy.isclose([776160.0, 10.0, 0.0, 5811560.0, 0.0, -10.0],
                                  expected_res.read_transform(),
                                  rtol=0,
                                  atol=1e-4,
@@ -94,13 +94,13 @@ class TestS2Downloader(unittest.TestCase):
         self.assertEqual((str(path), os.path.isfile(path)), (str(path), True))
         with rasterio.open(path) as expected_res:
             assert expected_res.dtypes[0] == "uint16"
-            assert expected_res.shape == (82, 102)
-            assert expected_res.bounds == rasterio.coords.BoundingBox(left=367820.0,
-                                                                      bottom=5804700.0,
-                                                                      right=368840.0,
-                                                                      top=5805520.0)
-            assert expected_res.read_crs() == CRS().from_epsg(code=32633)
-            assert numpy.isclose([367820.0, 10.0, 0.0, 5805520.0, 0.0, -10.0],
+            assert expected_res.shape == (86, 104)
+            assert expected_res.bounds == rasterio.coords.BoundingBox(left=776160.0,
+                                                                      bottom=5810700.0,
+                                                                      right=777200.0,
+                                                                      top=5811560.0)
+            assert expected_res.read_crs() == CRS().from_epsg(code=32632)
+            assert numpy.isclose([776160.0, 10.0, 0.0, 5811560.0, 0.0, -10.0],
                                  expected_res.read_transform(),
                                  rtol=0,
                                  atol=1e-4,
@@ -111,13 +111,13 @@ class TestS2Downloader(unittest.TestCase):
         self.assertEqual((str(path), os.path.isfile(path)), (str(path), True))
         with rasterio.open(path) as expected_res:
             assert expected_res.dtypes[0] == "uint16"
-            assert expected_res.shape == (82, 102)
-            assert expected_res.bounds == rasterio.coords.BoundingBox(left=367820.0,
-                                                                      bottom=5804700.0,
-                                                                      right=368840.0,
-                                                                      top=5805520.0)
-            assert expected_res.read_crs() == CRS().from_epsg(code=32633)
-            assert numpy.isclose([367820.0, 10.0, 0.0, 5805520.0, 0.0, -10.0],
+            assert expected_res.shape == (86, 104)
+            assert expected_res.bounds == rasterio.coords.BoundingBox(left=776160.0,
+                                                                      bottom=5810700.0,
+                                                                      right=777200.0,
+                                                                      top=5811560.0)
+            assert expected_res.read_crs() == CRS().from_epsg(code=32632)
+            assert numpy.isclose([776160.0, 10.0, 0.0, 5811560.0, 0.0, -10.0],
                                  expected_res.read_transform(),
                                  rtol=0,
                                  atol=1e-4,
@@ -128,13 +128,13 @@ class TestS2Downloader(unittest.TestCase):
         self.assertEqual((str(path), os.path.isfile(path)), (str(path), True))
         with rasterio.open(path) as expected_res:
             assert expected_res.dtypes[0] == "uint16"
-            assert expected_res.shape == (82, 102)
-            assert expected_res.bounds == rasterio.coords.BoundingBox(left=367820.0,
-                                                                      bottom=5804700.0,
-                                                                      right=368840.0,
-                                                                      top=5805520.0)
-            assert expected_res.read_crs() == CRS().from_epsg(code=32633)
-            assert numpy.isclose([367820.0, 10.0, 0.0, 5805520.0, 0.0, -10.0],
+            assert expected_res.shape == (86, 104)
+            assert expected_res.bounds == rasterio.coords.BoundingBox(left=776160.0,
+                                                                      bottom=5810700.0,
+                                                                      right=777200.0,
+                                                                      top=5811560.0)
+            assert expected_res.read_crs() == CRS().from_epsg(code=32632)
+            assert numpy.isclose([776160.0, 10.0, 0.0, 5811560.0, 0.0, -10.0],
                                  expected_res.read_transform(),
                                  rtol=0,
                                  atol=1e-4,
@@ -276,6 +276,55 @@ class TestS2Downloader(unittest.TestCase):
                                  atol=1e-4,
                                  equal_nan=False).all()
 
+    def testS2Downloader2UTMsSouthernHemisphere(self):
+        """Test downloader for 2 UTM tiles in southern hemisphere and west of Greenwich."""
+
+        config = deepcopy(self.configuration)
+        config["user_settings"]["aoi_settings"]["bounding_box"] = [-72.21253483033124,
+                                                                   -41.341630665653824,
+                                                                   -71.50872541102595,
+                                                                   -41.00765157647477]
+
+        config["user_settings"]["aoi_settings"]["date_range"] = ['2022-12-31']
+        Config(**config)
+        s2Downloader(config_dict=config)
+
+        # check output
+        # number of files:
+        filecount = sum([len(files) for r, d, files in os.walk(self.output_data_path)])
+        assert filecount == 6
+
+        # features of two files:
+        path = os.path.abspath(
+            os.path.join(self.output_data_path, "20221231_S2B_SCL.tif"))
+        self.assertEqual((str(path), os.path.isfile(path)), (str(path), True))
+        with rasterio.open(path) as expected_res:
+            assert expected_res.dtypes[0] == "uint8"
+            assert expected_res.shape == (3922, 6038)
+            assert expected_res.bounds == rasterio.coords.BoundingBox(left=733220.0, bottom=5417440.0,
+                                                                      right=793600.0, top=5456660.0)
+            assert expected_res.read_crs() == CRS().from_epsg(code=32718)
+            assert numpy.isclose([733220.0, 10.0, 0.0, 5456660.0, 0.0, -10.0],
+                                 expected_res.read_transform(),
+                                 rtol=0,
+                                 atol=1e-4,
+                                 equal_nan=False).all()
+
+        path = os.path.abspath(
+            os.path.join(self.output_data_path, "20221231_S2B_B02.tif"))
+        self.assertEqual((str(path), os.path.isfile(path)), (str(path), True))
+        with rasterio.open(path) as expected_res:
+            assert expected_res.dtypes[0] == "uint16"
+            assert expected_res.shape == (3922, 6038)
+            assert expected_res.bounds == rasterio.coords.BoundingBox(left=733220.0, bottom=5417440.0,
+                                                                      right=793600.0, top=5456660.0)
+            assert expected_res.read_crs() == CRS().from_epsg(code=32718)
+            assert numpy.isclose([733220.0, 10.0, 0.0, 5456660.0, 0.0, -10.0],
+                                 expected_res.read_transform(),
+                                 rtol=0,
+                                 atol=1e-4,
+                                 equal_nan=False).all()
+
     def testS2DownloaderOnlyDates(self):
         """Test configuration to test only dates download for the tile settings"""
 
@@ -306,13 +355,13 @@ class TestS2Downloader(unittest.TestCase):
             assert False
         with rasterio.open(scene_tif_path) as expected_res:
             assert expected_res.dtypes[0] == "uint16"
-            assert expected_res.shape == (82, 102)
-            assert expected_res.bounds == rasterio.coords.BoundingBox(left=367820.0,
-                                                                      bottom=5804700.0,
-                                                                      right=368840.0,
-                                                                      top=5805520.0)
-            assert expected_res.read_crs() == CRS().from_epsg(code=32633)
-            assert numpy.isclose([367820.0, 10.0, 0.0, 5805520.0, 0.0, -10.0],
+            assert expected_res.shape == (86, 104)
+            assert expected_res.bounds == rasterio.coords.BoundingBox(left=776160.0,
+                                                                      bottom=5810700.0,
+                                                                      right=777200.0,
+                                                                      top=5811560.0)
+            assert expected_res.read_crs() == CRS().from_epsg(code=32632)
+            assert numpy.isclose([776160.0, 10.0, 0.0, 5811560.0, 0.0, -10.0],
                                  expected_res.read_transform(),
                                  rtol=0,
                                  atol=1e-4,
@@ -359,24 +408,24 @@ class TestS2Downloader(unittest.TestCase):
 
         s2Downloader(config_dict=config)
 
-        scene_path = os.path.join(self.output_data_path, "S2B_33UUU_20210905_0_L2A_L2A_PVI.tif")
+        scene_path = os.path.join(self.output_data_path, "S2B_32UQD_20210905_0_L2A_L2A_PVI.tif")
 
         if not os.path.exists(scene_path):
             assert False
 
         if not os.path.exists(
             os.path.join(
-                self.output_data_path, "S2B_33UUU_20210905_0_L2A_preview.jpg")
+                self.output_data_path, "S2B_32UQD_20210905_0_L2A_preview.jpg")
         ):
             assert False
 
         with rasterio.open(scene_path) as expected_res:
             assert expected_res.dtypes[0] == "uint8"
             assert expected_res.shape == (343, 343)
-            assert expected_res.bounds == rasterio.coords.BoundingBox(left=300000.0, bottom=5790280.0,
-                                                                      right=409760.0, top=5900040.0)
-            assert expected_res.read_crs() == CRS().from_epsg(code=32633)
-            assert numpy.isclose([300000.0, 320.0, 0.0, 5900040.0, 0.0, -320.0],
+            assert expected_res.bounds == rasterio.coords.BoundingBox(left=699960.0, bottom=5790280.0,
+                                                                      right=809720.0, top=5900040.0)
+            assert expected_res.read_crs() == CRS().from_epsg(code=32632)
+            assert numpy.isclose([699960.0, 320.0, 0.0, 5900040.0, 0.0, -320.0],
                                  expected_res.read_transform(),
                                  rtol=0,
                                  atol=1e-4,

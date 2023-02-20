@@ -30,6 +30,7 @@
     "s2_settings": {
         "collections": [
             "sentinel-s2-l2a-cogs"
-        ]
+        ],
+        "tiles_definition_path" : "data/sentinel_2_index_shapefile_attr.zip"
     }
 }

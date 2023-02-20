@@ -217,10 +217,6 @@ class TestConfig(unittest.TestCase):
 
         config = deepcopy(self.configuration)
 
-        config['user_settings']['aoi_settings']['bounding_box'] = [12.1439, 52.3832, 13.4204, 53.0389]
-        with pytest.raises(ValueError):
-            Config(**config)
-
         config['user_settings']['aoi_settings']['bounding_box'] = [13.4204, 53.0389]
         with pytest.raises(ValueError):
             Config(**config)
