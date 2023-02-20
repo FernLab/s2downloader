@@ -159,7 +159,7 @@ class AoiSettings(BaseModel, extra=Extra.forbid):
         ns_dist = geopy.distance.geodesic(coords_nw, coords_sw).km
 
         if ew_dist > 500 or ns_dist > 500:
-            raise ValueError("Bounding Box is too large. It should be max 50*50km.")
+            raise ValueError("Bounding Box is too large. It should be max 500*500km.")
 
         return v
 
