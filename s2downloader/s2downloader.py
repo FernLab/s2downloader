@@ -15,6 +15,7 @@ from rasterio.merge import merge
 from rasterio.windows import from_bounds, Window, bounds
 from rasterio.warp import Resampling
 import urllib.request
+from typing import Union
 
 from pystac import Item
 from pystac_client import Client
@@ -25,7 +26,7 @@ from .config import Config
 
 def searchDataAtAWS(*,
                     s2_collection: list[str],
-                    bb: list[float],
+                    bb: Union[list[float], None],
                     date_range: list[str],
                     props_json: dict,
                     stac_catalog_url: str,
@@ -423,7 +424,7 @@ def downloadTileID(*, config_dict: dict):
 
     # search for Sentinel-2 data within the bounding box as defined in query_props.json (no data download yet)
     aws_items = searchDataAtAWS(s2_collection=s2_settings['collections'],
-                                bb=aoi_settings['bounding_box'],
+                                bb=None,
                                 date_range=aoi_settings['date_range'],
                                 props_json=tile_settings,
                                 stac_catalog_url=s2_settings['stac_catalog_url'],
@@ -442,129 +443,130 @@ def downloadTileID(*, config_dict: dict):
     scl_filter_values.append(0)
     scenes_info = {}
     for items_date in items_per_date.keys():
-        items = items_per_date[items_date]
-        num_tiles = len(items)
-        sensor_name = items[0].id[0:3]
-        output_scl_path = os.path.join(result_dir, f"{items_date.replace('-', '')}_{sensor_name}_SCL.tif")
+        for item in items_per_date[items_date]:
+            output_path = os.path.join(result_dir,
+                                       f"{item.properties['sentinel:utm_zone']}",
+                                       f"{item.properties['sentinel:latitude_band']}",
+                                       f"{item.properties['sentinel:grid_square']}",
+                                       f"{items_date.split('-')[0]}",
+                                       f"{items_date.split('-')[1]}",
+                                       f"{item.properties['sentinel:product_id']}")
+            os.makedirs(name=output_path, exist_ok=True)
+            output_scl_path = os.path.join(output_path, "SCL.tif")
 
-        file_url = items[0].assets["SCL"].href
-        with rasterio.open(file_url) as scl_src:
-            scl_trans = scl_src.transform
-            scl_scale_factor = scl_src.transform[0] / target_resolution
-            if scl_scale_factor != 1.0:
-                dst_height = int(scl_src.height * scl_scale_factor)
-                dst_width = int(scl_src.width * scl_scale_factor)
-                scl_band = scl_src.read(out_shape=(scl_src.count,
-                                                   dst_height,
-                                                   dst_width),
-                                        resampling=Resampling.nearest)
-                scl_trans[0] = scl_src.transform[0] / scl_scale_factor
-                scl_trans[4] = scl_src.transform[4] / scl_scale_factor
-            else:
-                scl_band = scl_src.read()
+            file_url = item.assets["SCL"].href
+            with rasterio.open(file_url) as scl_src:
+                scl_trans = scl_src.transform
+                scl_scale_factor = scl_src.transform[0] / target_resolution
+                if scl_scale_factor != 1.0:
+                    dst_height = int(scl_src.height * scl_scale_factor)
+                    dst_width = int(scl_src.width * scl_scale_factor)
+                    scl_band = scl_src.read(out_shape=(scl_src.count,
+                                                       dst_height,
+                                                       dst_width),
+                                            resampling=Resampling.nearest)
+                    scl_trans[0] = scl_src.transform[0] / scl_scale_factor
+                    scl_trans[4] = scl_src.transform[4] / scl_scale_factor
+                else:
+                    scl_band = scl_src.read()
 
             scl_crs = scl_src.crs
 
-        nonzero_pixels_per, valid_pixels_per = \
-            validPixelsFromSCLBand(
-                scl_band=scl_band,
-                scl_filter_values=scl_filter_values,
-                logger=logger)
+            nonzero_pixels_per, valid_pixels_per = \
+                validPixelsFromSCLBand(
+                    scl_band=scl_band,
+                    scl_filter_values=scl_filter_values,
+                    logger=logger)
 
-        scenes_info[items_date.replace('-', '')] = {
-            "item_ids": list(),
-            "nonzero_pixels": nonzero_pixels_per,
-            "valid_pixels": valid_pixels_per,
-            "data_available": False,
-            "error_info": ""
-            }
-        if nonzero_pixels_per >= aoi_settings["SCL_mask_valid_pixels_min_percentage"] \
-                and valid_pixels_per >= aoi_settings["aoi_min_coverage"]:
-            try:
-                if (download_thumbnails or download_overviews) or download_data:
-                    msg = f"Getting {''.join(data_msg)} for: {items[0].id}"
-                    logger.info(msg)
+            scenes_info[items_date.replace('-', '')] = {
+                "item_ids": list(),
+                "nonzero_pixels": nonzero_pixels_per,
+                "valid_pixels": valid_pixels_per,
+                "data_available": False,
+                "error_info": ""
+                }
+            if nonzero_pixels_per >= aoi_settings["SCL_mask_valid_pixels_min_percentage"] \
+                    and valid_pixels_per >= aoi_settings["aoi_min_coverage"]:
+                try:
+                    if (download_thumbnails or download_overviews) or download_data:
+                        msg = f"Getting {''.join(data_msg)} for: {item.id}"
+                        logger.info(msg)
 
-                # Create results directory
-                if not os.path.isdir(result_dir):
-                    os.makedirs(result_dir)
+                    # Create results directory
+                    if not os.path.isdir(result_dir):
+                        os.makedirs(result_dir)
 
-                if download_thumbnails or download_overviews:
-                    if num_tiles != 1:
-                        raise Exception("Not yet possible to download overviews and thumbnails for mosaics.")
-                    else:
+                    if download_thumbnails or download_overviews:
                         if download_thumbnails:
-                            file_url = items[0].assets["thumbnail"].href
+                            file_url = item.assets["thumbnail"].href
                             logger.info(file_url)
                             thumbnail_path = os.path.join(result_dir,
-                                                          f"{items[0].id}_{file_url.rsplit('/', 1)[1]}")
+                                                          f"{item.id}_{file_url.rsplit('/', 1)[1]}")
                             urllib.request.urlretrieve(file_url, thumbnail_path)
                         if download_overviews:
-                            file_url = items[0].assets["overview"].href
+                            file_url = item.assets["overview"].href
                             logger.info(file_url)
                             overview_path = os.path.join(result_dir,
-                                                         f"{items[0].id}_{file_url.rsplit('/', 1)[1]}")
+                                                         f"{item.id}_{file_url.rsplit('/', 1)[1]}")
                             urllib.request.urlretrieve(file_url, overview_path)
 
-                if download_data:
-                    scl_band_mask = None
-                    # Save the SCL band
-                    saveRasterToDisk(out_image=scl_band,
-                                     raster_crs=scl_crs,
-                                     out_transform=scl_trans,
-                                     output_raster_path=output_scl_path)
+                    if download_data:
+                        scl_band_mask = None
+                        # Save the SCL band
+                        saveRasterToDisk(out_image=scl_band,
+                                         raster_crs=scl_crs,
+                                         out_transform=scl_trans,
+                                         output_raster_path=output_scl_path)
 
-                    if cloudmasking:
-                        # Mask out Clouds
-                        scl_band_mask = np.where(np.isin(scl_band, scl_filter_values),
-                                                 np.uint16(0), np.uint16(1))
-                    del scl_band
-
-                    # Download all other bands
-                    bands = tile_settings["bands"]
-                    logger.info(f"Bands to retrieve: {bands}")
-
-                    for band in bands:
-                        output_band_path = os.path.join(result_dir,
-                                                        f"{items_date.replace('-', '')}_{sensor_name}_{band}.tif")
-
-                        file_url = items[0].assets[band].href
-                        logger.info(file_url)
-                        with rasterio.open(file_url) as band_src:
-                            raster_crs = band_src.crs
-                            raster_trans = band_src.transform
-                            band_scale_factor = band_src.transform[0] / target_resolution
-                            op_start = time.time()
-                            if band_scale_factor != 1.0:
-                                raster_band = \
-                                    band_src.read(out_shape=(band_src.count,
-                                                             dst_height,
-                                                             dst_width),
-                                                  resampling=Resampling[aoi_settings["resampling_method"]])
-                                raster_trans[0] = band_src.transform[0] / band_scale_factor
-                                raster_trans[4] = band_src.transform[4] / band_scale_factor
-                            else:
-                                raster_band = band_src.read()
-                            logger.debug(f"Reading band {band} took {(time.time() - op_start) * 1000} msecs.")
                         if cloudmasking:
-                            op_start = time.time()
-                            raster_band = raster_band * scl_band_mask
-                            logger.debug(f"Masking band {band} took {(time.time() - op_start) * 1000} msecs.")
+                            # Mask out Clouds
+                            scl_band_mask = np.where(np.isin(scl_band, scl_filter_values),
+                                                     np.uint16(0), np.uint16(1))
+                        del scl_band
 
-                        op_start = time.time()
-                        saveRasterToDisk(out_image=raster_band,
-                                         raster_crs=raster_crs,
-                                         out_transform=raster_trans,
-                                         output_raster_path=output_band_path)
-                        logger.debug(f"Saving band {band} to disk took {(time.time() - op_start) * 1000} msecs.")
-                        del raster_band
-            except Exception as err:
-                logger.error(f"For date {items_date} there was an exception: {err}")
-                scenes_info[items_date.replace('-', '')]["error_info"] = f"Failed to download scenes:{err}."
-            else:
-                scenes_info[items_date.replace('-', '')]["data_available"] = True
-                for item in items:
-                    scenes_info[items_date.replace('-', '')]["item_ids"].append({"id": item.to_dict()["id"]})
+                        # Download all other bands
+                        bands = tile_settings["bands"]
+                        logger.info(f"Bands to retrieve: {bands}")
+
+                        for band in bands:
+                            output_band_path = os.path.join(output_path, f"{band}.tif")
+
+                            file_url = item.assets[band].href
+                            logger.info(file_url)
+                            with rasterio.open(file_url) as band_src:
+                                raster_crs = band_src.crs
+                                raster_trans = band_src.transform
+                                band_scale_factor = band_src.transform[0] / target_resolution
+                                op_start = time.time()
+                                if band_scale_factor != 1.0:
+                                    raster_band = \
+                                        band_src.read(out_shape=(band_src.count,
+                                                                 dst_height,
+                                                                 dst_width),
+                                                      resampling=Resampling[aoi_settings["resampling_method"]])
+                                    raster_trans[0] = band_src.transform[0] / band_scale_factor
+                                    raster_trans[4] = band_src.transform[4] / band_scale_factor
+                                else:
+                                    raster_band = band_src.read()
+                                logger.debug(f"Reading band {band} took {(time.time() - op_start) * 1000} msecs.")
+                            if cloudmasking:
+                                op_start = time.time()
+                                raster_band = raster_band * scl_band_mask
+                                logger.debug(f"Masking band {band} took {(time.time() - op_start) * 1000} msecs.")
+
+                            op_start = time.time()
+                            saveRasterToDisk(out_image=raster_band,
+                                             raster_crs=raster_crs,
+                                             out_transform=raster_trans,
+                                             output_raster_path=output_band_path)
+                            logger.debug(f"Saving band {band} to disk took {(time.time() - op_start) * 1000} msecs.")
+                            del raster_band
+                except Exception as err:
+                    logger.error(f"For date {items_date} there was an exception: {err}")
+                    scenes_info[items_date.replace('-', '')]["error_info"] = f"Failed to download scenes:{err}."
+                else:
+                    scenes_info[items_date.replace('-', '')]["data_available"] = True
+                    scenes_info[items_date.replace('-', '')]["item_ids"].append({"id": item.id})
         else:
             logger.error(f"For date {items_date} there is not any"
                          f" available data for the current tile and AOI settings.")
