@@ -11,8 +11,9 @@ from datetime import datetime, date
 from enum import Enum
 from json import JSONDecodeError
 
+import pydantic
 # third party packages
-from pydantic import BaseModel, Field, validator, StrictBool, Extra, HttpUrl
+from pydantic import BaseModel, Field, validator, StrictBool, Extra, HttpUrl, root_validator
 from typing import Optional, List, Dict
 
 
@@ -46,23 +47,20 @@ class TileSettings(BaseModel):
         alias="sentinel:data_coverage",
         default={"gt": 10}
         )
-    utm_zone: Optional[Dict] = Field(
+    utm_zone: Dict = Field(
         title="UTM zone",
         description="UTM zones for which to search data.",
-        alias="sentinel:utm_zone",
-        default={}
+        alias="sentinel:utm_zone"
         )
-    latitude_band: Optional[Dict] = Field(
+    latitude_band: Dict = Field(
         title="Latitude band",
         description="Latitude band for which to search data.",
-        alias="sentinel:latitude_band",
-        default={}
+        alias="sentinel:latitude_band"
         )
-    grid_square: Optional[Dict] = Field(
+    grid_square: Dict = Field(
         title="Grid square",
         description="Grid square for which to search data.",
-        alias="sentinel:grid_square",
-        default={}
+        alias="sentinel:grid_square"
         )
     cloud_cover: Dict = Field(
         title="Cloud coverage",
@@ -100,6 +98,28 @@ class TileSettings(BaseModel):
             raise ValueError("Remove duplicates.")
         return v
 
+    @validator("utm_zone", "latitude_band", "grid_square")
+    def checkTileInfo(cls, v: dict, field: pydantic.fields.ModelField):
+        """Check if tile info is set correctly."""
+        v_type = str
+        if field.name == "utm_zone":
+            v_type = int
+        if len(v.keys()) > 0:
+            for key in v.keys():
+                if key in ["eq"]:
+                    if not isinstance(v[key], v_type):
+                        raise ValueError(f"For operator eq the value ({str(v[key])}) should be a {str(v_type)}.")
+                elif key in ["in"]:
+                    if not isinstance(v[key], list):
+                        raise ValueError(f"For operator eq the value ({str(v[key])}) should be a list.")
+                    else:
+                        for vv in v[key]:
+                            if not isinstance(v[key], v_type):
+                                raise ValueError(f"For operator in the value ({str(vv)}) should be a {str(v_type)}.")
+                else:
+                    raise ValueError("The operator should either be eq or in.")
+        return v
+
 
 class AoiSettings(BaseModel, extra=Extra.forbid):
     """Template for AOI settings in config file."""
@@ -107,12 +127,6 @@ class AoiSettings(BaseModel, extra=Extra.forbid):
     bounding_box: List[float] = Field(
         title="Bounding Box for AOI.",
         description="SW and NE corner coordinates of AOI Bounding Box.")
-    bb_max_utm_zone_overlap: int = Field(
-        title="Max overlap of the BB over a second UTM zone.",
-        description="Max overlap of the BB over a second UTM zone in meters. It's upper bound is 100km.",
-        default=50000,
-        gt=0, lt=100000
-        )
     apply_SCL_band_mask: Optional[StrictBool] = Field(
         title="Apply a filter mask from SCL.",
         description="Define if SCL masking should be applied.",
@@ -146,20 +160,21 @@ class AoiSettings(BaseModel, extra=Extra.forbid):
     @validator("bounding_box")
     def validateBB(cls, v):
         """Check if the Bounding Box is valid."""
-        if len(v) != 4:
-            raise ValueError("Bounding Box needs two pairs of lat/lon coordinates.")
-        if v[0] >= v[2] or v[1] >= v[3]:
-            raise ValueError("Bounding Box coordinates are not valid.")
+        if len(v) != 0:
+            if len(v) != 4:
+                raise ValueError("Bounding Box needs two pairs of lat/lon coordinates.")
+            if v[0] >= v[2] or v[1] >= v[3]:
+                raise ValueError("Bounding Box coordinates are not valid.")
 
-        coords_nw = (v[3], v[0])
-        coords_ne = (v[3], v[2])
-        coords_sw = (v[1], v[0])
+            coords_nw = (v[3], v[0])
+            coords_ne = (v[3], v[2])
+            coords_sw = (v[1], v[0])
 
-        ew_dist = geopy.distance.geodesic(coords_nw, coords_ne).km
-        ns_dist = geopy.distance.geodesic(coords_nw, coords_sw).km
+            ew_dist = geopy.distance.geodesic(coords_nw, coords_ne).km
+            ns_dist = geopy.distance.geodesic(coords_nw, coords_sw).km
 
-        if ew_dist > 500 or ns_dist > 500:
-            raise ValueError("Bounding Box is too large. It should be max 500*500km.")
+            if ew_dist > 500 or ns_dist > 500:
+                raise ValueError("Bounding Box is too large. It should be max 500*500km.")
 
         return v
 
@@ -278,6 +293,24 @@ class UserSettings(BaseModel, extra=Extra.forbid):
     result_settings: ResultsSettings = Field(
         title="Result Settings.", description=""
         )
+
+    @root_validator(skip_on_failure=True)
+    def checkBboxAndSetUTMZone(cls, v):
+        """Check BBOX UTM zone coverage and set UTM zone."""
+        bb = v["aoi_settings"].__dict__["bounding_box"]
+        utm_zone = v["tile_settings"].__dict__["utm_zone"]
+        latitude_band = v["tile_settings"].__dict__["latitude_band"]
+        grid_square = v["tile_settings"].__dict__["grid_square"]
+
+        if len(bb) != 0:
+            if len(utm_zone.keys()) != 0 and len(latitude_band.keys()) != 0 and len(grid_square.keys()) != 0:
+                raise ValueError("Both AOI and TileID info are set, only one should be set")
+        else:
+            if len(utm_zone.keys()) == 0 or len(latitude_band.keys()) == 0 or len(grid_square.keys()) == 0:
+                raise ValueError("Either AOI or TileID info (utm_zone, latitude_band and grid_square)"
+                                 " should be provided.")
+
+        return v
 
 
 class S2Settings(BaseModel, extra=Extra.forbid):
