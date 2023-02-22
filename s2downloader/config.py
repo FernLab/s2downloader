@@ -114,7 +114,7 @@ class TileSettings(BaseModel):
                         raise ValueError(f"For operator eq the value ({str(v[key])}) should be a list.")
                     else:
                         for vv in v[key]:
-                            if not isinstance(v[key], v_type):
+                            if not isinstance(vv, v_type):
                                 raise ValueError(f"For operator in the value ({str(vv)}) should be a {str(v_type)}.")
                 else:
                     raise ValueError("The operator should either be eq or in.")
