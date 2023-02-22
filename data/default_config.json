@@ -1,22 +1,49 @@
 {
     "user_settings": {
         "tile_settings": {
-            "platform" : {"in": ["sentinel-2b", "sentinel-2a"]},
-            "sentinel:data_coverage": {"ge": 0},
+            "platform": {
+                "in": [
+                    "sentinel-2b",
+                    "sentinel-2a"
+                ]
+            },
+            "sentinel:data_coverage": {
+                "ge": 0
+            },
             "sentinel:utm_zone": {},
             "sentinel:latitude_band": {},
             "sentinel:grid_square": {},
-            "eo:cloud_cover": {"le": 100},
-            "bands": ["B01","B02", "B05"]
+            "eo:cloud_cover": {
+                "le": 100
+            },
+            "bands": [
+                "B01",
+                "B02",
+                "B05"
+            ]
         },
         "aoi_settings": {
-            "bounding_box": [13.058397, 52.376620, 13.073049, 52.383835],
+            "bounding_box": [
+                13.058397,
+                52.376620,
+                13.073049,
+                52.383835
+            ],
             "apply_SCL_band_mask": true,
-            "SCL_filter_values": [3, 7, 8, 9, 10],
+            "SCL_filter_values": [
+                3,
+                7,
+                8,
+                9,
+                10
+            ],
             "SCL_mask_valid_pixels_min_percentage": 10,
             "aoi_min_coverage": 90,
             "resampling_method": "cubic",
-            "date_range": ["2021-09-04", "2021-09-05"]
+            "date_range": [
+                "2021-09-04",
+                "2021-09-05"
+            ]
         },
         "result_settings": {
             "results_dir": "data/data_output/",
@@ -31,6 +58,6 @@
         "collections": [
             "sentinel-s2-l2a-cogs"
         ],
-        "tiles_definition_path" : "data/sentinel_2_index_shapefile_attr.zip"
+        "tiles_definition_path": "data/sentinel_2_index_shapefile_attr.zip"
     }
 }
