@@ -4,6 +4,7 @@
 import json
 import logging
 import sys
+import time
 from logging import Logger
 import os
 
@@ -279,11 +280,18 @@ def s2Downloader(*, config_dict: dict):
                                 urllib.request.urlretrieve(file_url, overview_path)
 
                     if download_data:
+                        scl_band_mask = None
                         # Save the SCL band
                         saveRasterToDisk(out_image=scl_band,
                                          raster_crs=scl_crs,
                                          out_transform=scl_trans,
                                          output_raster_path=output_scl_path)
+
+                        if cloudmasking:
+                            # Mask out Clouds
+                            scl_band_mask = np.where(np.isin(scl_band, scl_filter_values),
+                                                     np.uint16(0), np.uint16(1))
+                        del scl_band
 
                         # Download all other bands
                         bands = tile_settings["bands"]
@@ -308,12 +316,14 @@ def s2Downloader(*, config_dict: dict):
                                                            scl_bb_window.height / win_scale_factor)
                                         bounds_window = bounds(bb_window, band_src.transform)
                                     srcs_to_mosaic.append(band_src)
+                                op_start = time.time()
                                 raster_band, raster_trans = \
                                     merge(datasets=srcs_to_mosaic,
                                           target_aligned_pixels=True,
                                           bounds=bounds_window,
                                           res=target_resolution,
                                           resampling=Resampling[aoi_settings["resampling_method"]])
+                                logger.debug(f"Merging band {band} took {(time.time() - op_start) * 1000} msecs.")
                             else:
                                 file_url = items[0].assets[band].href
                                 logger.info(file_url)
@@ -325,6 +335,7 @@ def s2Downloader(*, config_dict: dict):
                                                        scl_bb_window.row_off/win_scale_factor,
                                                        scl_bb_window.width/win_scale_factor,
                                                        scl_bb_window.height/win_scale_factor)
+                                    op_start = time.time()
                                     if band_scale_factor != 1.0:
                                         raster_band = \
                                             band_src.read(window=bb_window,
@@ -334,6 +345,7 @@ def s2Downloader(*, config_dict: dict):
                                                           resampling=Resampling[aoi_settings["resampling_method"]])
                                     else:
                                         raster_band = band_src.read(window=bb_window)
+                                    logger.debug(f"Reading band {band} took {(time.time() - op_start) * 1000} msecs.")
                                     raster_trans_win = band_src.window_transform(bb_window)
                                     raster_trans = rasterio.Affine(band_src.transform[0] / band_scale_factor,
                                                                    0,
@@ -342,15 +354,17 @@ def s2Downloader(*, config_dict: dict):
                                                                    band_src.transform[4] / band_scale_factor,
                                                                    raster_trans_win[5])
                             if cloudmasking:
-                                # Mask out Clouds
-                                scl_band_mask = np.where(np.isin(scl_band, scl_filter_values),
-                                                         np.uint16(0), np.uint16(1))
+                                op_start = time.time()
                                 raster_band = raster_band * scl_band_mask
+                                logger.debug(f"Masking band {band} took {(time.time() - op_start) * 1000} msecs.")
 
+                            op_start = time.time()
                             saveRasterToDisk(out_image=raster_band,
                                              raster_crs=raster_crs,
                                              out_transform=raster_trans,
                                              output_raster_path=output_band_path)
+                            logger.debug(f"Saving band {band} to disk took {(time.time() - op_start) * 1000} msecs.")
+                            del raster_band
                 except Exception as err:
                     logger.error(f"For date {items_date} there was an exception: {err}")
                     scenes_info[items_date.replace('-', '')]["error_info"] = f"Failed to download scenes:{err}."
