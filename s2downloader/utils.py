@@ -55,7 +55,7 @@ def saveRasterToDisk(*, out_image: np.ndarray, raster_crs: pyproj.crs.crs.CRS, o
                            driver='GTiff',
                            height=img_height,
                            width=img_width,
-                           count=img_count,    # nr of bands
+                           count=img_count,  # nr of bands
                            dtype=out_image.dtype,
                            crs=raster_crs,
                            transform=out_transform,
