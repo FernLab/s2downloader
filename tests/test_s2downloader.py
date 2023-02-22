@@ -326,6 +326,143 @@ class TestS2Downloader(unittest.TestCase):
                                  atol=1e-4,
                                  equal_nan=False).all()
 
+    def testS2DownloaderTileIDEQ(self):
+        """Test downloading a single TileID."""
+
+        config = deepcopy(self.configuration)
+        config["user_settings"]["aoi_settings"]["bounding_box"] = []
+        config['user_settings']["tile_settings"]["sentinel:utm_zone"] = {"eq": 33}
+        config['user_settings']["tile_settings"]["sentinel:latitude_band"] = {"eq": "U"}
+        config['user_settings']["tile_settings"]["sentinel:grid_square"] = {"eq": "UV"}
+        config['user_settings']['aoi_settings']['date_range'] = ["2018-06-06"]
+        config['user_settings']['aoi_settings']["SCL_filter_values"] = [3, 7, 8, 9, 10]
+
+        Config(**config)
+        s2Downloader(config_dict=config)
+
+        path = os.path.abspath(
+            os.path.join(self.output_data_path,
+                         "33/U/UV/2018/06/S2B_MSIL2A_20180606T102019_N0208_R065_T33UUV_20180606T190659/SCL.tif"))
+        self.assertEqual((str(path), os.path.isfile(path)), (str(path), True))
+        with rasterio.open(path) as expected_res:
+            assert expected_res.dtypes[0] == "uint8"
+            assert expected_res.shape == (10980, 10980)
+            assert expected_res.bounds == rasterio.coords.BoundingBox(left=300000.0,
+                                                                      bottom=5890200.0,
+                                                                      right=409800.0,
+                                                                      top=6000000.0)
+            assert expected_res.read_crs() == CRS().from_epsg(code=32633)
+            assert numpy.isclose([300000.0, 10.0, 0.0, 6000000.0, 0.0, -10.0],
+                                 expected_res.read_transform(),
+                                 rtol=0,
+                                 atol=1e-4,
+                                 equal_nan=False).all()
+
+        path = os.path.abspath(
+            os.path.join(self.output_data_path,
+                         "33/U/UV/2018/06/S2B_MSIL2A_20180606T102019_N0208_R065_T33UUV_20180606T190659/B01.tif"))
+        self.assertEqual((str(path), os.path.isfile(path)), (str(path), True))
+        with rasterio.open(path) as expected_res:
+            assert expected_res.dtypes[0] == "uint16"
+            assert expected_res.shape == (10980, 10980)
+            assert expected_res.bounds == rasterio.coords.BoundingBox(left=300000.0,
+                                                                      bottom=5890200.0,
+                                                                      right=409800.0,
+                                                                      top=6000000.0)
+            assert expected_res.read_crs() == CRS().from_epsg(code=32633)
+            assert numpy.isclose([300000.0, 10.0, 0.0, 6000000.0, 0.0, -10.0],
+                                 expected_res.read_transform(),
+                                 rtol=0,
+                                 atol=1e-4,
+                                 equal_nan=False).all()
+
+        path = os.path.abspath(
+            os.path.join(self.output_data_path,
+                         "33/U/UV/2018/06/S2B_MSIL2A_20180606T102019_N0208_R065_T33UUV_20180606T190659/B02.tif"))
+        self.assertEqual((str(path), os.path.isfile(path)), (str(path), True))
+        with rasterio.open(path) as expected_res:
+            assert expected_res.dtypes[0] == "uint16"
+            assert expected_res.shape == (10980, 10980)
+            assert expected_res.bounds == rasterio.coords.BoundingBox(left=300000.0,
+                                                                      bottom=5890200.0,
+                                                                      right=409800.0,
+                                                                      top=6000000.0)
+            assert expected_res.read_crs() == CRS().from_epsg(code=32633)
+            assert numpy.isclose([300000.0, 10.0, 0.0, 6000000.0, 0.0, -10.0],
+                                 expected_res.read_transform(),
+                                 rtol=0,
+                                 atol=1e-4,
+                                 equal_nan=False).all()
+
+        path = os.path.abspath(
+            os.path.join(self.output_data_path,
+                         "33/U/UV/2018/06/S2B_MSIL2A_20180606T102019_N0208_R065_T33UUV_20180606T190659/B05.tif"))
+        self.assertEqual((str(path), os.path.isfile(path)), (str(path), True))
+        with rasterio.open(path) as expected_res:
+            assert expected_res.dtypes[0] == "uint16"
+            assert expected_res.shape == (10980, 10980)
+            assert expected_res.bounds == rasterio.coords.BoundingBox(left=300000.0,
+                                                                      bottom=5890200.0,
+                                                                      right=409800.0,
+                                                                      top=6000000.0)
+            assert expected_res.read_crs() == CRS().from_epsg(code=32633)
+            assert numpy.isclose([300000.0, 10.0, 0.0, 6000000.0, 0.0, -10.0],
+                                 expected_res.read_transform(),
+                                 rtol=0,
+                                 atol=1e-4,
+                                 equal_nan=False).all()
+
+    def testS2DownloaderTileIDIN(self):
+        """Test downloading multiple TileIDs."""
+
+        config = deepcopy(self.configuration)
+        config["user_settings"]["aoi_settings"]["bounding_box"] = []
+        config['user_settings']["tile_settings"]["sentinel:utm_zone"] = {"in": [32, 33]}
+        config['user_settings']["tile_settings"]["sentinel:latitude_band"] = {"eq": "U"}
+        config['user_settings']["tile_settings"]["sentinel:grid_square"] = {"in": ["UV", "QE"]}
+        config['user_settings']['aoi_settings']['date_range'] = ["2018-06-06"]
+        config['user_settings']['aoi_settings']["SCL_filter_values"] = [3, 7, 8, 9, 10]
+        config["user_settings"]["tile_settings"]["bands"] = ["B01"]
+
+        Config(**config)
+        s2Downloader(config_dict=config)
+
+        path = os.path.abspath(
+            os.path.join(self.output_data_path,
+                         "33/U/UV/2018/06/S2B_MSIL2A_20180606T102019_N0208_R065_T33UUV_20180606T190659/SCL.tif"))
+        self.assertEqual((str(path), os.path.isfile(path)), (str(path), True))
+        with rasterio.open(path) as expected_res:
+            assert expected_res.dtypes[0] == "uint8"
+            assert expected_res.shape == (10980, 10980)
+            assert expected_res.bounds == rasterio.coords.BoundingBox(left=300000.0,
+                                                                      bottom=5890200.0,
+                                                                      right=409800.0,
+                                                                      top=6000000.0)
+            assert expected_res.read_crs() == CRS().from_epsg(code=32633)
+            assert numpy.isclose([300000.0, 10.0, 0.0, 6000000.0, 0.0, -10.0],
+                                 expected_res.read_transform(),
+                                 rtol=0,
+                                 atol=1e-4,
+                                 equal_nan=False).all()
+
+        path = os.path.abspath(
+            os.path.join(self.output_data_path,
+                         "32/U/QE/2018/06/S2B_MSIL2A_20180606T102019_N0208_R065_T32UQE_20180606T190659/SCL.tif"))
+        self.assertEqual((str(path), os.path.isfile(path)), (str(path), True))
+        with rasterio.open(path) as expected_res:
+            assert expected_res.dtypes[0] == "uint8"
+            assert expected_res.shape == (10980, 10980)
+            assert expected_res.bounds == rasterio.coords.BoundingBox(left=699960.0,
+                                                                      bottom=5890200.0,
+                                                                      right=809760.0,
+                                                                      top=6000000.0)
+            assert expected_res.read_crs() == CRS().from_epsg(code=32632)
+            assert numpy.isclose([699960.0, 10.0, 0.0, 6000000.0, 0.0, -10.0],
+                                 expected_res.read_transform(),
+                                 rtol=0,
+                                 atol=1e-4,
+                                 equal_nan=False).all()
+
     def testS2DownloaderOnlyDates(self):
         """Test configuration to test only dates download for the tile settings"""
 
