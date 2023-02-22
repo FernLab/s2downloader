@@ -59,6 +59,7 @@ def saveRasterToDisk(*, out_image: np.ndarray, raster_crs: pyproj.crs.crs.CRS, o
                            dtype=out_image.dtype,
                            crs=raster_crs,
                            transform=out_transform,
+                           compress='lzw',
                            nodata=0
                            ) as dst:
             dst.write(out_image)
