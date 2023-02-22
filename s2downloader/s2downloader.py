@@ -71,7 +71,7 @@ def searchDataAtAWS(*,
             query=props_json,  # cloud and data coverage properties
             datetime=date_range,  # time period
             sortby="-properties.datetime"  # sort by data descending (minus sign)
-        )
+            )
         # proceed if items are found
         if len(list(item_search.items())) == 0:
             raise ValueError("For these settings there is no data to be found at AWS. \n"
@@ -250,9 +250,9 @@ def s2Downloader(*, config_dict: dict):
                 "valid_pixels": valid_pixels_per,
                 "data_available": False,
                 "error_info": ""
-            }
+                }
             if nonzero_pixels_per >= aoi_settings["SCL_mask_valid_pixels_min_percentage"] \
-               and valid_pixels_per >= aoi_settings["aoi_min_coverage"]:
+                    and valid_pixels_per >= aoi_settings["aoi_min_coverage"]:
                 try:
                     if (download_thumbnails or download_overviews) or download_data:
                         msg = f"Getting {''.join(data_msg)} for: {items[0].id}"
@@ -299,7 +299,7 @@ def s2Downloader(*, config_dict: dict):
 
                         for band in bands:
                             output_band_path = os.path.join(result_dir,
-                                                            f"{items_date.replace('-','')}_{sensor_name}_{band}.tif")
+                                                            f"{items_date.replace('-', '')}_{sensor_name}_{band}.tif")
                             if num_tiles > 1:
                                 srcs_to_mosaic = []
                                 bounds_window = None
@@ -331,10 +331,10 @@ def s2Downloader(*, config_dict: dict):
                                     raster_crs = band_src.crs
                                     band_scale_factor = band_src.transform[0] / target_resolution
                                     win_scale_factor = band_src.transform[0] / scl_src.transform[0]
-                                    bb_window = Window(scl_bb_window.col_off/win_scale_factor,
-                                                       scl_bb_window.row_off/win_scale_factor,
-                                                       scl_bb_window.width/win_scale_factor,
-                                                       scl_bb_window.height/win_scale_factor)
+                                    bb_window = Window(scl_bb_window.col_off / win_scale_factor,
+                                                       scl_bb_window.row_off / win_scale_factor,
+                                                       scl_bb_window.width / win_scale_factor,
+                                                       scl_bb_window.height / win_scale_factor)
                                     op_start = time.time()
                                     if band_scale_factor != 1.0:
                                         raster_band = \

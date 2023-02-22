@@ -25,6 +25,7 @@ class TestS2Downloader(unittest.TestCase):
 
     @classmethod
     def setUp(cls) -> None:
+        """Define the Class method SetUp."""
         cls.root_path = "./"
         if os.path.basename(os.getcwd()) == "tests":
             cls.root_path = "../"
@@ -48,11 +49,11 @@ class TestS2Downloader(unittest.TestCase):
 
     @classmethod
     def tearDown(cls) -> None:
+        """Define the Class method tearDown."""
         # delete testfolder
         try:
             if os.path.exists(cls.output_data_path):
                 shutil.rmtree(cls.output_data_path)
-                print()
         except OSError:
             print("Deletion of the directory %s failed" % cls.output_data_path)
         else:
@@ -377,7 +378,7 @@ class TestS2Downloader(unittest.TestCase):
         Config(**config)
         s2Downloader(config_dict=config)
 
-        if len(os.listdir(self.output_data_path,)) != 2:
+        if len(os.listdir(self.output_data_path, )) != 2:
             assert False
 
     def testS2DownloaderErrorNoItemsAtAWS(self):
@@ -415,8 +416,7 @@ class TestS2Downloader(unittest.TestCase):
 
         if not os.path.exists(
             os.path.join(
-                self.output_data_path, "S2B_32UQD_20210905_0_L2A_preview.jpg")
-        ):
+                self.output_data_path, "S2B_32UQD_20210905_0_L2A_preview.jpg")):
             assert False
 
         with rasterio.open(scene_path) as expected_res:

@@ -20,6 +20,7 @@ class TestUtils(unittest.TestCase):
 
     @classmethod
     def setUp(cls) -> None:
+        """Define the Class method SetUp."""
         cls.root_path = "./"
         if os.path.basename(os.getcwd()) == "tests":
             cls.root_path = "../"
@@ -42,6 +43,7 @@ class TestUtils(unittest.TestCase):
 
     @classmethod
     def tearDown(cls) -> None:
+        """Define the Class method tearDown."""
         # delete testfolder
         try:
             if os.path.exists(cls.output_data_path):

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-"""Tests for `s2downloader` package."""
+"""Tests for `s2Downloader` package."""
 
 import os
 import shutil
@@ -19,6 +19,7 @@ class TestConfig(unittest.TestCase):
 
     @classmethod
     def setUp(cls) -> None:
+        """Define the Class method SetUp."""
         cls.root_path = "./"
         if os.path.basename(os.getcwd()) == "tests":
             cls.root_path = "../"
@@ -40,6 +41,7 @@ class TestConfig(unittest.TestCase):
 
     @classmethod
     def tearDown(cls) -> None:
+        """Define the Class method tearDown."""
         # delete test folder
         try:
             if os.path.exists(cls.output_data_path):
@@ -96,7 +98,7 @@ class TestConfig(unittest.TestCase):
         with pytest.raises(ValueError):
             Config(**config)
 
-    def testS2DownloaderdataCoverage(self):
+    def testS2DownloaderDataCoverage(self):
         """Test configuration to test coverage for the tile settings"""
 
         config = deepcopy(self.configuration)
@@ -123,7 +125,7 @@ class TestConfig(unittest.TestCase):
         with pytest.raises(ValueError):
             Config(**config)
 
-    def testS2DownloadercloudCoverage(self):
+    def testS2DownloaderCloudCoverage(self):
         """Test configuration to test coverage for the tile settings"""
 
         config = deepcopy(self.configuration)

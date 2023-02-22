@@ -38,43 +38,43 @@ class TileSettings(BaseModel):
         title="Sentinel-2 platform.",
         description="For which Sentinel-2 platform should data be downloaded.",
         default={"in": [S2Platform.S2A, S2Platform.S2B]}
-    )
+        )
 
     data_coverage: Dict = Field(
         title="Data coverage",
         description="Percentage of data coverage.",
         alias="sentinel:data_coverage",
         default={"gt": 10}
-    )
+        )
     utm_zone: Optional[Dict] = Field(
         title="UTM zone",
         description="UTM zones for which to search data.",
         alias="sentinel:utm_zone",
         default={}
-    )
+        )
     latitude_band: Optional[Dict] = Field(
         title="Latitude band",
         description="Latitude band for which to search data.",
         alias="sentinel:latitude_band",
         default={}
-    )
+        )
     grid_square: Optional[Dict] = Field(
         title="Grid square",
         description="Grid square for which to search data.",
         alias="sentinel:grid_square",
         default={}
-    )
+        )
     cloud_cover: Dict = Field(
         title="Cloud coverage",
         description="Percentage of cloud coverage.",
         alias="eo:cloud_cover",
         default={"lt": 20}
-    )
+        )
     bands: List[str] = Field(
         title="Bands",
         description="List of bands.",
         default=["B02", "B03", "B05"]
-    )
+        )
 
     @validator("data_coverage", "cloud_cover")
     def checkCoverage(cls, v: dict):
@@ -112,7 +112,7 @@ class AoiSettings(BaseModel, extra=Extra.forbid):
         description="Max overlap of the BB over a second UTM zone in meters. It's upper bound is 100km.",
         default=50000,
         gt=0, lt=100000
-    )
+        )
     apply_SCL_band_mask: Optional[StrictBool] = Field(
         title="Apply a filter mask from SCL.",
         description="Define if SCL masking should be applied.",
@@ -141,7 +141,7 @@ class AoiSettings(BaseModel, extra=Extra.forbid):
         min_items=1,
         max_items=2,
         default=["2021-09-01", "2021-09-05"]
-    )
+        )
 
     @validator("bounding_box")
     def validateBB(cls, v):
@@ -209,36 +209,36 @@ class ResultsSettings(BaseModel, extra=Extra.forbid):
         title="Request ID.",
         description="Request ID to identify the request.",
         default=round(time.time() * 1000)
-    )
+        )
     results_dir: str = Field(
         title="Location of the output directory.",
         description="Define folder where all output data should be stored."
-    )
+        )
     target_resolution: Optional[int] = Field(
         title="Target resolution.",
         description="Target resolution in meters, it should be either 60, 20 or 10 meters.",
         default=10, ge=10, le=60
-    )
+        )
     download_data: Optional[StrictBool] = Field(
         title="Download Data.",
         description="For each scene download the data.",
         default=True
-    )
+        )
     download_thumbnails: Optional[StrictBool] = Field(
         title="Download thumbnails.",
         description="For each scene download the provided thumbnail.",
         default=False
-    )
+        )
     download_overviews: Optional[StrictBool] = Field(
         title="Download preview.",
         description="For each scene download the provided preview.",
         default=False
-    )
+        )
     logging_level: Optional[str] = Field(
         title="Logging level.",
         description="Logging level, it should be one of: DEBUG, INFO, WARN, or ERROR.",
         default="INFO"
-    )
+        )
 
     @validator('logging_level')
     def checkLogLevel(cls, v):
@@ -269,15 +269,15 @@ class UserSettings(BaseModel, extra=Extra.forbid):
 
     aoi_settings: AoiSettings = Field(
         title="AOI Settings", description=""
-    )
+        )
 
     tile_settings: TileSettings = Field(
         title="Tile Settings.", description=""
-    )
+        )
 
     result_settings: ResultsSettings = Field(
         title="Result Settings.", description=""
-    )
+        )
 
 
 class S2Settings(BaseModel, extra=Extra.forbid):
@@ -287,19 +287,19 @@ class S2Settings(BaseModel, extra=Extra.forbid):
         title="Definition of data collection to be searched for.",
         description="Define S2 data collection.",
         default=["sentinel-s2-l2a-cogs"]
-    )
+        )
 
     stac_catalog_url: Optional[HttpUrl] = Field(
         title="STAC catalog URL.",
         description="URL to access the STAC catalog.",
         default="https://earth-search.aws.element84.com/v0"
-    )
+        )
 
     tiles_definition_path: str = Field(
         title="Tiles definition path.",
         description="Path to a shapefile.zip describing the tiles and its projections.",
         default="data/sentinel_2_index_shapefile_attr.zip"
-    )
+        )
 
     @validator('tiles_definition_path')
     def check_tiles_definition(cls, v):
@@ -314,11 +314,11 @@ class Config(BaseModel):
 
     user_settings: UserSettings = Field(
         title="User settings.", description=""
-    )
+        )
 
     s2_settings: S2Settings = Field(
         title="Sentinel 2 settings.", description=""
-    )
+        )
 
 
 def loadConfiguration(*, path: str) -> dict:
