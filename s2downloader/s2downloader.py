@@ -451,7 +451,6 @@ def downloadTileID(*, config_dict: dict):
                                        f"{items_date.split('-')[0]}",
                                        f"{items_date.split('-')[1]}",
                                        f"{item.properties['sentinel:product_id']}")
-            os.makedirs(name=output_path, exist_ok=True)
             output_scl_path = os.path.join(output_path, "SCL.tif")
 
             file_url = item.assets["SCL"].href
@@ -465,11 +464,14 @@ def downloadTileID(*, config_dict: dict):
                                                        dst_height,
                                                        dst_width),
                                             resampling=Resampling.nearest)
-                    scl_trans[0] = scl_src.transform[0] / scl_scale_factor
-                    scl_trans[4] = scl_src.transform[4] / scl_scale_factor
+                    scl_trans = rasterio.Affine(scl_src.transform[0] / scl_scale_factor,
+                                                0,
+                                                scl_src.transform[2],
+                                                0,
+                                                scl_src.transform[4] / scl_scale_factor,
+                                                scl_src.transform[5])
                 else:
                     scl_band = scl_src.read()
-
             scl_crs = scl_src.crs
 
             nonzero_pixels_per, valid_pixels_per = \
@@ -512,8 +514,10 @@ def downloadTileID(*, config_dict: dict):
 
                     if download_data:
                         scl_band_mask = None
+                        os.makedirs(name=output_path, exist_ok=True)
+
                         # Save the SCL band
-                        saveRasterToDisk(out_image=scl_band,
+                        saveRasterToDisk(out_image=scl_band.astype(rasterio.uint8),
                                          raster_crs=scl_crs,
                                          out_transform=scl_trans,
                                          output_raster_path=output_scl_path)
@@ -544,8 +548,12 @@ def downloadTileID(*, config_dict: dict):
                                                                  dst_height,
                                                                  dst_width),
                                                       resampling=Resampling[aoi_settings["resampling_method"]])
-                                    raster_trans[0] = band_src.transform[0] / band_scale_factor
-                                    raster_trans[4] = band_src.transform[4] / band_scale_factor
+                                    raster_trans = rasterio.Affine(band_src.transform[0] / band_scale_factor,
+                                                                   0,
+                                                                   band_src.transform[2],
+                                                                   0,
+                                                                   band_src.transform[4] / band_scale_factor,
+                                                                   band_src.transform[5])
                                 else:
                                     raster_band = band_src.read()
                                 logger.debug(f"Reading band {band} took {(time.time() - op_start) * 1000} msecs.")
@@ -567,9 +575,9 @@ def downloadTileID(*, config_dict: dict):
                 else:
                     scenes_info[items_date.replace('-', '')]["data_available"] = True
                     scenes_info[items_date.replace('-', '')]["item_ids"].append({"id": item.id})
-        else:
-            logger.error(f"For date {items_date} there is not any"
-                         f" available data for the current tile and AOI settings.")
+            else:
+                logger.error(f"For date {items_date} there is not any"
+                             f" available data for the current tile and AOI settings.")
 
     scenes_info_path = os.path.join(result_dir, f"scenes_info_{'_'.join(aoi_settings['date_range'])}.json")
     if os.path.exists(scenes_info_path):
