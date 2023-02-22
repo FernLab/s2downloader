@@ -54,7 +54,6 @@ class TestS2Downloader(unittest.TestCase):
         try:
             if os.path.exists(cls.output_data_path):
                 shutil.rmtree(cls.output_data_path)
-                print()
         except OSError:
             print("Deletion of the directory %s failed" % cls.output_data_path)
         else:

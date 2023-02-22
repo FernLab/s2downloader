@@ -5,6 +5,7 @@ History
 0.4.0 (coming soon)
 -------------------
 
+* Improve memory and disk footprint (the .tifs are now compressed using lzw).
 * The AOI width and height upper limit is 500 km.
 * Possible to download data for any UTM zone.
 
