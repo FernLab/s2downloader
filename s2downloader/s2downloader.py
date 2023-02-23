@@ -500,16 +500,17 @@ def downloadTileID(*, config_dict: dict):
                         os.makedirs(result_dir)
 
                     if download_thumbnails or download_overviews:
+                        os.makedirs(name=output_path, exist_ok=True)
                         if download_thumbnails:
                             file_url = item.assets["thumbnail"].href
                             logger.info(file_url)
-                            thumbnail_path = os.path.join(result_dir,
+                            thumbnail_path = os.path.join(output_path,
                                                           f"{item.id}_{file_url.rsplit('/', 1)[1]}")
                             urllib.request.urlretrieve(file_url, thumbnail_path)
                         if download_overviews:
                             file_url = item.assets["overview"].href
                             logger.info(file_url)
-                            overview_path = os.path.join(result_dir,
+                            overview_path = os.path.join(output_path,
                                                          f"{item.id}_{file_url.rsplit('/', 1)[1]}")
                             urllib.request.urlretrieve(file_url, overview_path)
 
