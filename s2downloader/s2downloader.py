@@ -444,7 +444,15 @@ def downloadTileID(*, config_dict: dict):
     scl_filter_values.append(0)
     scenes_info = {}
     for items_date in items_per_date.keys():
+        scenes_info[items_date.replace('-', '')] = {
+            "item_ids": list(),
+            "nonzero_pixels": list(),
+            "valid_pixels": list(),
+            "data_available": list(),
+            "error_info": list()
+            }
         for item in items_per_date[items_date]:
+            scenes_info[items_date.replace('-', '')]["item_ids"].append({"id": item.id})
             output_path = os.path.join(result_dir,
                                        f"{item.properties['sentinel:utm_zone']}",
                                        f"{item.properties['sentinel:latitude_band']}",
@@ -481,13 +489,9 @@ def downloadTileID(*, config_dict: dict):
                     scl_filter_values=scl_filter_values,
                     logger=logger)
 
-            scenes_info[items_date.replace('-', '')] = {
-                "item_ids": list(),
-                "nonzero_pixels": nonzero_pixels_per,
-                "valid_pixels": valid_pixels_per,
-                "data_available": False,
-                "error_info": ""
-                }
+            scenes_info[items_date.replace('-', '')]["nonzero_pixels"].append(nonzero_pixels_per)
+            scenes_info[items_date.replace('-', '')]["valid_pixels"].append(valid_pixels_per)
+
             if nonzero_pixels_per >= aoi_settings["SCL_mask_valid_pixels_min_percentage"] \
                     and valid_pixels_per >= aoi_settings["aoi_min_coverage"]:
                 try:
@@ -572,12 +576,15 @@ def downloadTileID(*, config_dict: dict):
                             logger.debug(f"Saving band {band} to disk took {(time.time() - op_start) * 1000} msecs.")
                             del raster_band
                 except Exception as err:
+                    scenes_info[items_date.replace('-', '')]["data_available"].append(False)
                     logger.error(f"For date {items_date} there was an exception: {err}")
-                    scenes_info[items_date.replace('-', '')]["error_info"] = f"Failed to download scenes:{err}."
+                    scenes_info[items_date.replace('-', '')]["error_info"].append(f"Failed to download scenes:{err}.")
                 else:
-                    scenes_info[items_date.replace('-', '')]["data_available"] = True
-                    scenes_info[items_date.replace('-', '')]["item_ids"].append({"id": item.id})
+                    scenes_info[items_date.replace('-', '')]["data_available"].append(True)
+                    scenes_info[items_date.replace('-', '')]["error_info"].append("")
             else:
+                scenes_info[items_date.replace('-', '')]["data_available"].append(False)
+                scenes_info[items_date.replace('-', '')]["error_info"].append("")
                 logger.error(f"For date {items_date} there is not any"
                              f" available data for the current tile and AOI settings.")
 
