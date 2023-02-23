@@ -227,6 +227,18 @@ class TestConfig(unittest.TestCase):
         with pytest.raises(ValueError):
             Config(**config)
 
+        config['user_settings']["tile_settings"]["sentinel:utm_zone"] = {"eq": 32}
+        with pytest.raises(ValueError):
+            Config(**config)
+
+        config['user_settings']["tile_settings"]["sentinel:latitude_band"] = {"eq": "U"}
+        config['user_settings']["tile_settings"]["sentinel:grid_square"] = {"eq": "UV"}
+        Config(**config)
+
+        config['user_settings']["tile_settings"]["sentinel:utm_zone"] = {"eq": "32"}
+        with pytest.raises(ValueError):
+            Config(**config)
+
     def testTargetResolution(self):
         """Test configuration for results target_resolution Parameter."""
 
