@@ -5,6 +5,7 @@ import json
 import logging
 import sys
 import time
+from datetime import datetime
 from logging import Logger
 import os
 
@@ -579,7 +580,8 @@ def downloadTileID(*, config_dict: dict):
                 logger.error(f"For date {items_date} there is not any"
                              f" available data for the current tile and AOI settings.")
 
-    scenes_info_path = os.path.join(result_dir, f"scenes_info_{'_'.join(aoi_settings['date_range'])}.json")
+    scenes_info_path = os.path.join(result_dir,
+                                    f"scenes_info_{datetime.now().strftime('%Y_%m_%d_%H_%M_%S')}.json")
     if os.path.exists(scenes_info_path):
         raise IOError(f"The scenes_info file: {scenes_info_path} already exists.")
     else:
