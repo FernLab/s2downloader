@@ -149,7 +149,10 @@ def downloadMosaic(*, config_dict: dict):
 
     tile_settings["sentinel:utm_zone"] = {}
     try:
-        tiles_gpd = geopandas.read_file(tiles_path)
+        op_start = time.time()
+        tiles_gpd = geopandas.read_file(tiles_path,
+                                        bbox=aoi_settings["bounding_box"])
+        logger.debug(f"Loading Sentinel-2 tiles took {(time.time() - op_start) * 1000} msecs.")
         utm_zone = getUTMZoneBB(tiles_gpd=tiles_gpd, bbox=aoi_settings['bounding_box'])
         if utm_zone != 0:
             tile_settings["sentinel:utm_zone"] = {"eq": utm_zone}
@@ -375,7 +378,8 @@ def downloadMosaic(*, config_dict: dict):
             logger.error(f"For date {items_date} there is not any"
                          f" available data for the current tile and AOI settings.")
 
-    scenes_info_path = os.path.join(result_dir, f"scenes_info_{'_'.join(aoi_settings['date_range'])}.json")
+    scenes_info_path = os.path.join(result_dir,
+                                    f"scenes_info_{datetime.now().strftime('%Y_%m_%d_%H_%M_%S')}.json")
     if os.path.exists(scenes_info_path):
         raise IOError(f"The scenes_info file: {scenes_info_path} already exists.")
     else:
