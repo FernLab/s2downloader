@@ -2,7 +2,7 @@
 History
 =======
 
-0.4.0 (coming soon)
+0.4.0 (2023-03-01)
 -------------------
 
 * It is possible to download data either by tileID or AOI.
