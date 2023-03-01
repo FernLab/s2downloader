@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """Tests for `s2downloader` package."""
-
+import fnmatch
 import json
 import os
 import shutil
@@ -15,6 +15,25 @@ from rasterio.crs import CRS
 from s2downloader.s2downloader import s2Downloader
 from s2downloader.config import loadConfiguration, Config
 from copy import deepcopy
+
+
+def find_files(base_dir, pattern):
+    """Return list of files matching a pattern in the base folder.
+
+    Parameters:
+    -----------
+    base_dir: str
+        Base directory.
+    pattern: str
+        Pattern for the file's name.
+
+    Returns:
+    --------
+    :list
+        List of filenames.
+    """
+    return [n for n in fnmatch.filter(os.listdir(os.path.realpath(base_dir)), pattern) if
+            os.path.isfile(os.path.join(os.path.realpath(base_dir), n))]
 
 
 class TestS2Downloader(unittest.TestCase):
@@ -467,24 +486,18 @@ class TestS2Downloader(unittest.TestCase):
         """Test configuration to test only dates download for the tile settings"""
 
         config = deepcopy(self.configuration)
-        scenes_info_path = os.path.join(self.output_data_path, "scenes_info_2021-09-04_2021-09-05.json")
         scene_tif_path = os.path.join(self.output_data_path, "20210905_S2B_B05.tif")
 
         config["user_settings"]["result_settings"]["download_data"] = False
         s2Downloader(config_dict=config)
+        scenes_info_path = os.path.join(self.output_data_path, find_files(self.output_data_path,
+                                                                          "scenes_info_*.json")[0])
         with open(scenes_info_path) as json_file:
             data = json.load(json_file)
             assert list(data.keys())[0] == "20210905"
 
         if os.path.exists(scene_tif_path):
             assert False
-
-        with pytest.raises(Exception) as exinfo:
-            s2Downloader(config_dict=config)
-
-        if exinfo.value.args is not None:
-            message = exinfo.value.args[0]
-            assert str(message).__contains__('.json already exists.')
 
         os.remove(scenes_info_path)
         config["user_settings"]["result_settings"]["download_data"] = True
