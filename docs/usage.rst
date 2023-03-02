@@ -18,6 +18,7 @@ To use S2Downloader in a project::
 
     Config(**config)
     s2DataDownloader(config_dict=config)
+
 ----
 
 Command line utilities
@@ -39,29 +40,56 @@ Input and Output
 Expected Input Configuration
 ----------------------------
 
-The package expects a configuration file in ``json`` format, like the `default_config.json`_ in the repository . A valid configuration for downloading data might look like follows:
+The package expects a configuration file in ``json`` format, like the `default_config.json <https://git.gfz-potsdam.de/fernlab/products/misac/misac-2/s2downloader/-/blob/main/data/default_config.json>`_ in the repository. A valid configuration for downloading data might look like follows:
 
 .. code-block:: json
 
     {
         "user_settings": {
             "tile_settings": {
-                "platform" : {"in": ["sentinel-2b", "sentinel-2a"]},
-                "sentinel:data_coverage": {"ge": 0},
+                "platform": {
+                    "in": [
+                        "sentinel-2b",
+                        "sentinel-2a"
+                    ]
+                },
+                "sentinel:data_coverage": {
+                    "ge": 0
+                },
                 "sentinel:utm_zone": {},
                 "sentinel:latitude_band": {},
                 "sentinel:grid_square": {},
-                "eo:cloud_cover": {"le": 100},
-                "bands": ["B01","B02", "B05"]
+                "eo:cloud_cover": {
+                    "le": 100
+                },
+                "bands": [
+                    "B01",
+                    "B02",
+                    "B05"
+                ]
             },
             "aoi_settings": {
-                "bounding_box": [13.058397, 52.376620, 13.073049, 52.383835],
+                "bounding_box": [
+                    13.058397,
+                    52.376620,
+                    13.073049,
+                    52.383835
+                ],
                 "apply_SCL_band_mask": true,
-                "SCL_filter_values": [3, 7, 8, 9, 10],
+                "SCL_filter_values": [
+                    3,
+                    7,
+                    8,
+                    9,
+                    10
+                ],
                 "SCL_mask_valid_pixels_min_percentage": 10,
                 "aoi_min_coverage": 90,
                 "resampling_method": "cubic",
-                "date_range": ["2021-09-04", "2021-09-05"]
+                "date_range": [
+                    "2021-09-04",
+                    "2021-09-05"
+                ]
             },
             "result_settings": {
                 "results_dir": "data/data_output/",
@@ -75,9 +103,11 @@ The package expects a configuration file in ``json`` format, like the `default_c
         "s2_settings": {
             "collections": [
                 "sentinel-s2-l2a-cogs"
-            ]
+            ],
+            "tiles_definition_path": "data/sentinel_2_index_shapefile_attr.zip"
         }
     }
+
 
 
 In the following, the parameter configuration is described in detail:
@@ -87,6 +117,8 @@ User Settings
 
 Tile Settings
 #############
+
+**Note:** To get the correct UTM zone, latitude band and grid square for downloading complete tiles either the tile grid `sentinel_2_index_shapefile_attr.zip <https://git.gfz-potsdam.de/fernlab/products/misac/misac-2/s2downloader/-/blob/main/data/sentinel_2_index_shapefile_attr.zip>`_ can be displayed in a GIS or this `web map <https://eatlas.org.au/data/uuid/f7468d15-12be-4e3f-a246-b2882a324f59>`_ can be used.
 
 .. list-table::
     :header-rows: 1
@@ -102,14 +134,14 @@ Tile Settings
       - Defines how much a requested Sentinel-2 tile is covered by data. Leave empty to only validate the AOI for data coverage.
       - ``"sentinel:data_coverage": {"eq": 100}``, ``"sentinel:data_coverage": {"gt": 80}``
     * - ``UTM zone``
-      - Preferred UTM zone. Can be an integer from 1 to 60 or empty if no preference is desired.
-      - ``"sentinel:utm_zone": {}``
-    * - Latitude Band
-      - The latitude band of a preferred UTM zone or tile. Example: "U" for tile 32UQC.
-      - ``"sentinel:latitude_band": {}``
-    * - Grid Square
-      - The grid square if only a certain tile should be downloaded. Example: "QC" for tile 32UQC.
-      - ``"sentinel:grid_square": {}``
+      - UTM zone. Must be a list with one or more integers from 1 to 60 or empty if AOI is provided. Example: "32" for tile 32UQC.
+      - ``"sentinel:utm_zone": {"in": 33}``
+    * - ``Latitude Band``
+      - The latitude band of a preferred UTM zone. Empty if AOI is provided. Example: "U" for tile 32UQC.
+      - ``"sentinel:latitude_band": {"eq": "N"}``
+    * - ``Grid Square``
+      - The grid square to specify the tile. Empty if AOI is provided. Example: "QC" for tile 32UQC.
+      - ``"sentinel:grid_square": {"in": ["RK", "TE"]``
     * - ``eo:cloud_cover``
       - The amount of clouds that are allowed at the **entire** Sentinel-2 scene. Leave empty to only validate the AOI for cloud coverage.
       - ``"eo:cloud_cover": {"eq": 0}``, ``"eo:cloud_cover": {"lt": 20}``
@@ -195,9 +227,15 @@ S2 Settings
     * - ``collections``
       - The Sentinel-2 preprocessing level of data to be downloaded. Currently only the S2 L2A download is tested.
       - ``"collections": ["sentinel-s2-l2a-cogs"]``
+    * - ``"tiles_definition_path``
+      - Path to the tile grid of Sentinel-2 data.
+      - ``"tiles_definition_path": "data/sentinel_2_index_shapefile_attr.zip"``
 
 Expected Output
 ---------------
+
+With AOI
+########
 
 The following files are saved within the defined output folder:
 
@@ -237,10 +275,18 @@ The information about the scenes for a certain date range. Example: scenes_info_
                     "id": "S2B_33UUU_20210905_0_L2A"
                 }
             ],
-            "nonzero_pixels": 100.0,
-            "valid_pixels": 100.0,
-            "data_available": true,
-            "error_info": ""
+            "nonzero_pixels": [
+                100.0
+            ],
+            "valid_pixels": [
+                100.0
+            ],
+            "data_available": [
+                true
+            ],
+            "error_info": [
+                ""
+            ]
         }
     }
 
@@ -255,3 +301,19 @@ For each date the following information is saved:
 **data_available:** If false no data for this date was found.
 
 **error_info:** If any error occurred during the download the error message will be saved here.
+
+
+With tile ID
+############
+
+The difference when downloading complete tiles is that they are sorted in multiple folders with the following structure::
+
+    <utm_zone>
+      <latitude_band>
+        <grid_square>
+          <year>
+            <month>
+              <platform>_<product_level>_<time>_<processing_baseline_number>_<relative_orbit_number>_<tile_number>_<product_id>
+                <band_number>.tif
+
+_______

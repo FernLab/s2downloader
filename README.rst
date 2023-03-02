@@ -22,7 +22,7 @@ For detailed information, refer to the `documentation <https://fernlab.git-pages
 Feature overview
 ----------------
 
-The **Sentinel2Downloader** allows to download Sentinel-2 L2A data from the cost-free `element84 AWS <https://registry.opendata.aws/sentinel-2-l2a-cogs/>`_ Amazon Cloud server. It specifically serves the purpose to download only data for user-defined area of interests (AOI), defined by a bounding box.
+The **Sentinel2Downloader** allows to download Sentinel-2 L2A data from the cost-free `element84 AWS <https://registry.opendata.aws/sentinel-2-l2a-cogs/>`_ Amazon Cloud server. It specifically serves the purpose to download data for user-defined area of interests (AOI), defined by a bounding box or whole tiles which are the original data product provided by ESA.
 
 Features
 ########
@@ -32,6 +32,7 @@ Features
 * download atmospheric corrected L2A Sentinel-2 thumbnail, overview, and data from AWS
 * provide single date or time range for finding data at the server
 * select which individual bands to download, the following bands are supported: ``"B01"``, ``"B02"``, ``"B03"``, ``"B04"``, ``"B05"``, ``"B06"``, ``"B07"``, ``"B08"``, ``"B8A"``, ``"B09"``, ``"B11"``, ``"B12"``
+* provide UTM zone, latitude band and grid square to download whole tiles
 
 
 **Features on AOI level**
