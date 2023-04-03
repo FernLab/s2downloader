@@ -104,8 +104,8 @@ pages:  # this job must be called 'pages' to advise GitLab to upload content to 
     - cp docs/index.html public/
     - cp -r docs/_static/* public/doc/_static/
     - cp -r docs/_build/html/* public/doc/
-    #- cp -r docs/images/* public/images/
-    #- cp -r docs/images/* public/doc/docs/images/
+    - cp -r docs/images/* public/images/
+    - cp -r docs/images/* public/doc/docs/images/
 
     # Copy over the coverage reports
     - cp -r htmlcov/* public/coverage/
