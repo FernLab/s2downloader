@@ -2,10 +2,10 @@
 History
 =======
 
-0.5.0 (coming soon)
--------------------
+0.4.1 (2023-04-03)
+------------------
 
-* Fix paths in the documentation.
+* Fix paths and URLS in the documentation.
 
 0.4.0 (2023-03-01)
 -------------------
