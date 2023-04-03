@@ -64,7 +64,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'S2Downloader'
-copyright = "2022, FernLab"
+copyright = "2023, FernLab"
 author = "FernLab"
 
 # The version info for the project you're documenting, acts as replacement
