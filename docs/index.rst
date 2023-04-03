@@ -6,7 +6,7 @@ S2Downloader documentation
    :caption: Contents:
 
    readme
-   Source code repository <https://git.gfz-potsdam.de/fernlab/s2downloader>
+   Source code repository <https://git.gfz-potsdam.de/fernlab/products/data-portal/s2downloader>
    installation
    usage
    modules

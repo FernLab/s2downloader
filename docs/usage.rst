@@ -13,7 +13,7 @@ To use S2Downloader in a project::
     from s2downloader.s2downloader import s2DataDownloader
     from s2downloader.config import loadConfiguration, Config
 
-    config_file = os.path.abspath("data/default_config.json")
+    config_file = os.path.abspath("../data/default_config.json")
     config = loadConfiguration(path=config_file)
 
     Config(**config)
@@ -255,3 +255,5 @@ For each date the following information is saved:
 **data_available:** If false no data for this date was found.
 
 **error_info:** If any error occurred during the download the error message will be saved here.
+
+.. _default_config.json: https://git.gfz-potsdam.de/fernlab/products/data-portal/s2downloader/-/blob/main/data/default_config.json

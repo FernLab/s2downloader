@@ -23,7 +23,7 @@ Using conda_ (latest version recommended), S2Downloader is installed as follows:
 
    .. code-block:: bash
 
-    $ git clone git@git.gfz-potsdam.de:fernlab/s2downloader.git
+    $ git clone git@git.gfz-potsdam.de:fernlab/products/data-portal/s2downloader.git
     $ cd s2downloader
     $ conda env update -n s2downloader -f tests/CI_docker/context/environment_s2downloader.yml
     $ pip install .
@@ -47,7 +47,7 @@ Then, the pip installer can be run by:
 
    .. code-block:: bash
 
-    $ pip install git@git.gfz-potsdam.de:fernlab/s2downloader.git
+    $ pip install git@git.gfz-potsdam.de:fernlab/products/data-portal/s2downloader.git
 
 If you don't have `pip`_ installed, this `Python installation guide`_ can guide
 you through the process.

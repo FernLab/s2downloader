@@ -15,7 +15,7 @@ Types of Contributions
 Report Bugs
 ~~~~~~~~~~~
 
-Report bugs at https://git.gfz-potsdam.de/fernlab/s2downloader/issues.
+Report bugs at https://git.gfz-potsdam.de/fernlab/products/data-portal/s2downloader/issues.
 
 If you are reporting a bug, please include:
 
@@ -45,7 +45,7 @@ articles, and such.
 Submit Feedback
 ~~~~~~~~~~~~~~~
 
-The best way to send feedback is to file an issue at https://git.gfz-potsdam.de/fernlab/s2downloader/issues.
+The best way to send feedback is to file an issue at https://git.gfz-potsdam.de/fernlab/products/data-portal/s2downloader/issues.
 
 If you are proposing a feature:
 
@@ -63,7 +63,7 @@ How to
 1. Fork the `s2downloader` repo on GitLab.
 2. Clone your fork locally::
 
-    $ git clone git@git.gfz-potsdam.de:fernlab/s2downloader.git
+    $ git clone git@git.gfz-potsdam.de:fernlab/products/data-portal/s2downloader.git
 
 3. Install your local copy into a virtualenv. Assuming you have virtualenvwrapper installed, this is how you set up your fork for local development::
 
@@ -115,7 +115,7 @@ Before you submit a pull request, check that it meets these guidelines:
    your new functionality into a function with a docstring, and add the
    feature to the list in README.rst.
 3. The pull request should work for Python 3.6, 3.7, 3.8 and 3.9. Check
-   https://git.gfz-potsdam.de/fernlab/s2downloader/-/merge_requests
+   https://git.gfz-potsdam.de/fernlab/products/data-portal/s2downloader/-/merge_requests
    and make sure that the tests pass for all supported Python versions.
 
 Tips

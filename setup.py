@@ -70,7 +70,7 @@ setup(
     setup_requires=req_setup,
     test_suite='tests',
     tests_require=req_test,
-    url='https://git.gfz-potsdam.de/fernlab/s2downloader',
+    url='https://git.gfz-potsdam.de/fernlab/products/data-portal/s2downloader',
     version=version['__version__'],
     zip_safe=False,
 )
