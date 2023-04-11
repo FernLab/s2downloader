@@ -22,7 +22,7 @@ For detailed information, refer to the `documentation <https://fernlab.git-pages
 Feature overview
 ----------------
 
-The **Sentinel2Downloader** allows to download Sentinel-2 L2A data from the cost-free `element84 AWS <https://registry.opendata.aws/sentinel-2-l2a-cogs/>`_ Amazon Cloud server. It specifically serves the purpose to download only data for user-defined area of interests (AOI), defined by a bounding box.
+The **S2Downloader** allows to download Sentinel-2 L2A data from the cost-free `element84 AWS <https://registry.opendata.aws/sentinel-2-l2a-cogs/>`_ Amazon Cloud server. It specifically serves the purpose to download only data for user-defined area of interests (AOI), defined by a bounding box.
 
 Features
 ########
@@ -68,7 +68,7 @@ Features
 Installation
 ------------
 
-`Install <https://fernlab.git-pages.gfz-potsdam.de/products/data-portal/s2downloader/doc/installation.html>`_ Sentinel2Downloader
+`Install <https://fernlab.git-pages.gfz-potsdam.de/products/data-portal/s2downloader/doc/installation.html>`_ S2Downloader
 
 
 Usage
