@@ -2,9 +2,10 @@
 History
 =======
 
-0.4.1 (2023-04-03)
+0.4.1 (2023-04-11)
 ------------------
 
+* Add license headers.
 * Fix paths and URLS in the documentation.
 
 0.4.0 (2023-03-01)
