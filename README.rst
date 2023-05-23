@@ -4,25 +4,25 @@ S2Downloader
 
 Downloader for Sentinel-2 data.
 
-.. image:: https://git.gfz-potsdam.de/fernlab/products/misac/misac-2/s2downloader/badges/main/pipeline.svg
-        :target: https://git.gfz-potsdam.de/fernlab/products/misac/misac-2/s2downloader/pipelines
+.. image:: https://git.gfz-potsdam.de/fernlab/products/data-portal/s2downloader/badges/main/pipeline.svg
+        :target: https://git.gfz-potsdam.de/fernlab/products/data-portal/s2downloader/pipelines
         :alt: Pipelines
-.. image:: https://git.gfz-potsdam.de/fernlab/products/misac/misac-2/s2downloader/badges/main/coverage.svg
-        :target: https://fernlab.git-pages.gfz-potsdam.de/products/misac/misac-2/s2downloader/coverage/
+.. image:: https://git.gfz-potsdam.de/fernlab/products/data-portal/s2downloader/badges/main/coverage.svg
+        :target: https://fernlab.git-pages.gfz-potsdam.de/products/data-portal/s2downloader/coverage/
         :alt: Coverage
 .. image:: https://img.shields.io/static/v1?label=Documentation&message=GitLab%20Pages&color=orange
-        :target: https://fernlab.git-pages.gfz-potsdam.de/products/misac/misac-2/s2downloader/doc/
+        :target: https://fernlab.git-pages.gfz-potsdam.de/products/data-portal/s2downloader/doc/
         :alt: Documentation
 
 
-For detailed information, refer to the `documentation <https://fernlab.git-pages.gfz-potsdam.de/products/misac/misac-2/s2downloader/doc/>`_. See also the latest coverage_ report and the pytest_ HTML report.
+For detailed information, refer to the `documentation <https://fernlab.git-pages.gfz-potsdam.de/products/data-portal/s2downloader/doc/>`_. See also the latest coverage_ report and the pytest_ HTML report.
 
 
 
 Feature overview
 ----------------
 
-The **Sentinel2Downloader** allows to download Sentinel-2 L2A data from the cost-free `element84 AWS <https://registry.opendata.aws/sentinel-2-l2a-cogs/>`_ Amazon Cloud server. It specifically serves the purpose to download data for user-defined area of interests (AOI), defined by a bounding box or whole tiles which are the original data product provided by ESA.
+The **S2Downloader** allows to download Sentinel-2 L2A data from the cost-free `element84 AWS <https://registry.opendata.aws/sentinel-2-l2a-cogs/>`_ Amazon Cloud server. It specifically serves the purpose to download only data for user-defined area of interests (AOI), defined by a bounding box or whole tiles which are the original data product provided by ESA.
 
 Features
 ########
@@ -69,7 +69,7 @@ Features
 Installation
 ------------
 
-`Install <https://fernlab.git-pages.gfz-potsdam.de/products/misac/misac-2/s2downloader/doc/installation.html>`_ Sentinel2Downloader
+`Install <https://fernlab.git-pages.gfz-potsdam.de/products/data-portal/s2downloader/doc/installation.html>`_ S2Downloader
 
 
 Usage
@@ -82,20 +82,20 @@ Run with relative or absolute path to config json file:
 
 Relative paths in the config file are supposed to be relative to the location of the repository.
 
-See `usage <https://fernlab.git-pages.gfz-potsdam.de/products/misac/misac-2/s2downloader/doc/usage.html>`_ for more details about the config file.
+See `usage <https://fernlab.git-pages.gfz-potsdam.de/products/data-portal/s2downloader/doc/usage.html>`_ for more details about the config file.
 
 Expected Output
 ---------------
 
 The downloaded raster files and overviews are saved in .tif format, the thumbnails are saved as .jpg. Additional information is saved in a.json and a logging file.
 
-See `usage <https://fernlab.git-pages.gfz-potsdam.de/products/misac/misac-2/s2downloader/doc/usage.html>`_ for more details about the output files.
+See `usage <https://fernlab.git-pages.gfz-potsdam.de/products/data-portal/s2downloader/doc/usage.html>`_ for more details about the output files.
 
 History / Changelog
 -------------------
 
 You can find the protocol of recent changes in the S2Downloader package
-`here <https://git.gfz-potsdam.de/fernlab/products/misac/misac-2/s2downloader/-/blob/main/HISTORY.rst>`__.
+`here <https://git.gfz-potsdam.de/fernlab/products/data-portal/s2downloader/-/blob/main/HISTORY.rst>`__.
 
 
 Contribution
@@ -127,5 +127,5 @@ This package was created with Cookiecutter_ and the `fernlab/cookiecutter-pypack
 .. _`fernlab/cookiecutter-pypackage`: https://github.com/fernlab/cookiecutter-pypackage
 .. _coverage: https://fernlab.git-pages.gfz-potsdam.de/products/data-portal/sentinel2_portal/coverage/
 .. _pytest: https://fernlab.git-pages.gfz-potsdam.de/products/data-portal/sentinel2_portal/test_reports/report.html
-.. _default_config.json: https://git.gfz-potsdam.de/fernlab/products/misac/misac-2/s2downloader/-/blob/main/data/default_config.json
+.. _default_config.json: https://git.gfz-potsdam.de/fernlab/products/data-portal/s2downloader/-/blob/main/data/default_config.json
 
