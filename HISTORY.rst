@@ -2,10 +2,10 @@
 History
 =======
 
-0.4.1 (2023-04-11)
+0.4.1 (2023-05-23)
 ------------------
 
-* Add license headers.
+* Add license headers for EUPL license.
 * Fix paths and URLS in the documentation.
 
 0.4.0 (2023-03-01)
