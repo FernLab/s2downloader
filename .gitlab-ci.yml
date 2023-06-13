@@ -73,6 +73,8 @@ test_s2downloader_install:
 
     # run installer
     - pip install .
+    - pip install pystac=1.6.1
+    - pip install pystac-client=0.6.0
 
     # check if all dependencies are correctly installed
     - pip check
