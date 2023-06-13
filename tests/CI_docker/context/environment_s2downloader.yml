@@ -49,5 +49,5 @@ dependencies:
     - twine
 
     # code requirements
-    - pystac
-    - pystac_client
+    - pystac==1.6.1
+    - pystac-client==0.6.0
