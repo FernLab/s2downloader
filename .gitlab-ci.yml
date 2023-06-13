@@ -16,6 +16,8 @@ test_s2downloader:
 
     # install missing dependencies on the CI container
     - mamba env update --name ci_env --file tests/CI_docker/context/environment_s2downloader.yml  --prune
+    - pip install pystac=1.6.1
+    - pip install pystac-client=0.6.0
 
     # run tests
     - make pytest
@@ -73,8 +75,6 @@ test_s2downloader_install:
 
     # run installer
     - pip install .
-    - pip install pystac=1.6.1
-    - pip install pystac-client=0.6.0
 
     # check if all dependencies are correctly installed
     - pip check
