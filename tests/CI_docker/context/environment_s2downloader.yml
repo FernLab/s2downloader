@@ -22,7 +22,7 @@ dependencies:
   - pydantic
   - geopy
   - pystac=1.6.1
-  - pystac_client=0.6.0
+  - pystac-client=0.6.0
 
   - pip:
     # setup requirements
