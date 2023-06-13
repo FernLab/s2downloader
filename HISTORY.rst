@@ -2,6 +2,12 @@
 History
 =======
 
+0.4.2 (2023-06-13)
+------------------
+
+* Use stable versions of pystac and pystac-client packages.
+
+
 0.4.1 (2023-05-23)
 ------------------
 
