@@ -405,6 +405,13 @@ def downloadMosaic(*, config_dict: dict):
         with open(scenes_info_path, "w") as write_file:
             json.dump(scenes_info, write_file, indent=4)
 
+    # close log-file to avoid problems with deleting the files
+    if logger.hasHandlers():
+        for handler in logger.handlers[:]:
+            logger.removeHandler(handler)
+            handler.flush()
+            handler.close()
+
 
 def downloadTileID(*, config_dict: dict):
     """downloadTileID.
@@ -618,6 +625,13 @@ def downloadTileID(*, config_dict: dict):
     else:
         with open(scenes_info_path, "w") as write_file:
             json.dump(scenes_info, write_file, indent=4)
+
+    # close log-file to avoid problems with deleting the files
+    if logger.hasHandlers():
+        for handler in logger.handlers[:]:
+            logger.removeHandler(handler)
+            handler.flush()
+            handler.close()
 
 
 def s2Downloader(*, config_dict: dict):
