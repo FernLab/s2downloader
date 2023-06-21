@@ -2,21 +2,21 @@
 History
 =======
 
+0.4.3 (2023-06-21)
+------------------
+* Fix bugs of logger.
+
 0.4.2 (2023-06-13)
 ------------------
-
 * Use stable versions of pystac and pystac-client packages.
-
 
 0.4.1 (2023-05-23)
 ------------------
-
 * Add license headers for EUPL license.
 * Fix paths and URLS in the documentation.
 
 0.4.0 (2023-03-01)
 -------------------
-
 * It is possible to download data either by tileID or AOI.
 * Improve memory and disk footprint (the .tifs are now compressed using lzw).
 * The AOI width and height upper limit is 500 km.
@@ -24,14 +24,12 @@ History
 
 0.3.0 (2023-02-10)
 ------------------
-
 * Fix the a bug with the mosaic, the bounds should come from the new window for the SCL band.
 * Schema validation for date_range in the aoi settings.
 * Pin Python version to 3.10 for consistent results between C/I and development environments.
 
 0.2.0 (2022-11-23)
 ------------------
-
 * The .tif files have the following nomenclature: <date>_<sentinel_platform>_<band>.tif
 * Scenes information saved into a JSON file.
 * Provide logging.
@@ -42,19 +40,16 @@ History
 
 0.1.2 (2022-11-16)
 ------------------
-
 * Change default config file to filter data and cloud coverage only at AOI level.
 * Fix bug in AOI coverage query.
 * Add information to print if AWS cloud cover is valid.
 
 0.1.1 (2022-11-08)
 ------------------
-
 * Define the first default config file and its schema.
 * First full run with the default config file.
 * Improve command line client.
 
 0.1.0 (2022-11-03)
 ------------------
-
 * Package skeleton as created by https://github.com/danschef/cookiecutter-pypackage.
