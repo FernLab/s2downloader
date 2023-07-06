@@ -7,19 +7,19 @@
                     "sentinel-2a"
                 ]
             },
-            "sentinel:data_coverage": {
-                "ge": 0
+            "s2:nodata_pixel_percentage": {
+                "le": 100
             },
-            "sentinel:utm_zone": {},
-            "sentinel:latitude_band": {},
-            "sentinel:grid_square": {},
+            "mgrs:utm_zone": {},
+            "mgrs:latitude_band": {},
+            "mgrs:grid_square": {},
             "eo:cloud_cover": {
                 "le": 100
             },
             "bands": [
-                "B01",
-                "B02",
-                "B05"
+                "coastal",
+                "blue",
+                "rededge1"
             ]
         },
         "aoi_settings": {
@@ -56,7 +56,7 @@
     },
     "s2_settings": {
         "collections": [
-            "sentinel-s2-l2a-cogs"
+            "sentinel-2-l2a"
         ],
         "tiles_definition_path": "data/sentinel_2_index_shapefile_attr.zip"
     }
