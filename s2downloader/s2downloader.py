@@ -173,7 +173,7 @@ def downloadMosaic(*, config_dict: dict):
     cloudmasking = aoi_settings["apply_SCL_band_mask"]
     tiles_path = config_dict['s2_settings']['tiles_definition_path']
 
-    tile_settings["sentinel:utm_zone"] = {}
+    tile_settings["mgrs:utm_zone"] = {}
     try:
         op_start = time.time()
         tiles_gpd = geopandas.read_file(tiles_path,
@@ -500,12 +500,12 @@ def downloadTileID(*, config_dict: dict):
         for item in items_per_date[items_date]:
             scenes_info[items_date.replace('-', '')]["item_ids"].append({"id": item.id})
             output_path = os.path.join(result_dir,
-                                       f"{item.properties['sentinel:utm_zone']}",
-                                       f"{item.properties['sentinel:latitude_band']}",
-                                       f"{item.properties['sentinel:grid_square']}",
+                                       f"{item.properties['mgrs:utm_zone']}",
+                                       f"{item.properties['mgrs:latitude_band']}",
+                                       f"{item.properties['mgrs:grid_square']}",
                                        f"{items_date.split('-')[0]}",
                                        f"{items_date.split('-')[1]}",
-                                       f"{item.properties['sentinel:product_id']}")
+                                       f"{item.properties['s2:product_uri'].split('.')[0]}")
             output_scl_path = os.path.join(output_path, "SCL.tif")
 
             file_url = item.assets["scl"].href
@@ -558,7 +558,7 @@ def downloadTileID(*, config_dict: dict):
                                                           f"{item.id}_{file_url.rsplit('/', 1)[1]}")
                             urllib.request.urlretrieve(file_url, thumbnail_path)
                         if download_overviews:
-                            file_url = item.assets["overview"].href
+                            file_url = item.assets["visual"].href
                             logger.info(file_url)
                             overview_path = os.path.join(output_path,
                                                          f"{item.id}_{file_url.rsplit('/', 1)[1]}")
