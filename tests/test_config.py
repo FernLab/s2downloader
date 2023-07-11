@@ -122,26 +122,26 @@ class TestConfig(unittest.TestCase):
         """Test configuration to test coverage for the tile settings"""
 
         config = deepcopy(self.configuration)
-        config['user_settings']['tile_settings']['sentinel:data_coverage'] = {"lt": 80}
+        config['user_settings']['tile_settings']['s2:nodata_pixel_percentage'] = {"lt": 80}
         Config(**config)
 
-        config['user_settings']['tile_settings']['sentinel:data_coverage'] = {"xx": 25}
+        config['user_settings']['tile_settings']['s2:nodata_pixel_percentage'] = {"xx": 25}
         with pytest.raises(ValueError):
             Config(**config)
 
-        config['user_settings']['tile_settings']['sentinel:data_coverage'] = {"gt": 25, "lt": 70}
+        config['user_settings']['tile_settings']['s2:nodata_pixel_percentage'] = {"gt": 25, "lt": 70}
         with pytest.raises(ValueError):
             Config(**config)
 
-        config['user_settings']['tile_settings']['sentinel:data_coverage'] = {"gt": -25}
+        config['user_settings']['tile_settings']['s2:nodata_pixel_percentage'] = {"gt": -25}
         with pytest.raises(ValueError):
             Config(**config)
 
-        config['user_settings']['tile_settings']['sentinel:data_coverage'] = {"gt": "err"}
+        config['user_settings']['tile_settings']['s2:nodata_pixel_percentage'] = {"gt": "err"}
         with pytest.raises(ValueError):
             Config(**config)
 
-        config['user_settings']['tile_settings']['sentinel:data_coverage'] = {}
+        config['user_settings']['tile_settings']['s2:nodata_pixel_percentage'] = {}
         with pytest.raises(ValueError):
             Config(**config)
 
@@ -177,15 +177,16 @@ class TestConfig(unittest.TestCase):
 
         config = deepcopy(self.configuration)
         config['user_settings']['tile_settings']['bands'] = \
-            ["B01", "B02", "B03", "B04", "B05", "B06", "B07", "B08", "B8A", "B09", "B11", "B12"]
+            ["coastal", "blue", "green", "red", "rededge1", "rededge2", "rededge3", "nir",
+             "nir08", "nir09", "swir16", "swir22"]
         Config(**config)
 
         config['user_settings']['tile_settings']['bands'] = \
-            ["B01", "B02", "B07", "B08", "B8A", "B09", "B11", "B12"]
+            ["coastal", "blue", "rededge3", "nir", "nir08", "nir09", "swir16", "swir22"]
         Config(**config)
 
         config['user_settings']['tile_settings']['bands'] = \
-            ["B01"]
+            ["coastal"]
         Config(**config)
 
         config['user_settings']['tile_settings']['bands'] = \
@@ -194,12 +195,12 @@ class TestConfig(unittest.TestCase):
             Config(**config)
 
         config['user_settings']['tile_settings']['bands'] = \
-            ["B01", "B02", "B03", "B02"]
+            ["coastal", "blue", "green", "blue"]
         with pytest.raises(ValueError):
             Config(**config)
 
         config['user_settings']['tile_settings']['bands'] = \
-            ["B01", "B34"]
+            ["coastal", "rainbow"]
         with pytest.raises(ValueError):
             Config(**config)
 
@@ -247,15 +248,15 @@ class TestConfig(unittest.TestCase):
         with pytest.raises(ValueError):
             Config(**config)
 
-        config['user_settings']["tile_settings"]["sentinel:utm_zone"] = {"eq": 32}
+        config['user_settings']["tile_settings"]["mgrs:utm_zone"] = {"eq": 32}
         with pytest.raises(ValueError):
             Config(**config)
 
-        config['user_settings']["tile_settings"]["sentinel:latitude_band"] = {"eq": "U"}
-        config['user_settings']["tile_settings"]["sentinel:grid_square"] = {"eq": "UV"}
+        config['user_settings']["tile_settings"]["mgrs:latitude_band"] = {"eq": "U"}
+        config['user_settings']["tile_settings"]["mgrs:grid_square"] = {"eq": "UV"}
         Config(**config)
 
-        config['user_settings']["tile_settings"]["sentinel:utm_zone"] = {"eq": "32"}
+        config['user_settings']["tile_settings"]["mgrs:utm_zone"] = {"eq": "32"}
         with pytest.raises(ValueError):
             Config(**config)
 

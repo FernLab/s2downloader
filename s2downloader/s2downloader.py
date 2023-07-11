@@ -91,8 +91,17 @@ def searchDataAtAWS(*,
             # intersects=geoj,   # method can be used instead of bbox, but currently throws error
             query=props_json,  # cloud and data coverage properties
             datetime=date_range,  # time period
-            sortby="-properties.datetime"  # sort by data descending (minus sign)
+            # sortby="-properties.datetime"  # sort by data descending (minus sign) ->
+            # deactivated: error for catalog v1
             )
+
+        print("__________________________________________________________________________________________")
+        print(item_search.matched())
+        print(type(item_search.items()))
+        print(item_search.items())
+        print(len(list(item_search.items())))
+        print("__________________________________________________________________________________________")
+
         # proceed if items are found
         if len(list(item_search.items())) == 0:
             raise ValueError("For these settings there is no data to be found at AWS. \n"
@@ -107,18 +116,16 @@ def searchDataAtAWS(*,
         item_list_dict = [i.to_dict() for i in items_list]
 
         # print overview of found data
-        logger.info("{:<25} {:<25} {:<10} {:<10} {:<20} {:<20} {:<15}".format('Date', 'ID', 'UTM Zone', 'EPSG',
-                                                                              'Valid Cloud Cover', 'Tile Cloud Cover',
-                                                                              'Tile Coverage'))
+        logger.info("{:<25} {:<25} {:<10} {:<10} {:<20} {:<15}".format('Date', 'ID', 'UTM Zone', 'EPSG',
+                                                                       'Tile Cloud Cover', 'Tile Coverage'))
         for i in item_list_dict:
-            logger.info("{:<25} {:<25} {:<10} {:<10} {:<20} {:<20} {:<15}\n".format(
+            logger.info("{:<25} {:<25} {:<10} {:<10} {:<20} {:<15}\n".format(
                 i['properties']['datetime'],
                 i['id'],
-                i['properties']['sentinel:utm_zone'],
+                i['properties']['mgrs:utm_zone'],
                 i['properties']['proj:epsg'],
-                str(i['properties']['sentinel:valid_cloud_cover']),
                 i['properties']['eo:cloud_cover'],
-                i['properties']['sentinel:data_coverage']))
+                i['properties']['s2:nodata_pixel_percentage']))
 
         return items_list
     except Exception as e:  # pragma: no cover
@@ -166,7 +173,7 @@ def downloadMosaic(*, config_dict: dict):
     cloudmasking = aoi_settings["apply_SCL_band_mask"]
     tiles_path = config_dict['s2_settings']['tiles_definition_path']
 
-    tile_settings["sentinel:utm_zone"] = {}
+    tile_settings["mgrs:utm_zone"] = {}
     try:
         op_start = time.time()
         tiles_gpd = geopandas.read_file(tiles_path,
@@ -174,9 +181,18 @@ def downloadMosaic(*, config_dict: dict):
         logger.debug(f"Loading Sentinel-2 tiles took {(time.time() - op_start) * 1000} msecs.")
         utm_zone = getUTMZoneBB(tiles_gpd=tiles_gpd, bbox=aoi_settings['bounding_box'])
         if utm_zone != 0:
-            tile_settings["sentinel:utm_zone"] = {"eq": utm_zone}
+            tile_settings["mgrs:utm_zone"] = {"eq": utm_zone}
     except (IOError, FileNotFoundError) as err:
         logger.warning(f"It is not possible to determine in which UTM zone is the bounding-box: {err}")
+
+    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+    print(utm_zone)
+    print(s2_settings['collections'])
+    print(aoi_settings['bounding_box'])
+    print(aoi_settings['date_range'])
+    print(tile_settings)
+    print(s2_settings['stac_catalog_url'])
+    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 
     # search for Sentinel-2 data within the bounding box as defined in query_props.json (no data download yet)
     aws_items = searchDataAtAWS(s2_collection=s2_settings['collections'],
@@ -214,7 +230,7 @@ def downloadMosaic(*, config_dict: dict):
             scl_mosaic = []
             new_bounds = None
             for item_idx in range(len(items)):
-                scl_src = rasterio.open(items[item_idx].assets["SCL"].href)
+                scl_src = rasterio.open(items[item_idx].assets["scl"].href)
                 if item_idx == 0:
                     scl_crs = scl_src.crs
                     scl_bb_window = from_bounds(left=bounds_utm[0],
@@ -231,7 +247,7 @@ def downloadMosaic(*, config_dict: dict):
                                         res=target_resolution,
                                         resampling=Resampling[aoi_settings["resampling_method"]])
         elif len(items) == 1:
-            file_url = items[0].assets["SCL"].href
+            file_url = items[0].assets["scl"].href
             with rasterio.open(file_url) as scl_src:
                 scl_scale_factor = scl_src.transform[0] / target_resolution
                 scl_bb_window = from_bounds(left=bounds_utm[0],
@@ -294,7 +310,7 @@ def downloadMosaic(*, config_dict: dict):
                                                           f"{items[0].id}_{file_url.rsplit('/', 1)[1]}")
                             urllib.request.urlretrieve(file_url, thumbnail_path)
                         if download_overviews:
-                            file_url = items[0].assets["overview"].href
+                            file_url = items[0].assets["visual"].href
                             logger.info(file_url)
                             overview_path = os.path.join(result_dir,
                                                          f"{items[0].id}_{file_url.rsplit('/', 1)[1]}")
@@ -484,15 +500,15 @@ def downloadTileID(*, config_dict: dict):
         for item in items_per_date[items_date]:
             scenes_info[items_date.replace('-', '')]["item_ids"].append({"id": item.id})
             output_path = os.path.join(result_dir,
-                                       f"{item.properties['sentinel:utm_zone']}",
-                                       f"{item.properties['sentinel:latitude_band']}",
-                                       f"{item.properties['sentinel:grid_square']}",
+                                       f"{item.properties['mgrs:utm_zone']}",
+                                       f"{item.properties['mgrs:latitude_band']}",
+                                       f"{item.properties['mgrs:grid_square']}",
                                        f"{items_date.split('-')[0]}",
                                        f"{items_date.split('-')[1]}",
-                                       f"{item.properties['sentinel:product_id']}")
+                                       f"{item.properties['s2:product_uri'].split('.')[0]}")
             output_scl_path = os.path.join(output_path, "SCL.tif")
 
-            file_url = item.assets["SCL"].href
+            file_url = item.assets["scl"].href
             with rasterio.open(file_url) as scl_src:
                 scl_trans = scl_src.transform
                 scl_scale_factor = scl_src.transform[0] / target_resolution
@@ -542,7 +558,7 @@ def downloadTileID(*, config_dict: dict):
                                                           f"{item.id}_{file_url.rsplit('/', 1)[1]}")
                             urllib.request.urlretrieve(file_url, thumbnail_path)
                         if download_overviews:
-                            file_url = item.assets["overview"].href
+                            file_url = item.assets["visual"].href
                             logger.info(file_url)
                             overview_path = os.path.join(output_path,
                                                          f"{item.id}_{file_url.rsplit('/', 1)[1]}")

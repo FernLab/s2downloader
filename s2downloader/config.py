@@ -60,26 +60,26 @@ class TileSettings(BaseModel):
         default={"in": [S2Platform.S2A, S2Platform.S2B]}
         )
 
-    data_coverage: Dict = Field(
-        title="Data coverage",
-        description="Percentage of data coverage.",
-        alias="sentinel:data_coverage",
+    nodata_pixel_percentage: Dict = Field(
+        title="NoData pixel percentage",
+        description="Percentage of NoData pixel.",
+        alias="s2:nodata_pixel_percentage",
         default={"gt": 10}
         )
     utm_zone: Dict = Field(
         title="UTM zone",
         description="UTM zones for which to search data.",
-        alias="sentinel:utm_zone"
+        alias="mgrs:utm_zone"
         )
     latitude_band: Dict = Field(
         title="Latitude band",
         description="Latitude band for which to search data.",
-        alias="sentinel:latitude_band"
+        alias="mgrs:latitude_band"
         )
     grid_square: Dict = Field(
         title="Grid square",
         description="Grid square for which to search data.",
-        alias="sentinel:grid_square"
+        alias="mgrs:grid_square"
         )
     cloud_cover: Dict = Field(
         title="Cloud coverage",
@@ -90,10 +90,10 @@ class TileSettings(BaseModel):
     bands: List[str] = Field(
         title="Bands",
         description="List of bands.",
-        default=["B02", "B03", "B05"]
+        default=["blue", "green", "rededge1"]
         )
 
-    @validator("data_coverage", "cloud_cover")
+    @validator("nodata_pixel_percentage", "cloud_cover")
     def checkCoverage(cls, v: dict):
         """Check if coverage equations are set correctly."""
         if len(v.keys()) != 1:
@@ -109,10 +109,10 @@ class TileSettings(BaseModel):
     @validator("bands")
     def checkBands(cls, v):
         """Check if bands is set correctly."""
-        if len(v) == 0 or not set(v).issubset(["B01", "B02", "B03", "B04", "B05", "B06", "B07", "B08", "B8A",
-                                               "B09", "B11", "B12"]):
-            raise ValueError("Only the following band names are supported: B01, B02, B03, B04, B05, B06, B07,"
-                             " B08, B8A, B09, B11, B12.")
+        if len(v) == 0 or not set(v).issubset(["coastal", "blue", "green", "red", "rededge1", "rededge2", "rededge3",
+                                               "nir", "nir08", "nir09", "swir16", "swir22"]):
+            raise ValueError("Only the following band names are supported: coastal, blue, green, red, rededge1,"
+                             " rededge2, rededge3, nir, nir08, nir09, swir16, swir22.")
         if len(v) != len(set(v)):
             raise ValueError("Remove duplicates.")
         return v
@@ -338,13 +338,13 @@ class S2Settings(BaseModel, extra=Extra.forbid):
     collections: List[str] = Field(
         title="Definition of data collection to be searched for.",
         description="Define S2 data collection.",
-        default=["sentinel-s2-l2a-cogs"]
+        default=["sentinel-2-l2a"]
         )
 
     stac_catalog_url: Optional[HttpUrl] = Field(
         title="STAC catalog URL.",
         description="URL to access the STAC catalog.",
-        default="https://earth-search.aws.element84.com/v0"
+        default="https://earth-search.aws.element84.com/v1"
         )
 
     tiles_definition_path: str = Field(
