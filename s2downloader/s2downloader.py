@@ -95,13 +95,6 @@ def searchDataAtAWS(*,
             # deactivated: error for catalog v1
             )
 
-        print("__________________________________________________________________________________________")
-        print(item_search.matched())
-        print(type(item_search.items()))
-        print(item_search.items())
-        print(len(list(item_search.items())))
-        print("__________________________________________________________________________________________")
-
         # proceed if items are found
         if len(list(item_search.items())) == 0:
             raise ValueError("For these settings there is no data to be found at AWS. \n"
@@ -184,15 +177,6 @@ def downloadMosaic(*, config_dict: dict):
             tile_settings["mgrs:utm_zone"] = {"eq": utm_zone}
     except (IOError, FileNotFoundError) as err:
         logger.warning(f"It is not possible to determine in which UTM zone is the bounding-box: {err}")
-
-    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-    print(utm_zone)
-    print(s2_settings['collections'])
-    print(aoi_settings['bounding_box'])
-    print(aoi_settings['date_range'])
-    print(tile_settings)
-    print(s2_settings['stac_catalog_url'])
-    print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 
     # search for Sentinel-2 data within the bounding box as defined in query_props.json (no data download yet)
     aws_items = searchDataAtAWS(s2_collection=s2_settings['collections'],
