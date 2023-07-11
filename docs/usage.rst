@@ -44,7 +44,7 @@ The package expects a configuration file in ``json`` format, like the `default_c
 
 .. code-block:: json
 
-    {
+        {
         "user_settings": {
             "tile_settings": {
                 "platform": {
@@ -53,19 +53,19 @@ The package expects a configuration file in ``json`` format, like the `default_c
                         "sentinel-2a"
                     ]
                 },
-                "sentinel:data_coverage": {
-                    "ge": 0
+                "s2:nodata_pixel_percentage": {
+                    "le": 100
                 },
-                "sentinel:utm_zone": {},
-                "sentinel:latitude_band": {},
-                "sentinel:grid_square": {},
+                "mgrs:utm_zone": {},
+                "mgrs:latitude_band": {},
+                "mgrs:grid_square": {},
                 "eo:cloud_cover": {
                     "le": 100
                 },
                 "bands": [
-                    "B01",
-                    "B02",
-                    "B05"
+                    "coastal",
+                    "blue",
+                    "rededge1"
                 ]
             },
             "aoi_settings": {
@@ -102,7 +102,7 @@ The package expects a configuration file in ``json`` format, like the `default_c
         },
         "s2_settings": {
             "collections": [
-                "sentinel-s2-l2a-cogs"
+                "sentinel-2-l2a"
             ],
             "tiles_definition_path": "data/sentinel_2_index_shapefile_attr.zip"
         }
@@ -130,24 +130,24 @@ Tile Settings
     * - ``Platform``
       - Which satellite to use. Default: both A and B.
       - ``"platform" : {"in": ["sentinel-2b", "sentinel-2a"]}``
-    * - ``sentinel:data_coverage``
-      - Defines how much a requested Sentinel-2 tile is covered by data. Leave empty to only validate the AOI for data coverage.
-      - ``"sentinel:data_coverage": {"eq": 100}``, ``"sentinel:data_coverage": {"gt": 80}``
+    * - ``NoData pixel percentage``
+      - Defines how many pixels of a  requested Sentinel-2 tile have NoData values. Leave empty to only validate the AOI for data coverage.
+      - ``"s2:nodata_pixel_percentage": {"eq": 0}``, ``"s2:nodata_pixel_percentage": {"lt": 80}``
     * - ``UTM zone``
       - UTM zone. Must be a list with one or more integers from 1 to 60 or empty if AOI is provided. Example: "32" for tile 32UQC.
-      - ``"sentinel:utm_zone": {"in": 33}``
+      - ``"mgrs:utm_zone": {"in": 33}``
     * - ``Latitude Band``
       - The latitude band of a preferred UTM zone. Empty if AOI is provided. Example: "U" for tile 32UQC.
-      - ``"sentinel:latitude_band": {"eq": "N"}``
+      - ``"mgrs:latitude_band": {"eq": "N"}``
     * - ``Grid Square``
       - The grid square to specify the tile. Empty if AOI is provided. Example: "QC" for tile 32UQC.
-      - ``"sentinel:grid_square": {"in": ["RK", "TE"]``
+      - ``"mgrs:grid_square": {"in": ["RK", "TE"]``
     * - ``eo:cloud_cover``
       - The amount of clouds that are allowed at the **entire** Sentinel-2 scene. Leave empty to only validate the AOI for cloud coverage.
       - ``"eo:cloud_cover": {"eq": 0}``, ``"eo:cloud_cover": {"lt": 20}``
     * - ``bands``
-      - Defines which Sentinel-2 bands to download. You may choose from these options: ["B01", "B02", "B03", "B04", "B05", "B06", "B07", "B08", "B8A", "B09", "B11", "B12"].
-      - ``"bands": ["B01", "B05","B08"]``
+      - Defines which Sentinel-2 bands to download. You may choose from these options: ["coastal", "blue", "green", "red", "rededge1", "rededge2", "rededge3", "nir", "nir08", "nir09", "swir16", "swir22"].
+      - ``"bands": ["coastal", "rededge1", "nir"]``
 
 
 AOI Settings
@@ -226,7 +226,7 @@ S2 Settings
       - Examples
     * - ``collections``
       - The Sentinel-2 preprocessing level of data to be downloaded. Currently only the S2 L2A download is tested.
-      - ``"collections": ["sentinel-s2-l2a-cogs"]``
+      - ``"collections": ["sentinel-2-l2a"]``
     * - ``"tiles_definition_path``
       - Path to the tile grid of Sentinel-2 data.
       - ``"tiles_definition_path": "data/sentinel_2_index_shapefile_attr.zip"``
@@ -243,22 +243,22 @@ The following files are saved within the defined output folder:
 
   - <date_sensor_band>.tif
   - <date_sensor>_SCL.tif
-  - <sensor_tile_date>_0_L2A_L2A_PVI.tif
-  - <sensor_tile_date>_0_L2A_preview.jpg
+  - <sensor_tile_date>_0_L2A_TCI.tif
+  - <sensor_tile_date>_0_L2A_thumbnail.jpg
   - s2DataDownloader.log
   - scenes_info_<daterange>.json
 
 **date_sensor_band.tif**
-The tif file of each band. Example: 20210905_S2B_B01.tif for date 2021-09-05, sensor B and band 1.
+The tif file of each band. Example: 20210905_S2B_coastal.tif for date 2021-09-05, sensor B and band 1.
 
 **date_sensor_SCL.tif**
 The tif file for the scl band of the according date. Example: 20210905_S2B_SCL.tif
 
 **sensor_tile_date_0_L2A_L2A_PVI.tif**
-If "download_overviews" is set to true this file contains the overview per sensor, tile and date. Example: S2B_33UUU_20210908_0_L2A_L2A_PVI.tif
+If "download_overviews" is set to true this file contains the overview per sensor, tile and date. Example: S2B_33UUU_20210908_0_L2A_TCI.tif
 
 **sensor_tile_date_0_L2A_preview.jpg**
-If "download_thumbnails" is set to true this file contains the thumbnail per sensor, tile and date. Example: S2B_33UUU_20210908_0_L2A_preview.jpg
+If "download_thumbnails" is set to true this file contains the thumbnail per sensor, tile and date. Example: S2B_33UUU_20210908_0_L2A_thumbnail.jpg
 
 **s2DataDownloader.log**
 The log file containing all logs. The logging level can be set in the result settings in the config.json.
