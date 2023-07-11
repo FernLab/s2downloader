@@ -19,6 +19,13 @@ To use S2Downloader in a project::
     Config(**config)
     s2DataDownloader(config_dict=config)
 
+
+
+*Note:*
+
+Since version 1.0.0 s2Downloader uses the new version of element84's catalog for querying through the downloadable data. If you want to use the old version
+of the catalog (v0) for any reason, fall back to version 0.4.3 of s2Downloader. More information about the `catalog changes <https://www.element84.com/blog/introducing-earth-search-v1-new-datasets-now-available>`_.
+
 ----
 
 Command line utilities
