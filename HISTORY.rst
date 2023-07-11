@@ -2,6 +2,12 @@
 History
 =======
 
+1.0.0 (2023-07-11)
+------------------
+* Use new catalog (v1) of element84 for downloading.
+* Align documentation.
+* Pin pydantic package to v1.10.10.
+
 0.4.3 (2023-06-21)
 ------------------
 * Fix bugs of logger.
