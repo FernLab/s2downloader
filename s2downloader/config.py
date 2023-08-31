@@ -99,8 +99,8 @@ class TileSettings(BaseModel):
         if len(v.keys()) != 1:
             raise ValueError("It should be a dictionary with one key (operator) value (integer) pair.")
         for key in v.keys():
-            if key not in ["le", "lt", "eq", "ge", "gt"]:
-                raise ValueError("The operator should be one of: le, lt, eq, ge or gt.")
+            if key not in ["lte", "lt", "eq", "gte", "gt"]:
+                raise ValueError("The operator should be one of: lte, lt, eq, gte or gt.")
             value = v[key]
             if not isinstance(value, int) or value < 0 or value > 100:
                 raise ValueError(f"The value ({str(value)}) should be an integer between 0 and 100.")
