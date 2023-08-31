@@ -61,13 +61,13 @@ The package expects a configuration file in ``json`` format, like the `default_c
                     ]
                 },
                 "s2:nodata_pixel_percentage": {
-                    "le": 100
+                    "lte": 100
                 },
                 "mgrs:utm_zone": {},
                 "mgrs:latitude_band": {},
                 "mgrs:grid_square": {},
                 "eo:cloud_cover": {
-                    "le": 100
+                    "lte": 100
                 },
                 "bands": [
                     "coastal",
