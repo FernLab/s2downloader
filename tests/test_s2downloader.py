@@ -578,6 +578,7 @@ class TestS2Downloader(unittest.TestCase):
         config["user_settings"]["result_settings"]["download_thumbnails"] = True
         config["user_settings"]["result_settings"]["download_data"] = False
         config["user_settings"]["aoi_settings"]["date_range"] = ['2021-09-08', '2021-09-08']
+        config['user_settings']["tile_settings"]["eo:cloud_cover"] = {"lte": 2}
 
         s2Downloader(config_dict=config)
 
