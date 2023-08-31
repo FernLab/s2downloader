@@ -2,6 +2,11 @@
 History
 =======
 
+1.0.1 (2023-09-01)
+------------------
+* Fix wrong query operators.
+* Fix logger bug.
+
 1.0.0 (2023-07-11)
 ------------------
 * Use new catalog (v1) of element84 for downloading.
