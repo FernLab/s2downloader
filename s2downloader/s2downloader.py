@@ -97,6 +97,14 @@ def searchDataAtAWS(*,
 
         # proceed if items are found
         if len(list(item_search.items())) == 0:
+
+            # close log-file to avoid problems with deleting the files
+            if logger.hasHandlers():
+                for handler in logger.handlers[:]:
+                    logger.removeHandler(handler)
+                    handler.flush()
+                    handler.close()
+
             raise ValueError("For these settings there is no data to be found at AWS. \n"
                              "Try to adapt your search parameters:\n"
                              "- increase time span,\n"
@@ -110,7 +118,7 @@ def searchDataAtAWS(*,
 
         # print overview of found data
         logger.info("{:<25} {:<25} {:<10} {:<10} {:<20} {:<15}".format('Date', 'ID', 'UTM Zone', 'EPSG',
-                                                                       'Tile Cloud Cover', 'Tile Coverage'))
+                                                                       'Tile Cloud Cover', 'Tile NoData Percentage'))
         for i in item_list_dict:
             logger.info("{:<25} {:<25} {:<10} {:<10} {:<20} {:<15}\n".format(
                 i['properties']['datetime'],
