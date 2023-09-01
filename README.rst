@@ -31,7 +31,7 @@ Features
 
 * download atmospheric corrected L2A Sentinel-2 thumbnail, overview, and data from AWS
 * provide single date or time range for finding data at the server
-* select which individual bands to download, the following bands are supported: ``"B01"``, ``"B02"``, ``"B03"``, ``"B04"``, ``"B05"``, ``"B06"``, ``"B07"``, ``"B08"``, ``"B8A"``, ``"B09"``, ``"B11"``, ``"B12"``
+* select which individual bands to download, the following bands are supported: ``"coastal"``, ``"blue"``, ``"green"``, ``"red"``, ``"rededge1"``, ``"rededge2"``, ``"rededge3"``, ``"nir"``, ``"nir08"``, ``"nir09"``, ``"swir16"``, ``"swir22"``
 * provide UTM zone, latitude band and grid square to download whole tiles
 
 
