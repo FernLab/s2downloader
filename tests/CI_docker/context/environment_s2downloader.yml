@@ -29,6 +29,7 @@ dependencies:
     # test requirements
     - pytest
     - pytest-cov
+    - pytest-runner
     - pytest-reporter-html1
     - urlchecker==0.0.32
 
