@@ -41,7 +41,7 @@ req = ['gdal', 'affine', 'pyproj', 'numpy', 'matplotlib', 'geojson', 'rasterio',
 
 req_setup = ['pytest-runner']
 
-req_test = ['pytest>=3', 'pytest-cov', 'pytest-reporter-html1', 'urlchecker==0.0.32']
+req_test = ['pytest>=3', 'pytest-cov', 'pytest-reporter-html1', 'urlchecker']
 
 req_doc = [
     'sphinx>=4.1.1',
