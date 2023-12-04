@@ -117,10 +117,10 @@ def searchDataAtAWS(*,
         item_list_dict = [i.to_dict() for i in items_list]
 
         # print overview of found data
-        logger.info("{:<25} {:<25} {:<10} {:<10} {:<20} {:<15}".format('Date', 'ID', 'UTM Zone', 'EPSG',
-                                                                       'Tile Cloud Cover', 'Tile NoData Percentage'))
+        logger.info("{:<30} {:<25} {:<12} {:<10} {:<22} {:<15}".format('Date', 'ID', 'UTM Zone', 'EPSG',
+                                                                       'Tile Cloud Cover %', 'Tile NoData %'))
         for i in item_list_dict:
-            logger.info("{:<25} {:<25} {:<10} {:<10} {:<20} {:<15}\n".format(
+            logger.info("{:<30} {:<25} {:<12} {:<10} {:<22} {:<15}\n".format(
                 i['properties']['datetime'],
                 i['id'],
                 i['properties']['mgrs:utm_zone'],
