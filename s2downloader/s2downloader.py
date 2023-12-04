@@ -109,8 +109,8 @@ def searchDataAtAWS(*,
                              "Try to adapt your search parameters:\n"
                              "- increase time span,\n"
                              "- allow more cloud coverage,\n"
-                             "- reduce data coverage (your polygon(s) may not be affected"
-                             " by a smaller tile coverage).")
+                             "- increase nodata pixel percentage (your polygon(s) may not be affected"
+                             " by a higher nodata pixel availability).")
 
         # items to list
         items_list = list(item_search.items())
