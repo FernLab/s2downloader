@@ -1,5 +1,5 @@
 # ref https://github.com/tebeka/pythonwise/blob/master/docker-miniconda/Dockerfile
-FROM python:3.10-slim-buster
+FROM python:3.11-slim-buster
 
 # System packages
 RUN apt-get update -y && \
@@ -23,7 +23,7 @@ RUN mamba init bash
 
 # copy some needed stuff to /root
 COPY *.yml /root/
-RUN mamba env create -n ci_env -f /root/environment_s2downloader.yml python=3.10
+RUN mamba env create -n ci_env -f /root/environment_s2downloader.yml
 
 # Make RUN commands use the new environment:
 SHELL ["conda", "run", "-n", "ci_env", "/bin/bash", "-c"]
