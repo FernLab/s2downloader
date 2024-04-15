@@ -21,4 +21,4 @@
 """Version module for S2Downloader."""
 
 __version__ = '1.0.2'
-__versionalias__ = '2024-01-16_01'
+__versionalias__ = '2024-04-15_01'

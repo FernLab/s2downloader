@@ -2,6 +2,11 @@
 History
 =======
 
+1.0.2 (2024-04-15)
+------------------
+* Adapt error message and output log.
+* Fix installation and requirements.
+
 1.0.1 (2023-09-01)
 ------------------
 * Fix wrong query operators.
