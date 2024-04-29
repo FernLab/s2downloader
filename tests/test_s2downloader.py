@@ -72,7 +72,8 @@ class TestS2Downloader(unittest.TestCase):
         cls.config_file = os.path.abspath(f"{cls.root_path}data/default_config.json")
         cls.configuration = loadConfiguration(path=cls.config_file)
 
-        cls.configuration['user_settings']['result_settings']['results_dir'] = "tests/temp_results"
+        cls.configuration['user_settings']['result_settings']['results_dir'] = (
+            os.path.abspath(os.path.join(cls.root_path, "tests/temp_results")))
 
         cls.output_data_path = cls.configuration['user_settings']['result_settings']['results_dir']
         cls.configuration['user_settings']['aoi_settings']['SCL_filter_values'] = [3, 6]
@@ -381,7 +382,7 @@ class TestS2Downloader(unittest.TestCase):
 
         path = os.path.abspath(
             os.path.join(self.output_data_path,
-                         "33/U/UV/2018/06/S2B_MSIL2A_20180606T102019_N0208_R065_T33UUV_20180606T190659/SCL.tif"))
+                         "33/U/UV/2018/06/S2B_MSIL2A_20180606T102019_N0500_R065_T33UUV_20230824T062839/SCL.tif"))
         self.assertEqual((str(path), os.path.isfile(path)), (str(path), True))
         with rasterio.open(path) as expected_res:
             assert expected_res.dtypes[0] == "uint8"
@@ -399,7 +400,7 @@ class TestS2Downloader(unittest.TestCase):
 
         path = os.path.abspath(
             os.path.join(self.output_data_path,
-                         "33/U/UV/2018/06/S2B_MSIL2A_20180606T102019_N0208_R065_T33UUV_20180606T190659/coastal.tif"))
+                         "33/U/UV/2018/06/S2B_MSIL2A_20180606T102019_N0500_R065_T33UUV_20230824T062839/coastal.tif"))
         self.assertEqual((str(path), os.path.isfile(path)), (str(path), True))
         with rasterio.open(path) as expected_res:
             assert expected_res.dtypes[0] == "uint16"
@@ -417,7 +418,7 @@ class TestS2Downloader(unittest.TestCase):
 
         path = os.path.abspath(
             os.path.join(self.output_data_path,
-                         "33/U/UV/2018/06/S2B_MSIL2A_20180606T102019_N0208_R065_T33UUV_20180606T190659/blue.tif"))
+                         "33/U/UV/2018/06/S2B_MSIL2A_20180606T102019_N0500_R065_T33UUV_20230824T062839/blue.tif"))
         self.assertEqual((str(path), os.path.isfile(path)), (str(path), True))
         with rasterio.open(path) as expected_res:
             assert expected_res.dtypes[0] == "uint16"
@@ -435,7 +436,7 @@ class TestS2Downloader(unittest.TestCase):
 
         path = os.path.abspath(
             os.path.join(self.output_data_path,
-                         "33/U/UV/2018/06/S2B_MSIL2A_20180606T102019_N0208_R065_T33UUV_20180606T190659/rededge1.tif"))
+                         "33/U/UV/2018/06/S2B_MSIL2A_20180606T102019_N0500_R065_T33UUV_20230824T062839/rededge1.tif"))
         self.assertEqual((str(path), os.path.isfile(path)), (str(path), True))
         with rasterio.open(path) as expected_res:
             assert expected_res.dtypes[0] == "uint16"
@@ -450,6 +451,26 @@ class TestS2Downloader(unittest.TestCase):
                                  rtol=0,
                                  atol=1e-4,
                                  equal_nan=False).all()
+
+    def testS2DownloaderTileIDEQ_false(self):
+        """Test downloading a single TileID, but for a wrongly returned image."""
+
+        config = deepcopy(self.configuration)
+        config["user_settings"]["aoi_settings"]["bounding_box"] = []
+        config['user_settings']["tile_settings"]["mgrs:utm_zone"] = {"eq": 33}
+        config['user_settings']["tile_settings"]["mgrs:latitude_band"] = {"eq": "U"}
+        config['user_settings']["tile_settings"]["mgrs:grid_square"] = {"eq": "UV"}
+        config['user_settings']['aoi_settings']['date_range'] = ["2018-06-06"]
+        config["user_settings"]["tile_settings"]["bands"] = ["coastal"]
+        config['user_settings']['aoi_settings']["SCL_filter_values"] = [3, 7, 8, 9, 10]
+
+        Config(**config)
+        s2Downloader(config_dict=config)
+
+        path = os.path.abspath(
+            os.path.join(self.output_data_path,
+                         "33/U/UV/2018/06/S2B_MSIL2A_20180606T102019_N0208_R065_T33UUV_20180606T190659/SCL.tif"))
+        self.assertFalse(os.path.isfile(path))
 
     def testS2DownloaderTileIDIN(self):
         """Test downloading multiple TileIDs."""
@@ -468,7 +489,7 @@ class TestS2Downloader(unittest.TestCase):
 
         path = os.path.abspath(
             os.path.join(self.output_data_path,
-                         "33/U/UV/2018/06/S2B_MSIL2A_20180606T102019_N0208_R065_T33UUV_20180606T190659/SCL.tif"))
+                         "33/U/UV/2018/06/S2B_MSIL2A_20180606T102019_N0500_R065_T33UUV_20230824T062839/SCL.tif"))
         self.assertEqual((str(path), os.path.isfile(path)), (str(path), True))
         with rasterio.open(path) as expected_res:
             assert expected_res.dtypes[0] == "uint8"
@@ -486,7 +507,7 @@ class TestS2Downloader(unittest.TestCase):
 
         path = os.path.abspath(
             os.path.join(self.output_data_path,
-                         "32/U/QE/2018/06/S2B_MSIL2A_20180606T102019_N0208_R065_T32UQE_20180606T190659/SCL.tif"))
+                         "32/U/QE/2018/06/S2B_MSIL2A_20180606T102019_N0500_R065_T32UQE_20230824T062839/SCL.tif"))
         self.assertEqual((str(path), os.path.isfile(path)), (str(path), True))
         with rasterio.open(path) as expected_res:
             assert expected_res.dtypes[0] == "uint8"

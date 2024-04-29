@@ -2,6 +2,12 @@
 History
 =======
 
+
+1.0.3 (2024-04-25)
+------------------
+* Filter query for duplicates, keep only the most up to date data in terms of s2:processing.
+* Ensure data comparison is valid in terms of processing baselines.
+
 1.0.2 (2024-04-15)
 ------------------
 * Adapt error message and output log.
