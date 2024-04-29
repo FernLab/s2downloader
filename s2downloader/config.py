@@ -355,9 +355,14 @@ class S2Settings(BaseModel, extra=Extra.forbid):
 
     @validator('tiles_definition_path')
     def check_tiles_definition(cls, v):
-        """Check if the tiles definition path is exists."""
-        if not os.path.exists(os.path.abspath(v)):
-            raise ValueError(f"Tiles definition path is invalid: {v}")
+        """Check if the tiles definition path exists."""
+        v_abs = os.path.abspath(v)
+        if not os.path.exists(v_abs):
+            v_parent = os.path.abspath(os.path.join(os.pardir, v))
+            if not os.path.exists(v_parent):
+                raise ValueError(f"Tiles definition path is invalid: {v}")
+            else:
+                v = v_parent
         return v
 
 

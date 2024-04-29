@@ -47,7 +47,8 @@ class TestConfig(unittest.TestCase):
         cls.config_file = os.path.abspath(f"{cls.root_path}data/default_config.json")
         cls.configuration = loadConfiguration(path=cls.config_file)
 
-        cls.configuration['user_settings']['result_settings']['results_dir'] = "tests/temp_results"
+        cls.configuration['user_settings']['result_settings']['results_dir'] = (
+            os.path.abspath(os.path.join(cls.root_path, "tests/temp_results")))
 
         cls.output_data_path = cls.configuration['user_settings']['result_settings']['results_dir']
 

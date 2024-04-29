@@ -40,7 +40,8 @@ from typing import Union
 from pystac import Item
 from pystac_client import Client
 
-from .utils import saveRasterToDisk, validPixelsFromSCLBand, getBoundsUTM, groupItemsPerDate, getUTMZoneBB
+from .utils import (saveRasterToDisk, validPixelsFromSCLBand, getBoundsUTM,
+                    groupItemsPerDate, getUTMZoneBB, remove_duplicates_and_ensure_data_consistency)
 from .config import Config
 
 
@@ -115,6 +116,13 @@ def searchDataAtAWS(*,
         # items to list
         items_list = list(item_search.items())
         item_list_dict = [i.to_dict() for i in items_list]
+
+        # filter duplicates for s2:processing_baseline and earthsearch:boa_offset_applied,
+        # if collection equals sentinel-2-l2a
+        if s2_collection[0] == 'sentinel-2-l2a':
+            item_list_dict = remove_duplicates_and_ensure_data_consistency(item_list_dict)
+            filtered_ids = [item['id'] for item in item_list_dict]
+            items_list = [item for item in items_list if item.id in filtered_ids]
 
         # print overview of found data
         logger.info("{:<30} {:<25} {:<12} {:<10} {:<22} {:<15}".format('Date', 'ID', 'UTM Zone', 'EPSG',

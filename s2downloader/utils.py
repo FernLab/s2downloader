@@ -30,6 +30,7 @@ import pystac
 import rasterio
 import rasterio.io
 from shapely.geometry import box
+from datetime import datetime
 
 
 def saveRasterToDisk(*, out_image: np.ndarray, raster_crs: pyproj.crs.crs.CRS, out_transform: affine.Affine,
@@ -230,3 +231,49 @@ def getUTMZoneBB(*, tiles_gpd: geopandas.GeoDataFrame, bbox: list[float], logger
             utm_zone = bb_crs - 32700
 
     return utm_zone
+
+
+def remove_duplicates_and_ensure_data_consistency(item_list_dict: list) -> list:
+    """Remove dicts with duplicate date based on highest s2:processing_baseline and check data consistency.
+
+    Parameters
+    ----------
+    item_list_dict : list
+        Contains the dicts of all queried data.
+
+    Returns
+    -------
+    : list
+       Contains remaining data dicts.
+
+    """
+    # find duplicates based on the date and tile location of the images, for dates only compare yyyy-mm-dd part
+    duplicates = {}
+    for item in item_list_dict:
+        date_part = datetime.strptime(item['properties']['datetime'][:10], '%Y-%m-%d')
+        key = (date_part,
+               item['properties']['mgrs:utm_zone'],
+               item['properties']['mgrs:latitude_band'],
+               item['properties']['mgrs:grid_square'])
+        if key in duplicates:
+            duplicates[key].append(item)
+        else:
+            duplicates[key] = [item]
+
+    # for each group of duplicates, find the one with the highest value of s2:processing_baseline
+    for date_part, items in duplicates.items():
+        if len(items) > 1:  # Only if there are duplicates
+            max_b_item = max(items, key=lambda x: x['properties']['s2:processing_baseline'])
+            items.remove(max_b_item)
+            for item in items:
+                item_list_dict.remove(item)
+
+    # for remaining list without duplicate dates, keep only data that is comparable to each other,
+    item_list_dict = [item for item in item_list_dict if
+                      (float(item['properties']['s2:processing_baseline']) >= 4.0 and
+                       item['properties']['earthsearch:boa_offset_applied'] is True)
+                      or
+                      (float(item['properties']['s2:processing_baseline']) < 4.0 and
+                       item['properties']['earthsearch:boa_offset_applied'] is False)]
+
+    return item_list_dict
