@@ -288,8 +288,8 @@ def downloadMosaic(*, config_dict: dict):
             "data_available": False,
             "error_info": ""
             }
-        if nonzero_pixels_per >= aoi_settings["SCL_mask_valid_pixels_min_percentage"] \
-                and valid_pixels_per >= aoi_settings["aoi_min_coverage"]:
+        if nonzero_pixels_per >= aoi_settings["aoi_min_coverage"] \
+                and valid_pixels_per >= aoi_settings["SCL_mask_valid_pixels_min_percentage"]:
             try:
                 if (download_thumbnails or download_overviews) or download_data:
                     msg = f"Getting {''.join(data_msg)} for: {items[0].id}"
@@ -538,8 +538,8 @@ def downloadTileID(*, config_dict: dict):
             scenes_info[items_date.replace('-', '')]["nonzero_pixels"].append(nonzero_pixels_per)
             scenes_info[items_date.replace('-', '')]["valid_pixels"].append(valid_pixels_per)
 
-            if nonzero_pixels_per >= aoi_settings["SCL_mask_valid_pixels_min_percentage"] \
-                    and valid_pixels_per >= aoi_settings["aoi_min_coverage"]:
+            if nonzero_pixels_per >= aoi_settings["aoi_min_coverage"] \
+                    and valid_pixels_per >= aoi_settings["SCL_mask_valid_pixels_min_percentage"]:
                 try:
                     if (download_thumbnails or download_overviews) or download_data:
                         msg = f"Getting {''.join(data_msg)} for: {item.id}"
