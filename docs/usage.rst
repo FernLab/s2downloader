@@ -91,6 +91,7 @@ The package expects a configuration file in ``json`` format, like the `default_c
                     10
                 ],
                 "aoi_min_coverage": 90,
+                "SCL_masked_pixels_max_percentage": 20,
                 "valid_pixels_min_percentage": 10,
                 "resampling_method": "cubic",
                 "date_range": [
@@ -179,6 +180,9 @@ AOI Settings
     * - ``aoi_min_coverage``
       - User defined threshold for noData values inside the AOI. It may happen due to Sentinel-2 data tile structure that parts of the AOI have noData values. Here the user can define a percentage value of minimum valid pixels inside the AOI.
       - ``"aoi_min_coverage": 90``
+    * - ``SCL_masked_pixels_max_percentage``
+      - User defined threshold for the SCL masked values inside the AOI. Here the user can define a percentage value of maximum masked pixels after masking in order to save the image. As an example, allow at most 20% cloud coverage in the image.
+      - ``"SCL_masked_pixels_max_percentage": 20``
     * - ``valid_pixels_min_percentage``
       - If cloud masking based on the SCL band is applied, it may happen that images are saved which contain only very few valid pixels. Here the user can define a percentage value of minimum valid pixels that should be left over after masking in order to save the image.
       - ``"valid_pixels_min_percentage": 70``
