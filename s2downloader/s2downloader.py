@@ -283,6 +283,7 @@ def downloadMosaic(*, config_dict: dict):
         scenes_info[items_date.replace('-', '')] = {
             "item_ids": list(),
             "nonzero_pixels": nonzero_pixels_per,
+            "masked_pixels": masked_pixels_per,
             "valid_pixels": valid_pixels_per,
             "data_available": False,
             "error_info": ""
@@ -492,6 +493,7 @@ def downloadTileID(*, config_dict: dict):
         scenes_info[items_date.replace('-', '')] = {
             "item_ids": list(),
             "nonzero_pixels": list(),
+            "masked_pixels": list(),
             "valid_pixels": list(),
             "data_available": list(),
             "error_info": list()
