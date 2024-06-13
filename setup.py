@@ -37,7 +37,7 @@ with open("s2downloader/version.py") as version_file:
 
 req = ['gdal', 'affine', 'pyproj', 'numpy', 'matplotlib', 'geojson', 'rasterio', 'geopy',
        'pandas', 'geopandas>=0.11', 'shapely', 'rtree', 'python-dateutil', 'pystac==1.6.1',
-       'pystac-client==0.6.0', 'pydantic==1.10.10']
+       'pystac-client==0.6.0', 'pydantic==1.10.10', 'geojson-pydantic']
 
 req_setup = ['pytest-runner']
 
