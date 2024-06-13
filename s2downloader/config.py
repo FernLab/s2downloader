@@ -33,7 +33,6 @@ from json import JSONDecodeError
 import pydantic
 # third party packages
 from pydantic import BaseModel, Field, StrictBool, Extra, HttpUrl, field_validator, model_validator
-from pydantic_core.core_schema import ModelField
 from typing import Optional, List, Dict
 
 
