@@ -154,14 +154,15 @@ class AoiSettings(BaseModel, extra=Extra.forbid):
         title="SCL values for the filter mask.",
         description="Define which values of SCL band should be applied as filter.",
         default=[3, 7, 8, 9, 10])
-    SCL_mask_valid_pixels_min_percentage: float = Field(
-        title="Minimum percentage of valid pixels after cloud masking.",
-        description="Define a minimum percentage of pixels that should be valid after cloud masking in the AOI.",
-        default=0.0, ge=0.0, le=100.0)
     aoi_min_coverage: float = Field(
         title="Minimum percentage of valid pixels after noData filtering.",
         description="Define a minimum percentage of pixels that should be valid (not noData) after noData filtering"
                     " in the aoi.",
+        default=0.0, ge=0.0, le=100.0)
+    valid_pixels_min_percentage: float = Field(
+        title="Minimum percentage of valid pixels after noData filtering and cloud masking.",
+        description="Define a minimum percentage of pixels that should be valid after noData filtering and cloud "
+                    "masking in the AOI.",
         default=0.0, ge=0.0, le=100.0)
     resampling_method: ResamplingMethodName = Field(
         title="Rasterio resampling method name.",
