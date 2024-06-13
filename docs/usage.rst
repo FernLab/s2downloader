@@ -90,8 +90,8 @@ The package expects a configuration file in ``json`` format, like the `default_c
                     9,
                     10
                 ],
-                "SCL_mask_valid_pixels_min_percentage": 10,
                 "aoi_min_coverage": 90,
+                "valid_pixels_min_percentage": 10,
                 "resampling_method": "cubic",
                 "date_range": [
                     "2021-09-04",
@@ -176,12 +176,12 @@ AOI Settings
     * - ``SCL_filter_values``
       - List of integer-Values corresponding to the SCL classes. It's default classes are: cloud shadow (class 3), clouds (classes 7, 8, 9) and thin cirrus (class 10).
       - ``"SCL_filter_values": [3, 7, 8, 9, 10]"``
-    * - ``SCL_mask_valid_pixels_min_percentage``
-      - If cloud masking based on the SCL band is applied, it may happen that images are saved which contain only very few valid pixels. Here the user can define a percentage value of minimum valid pixels that should be left over after masking in order to save the image.
-      - ``"SCL_mask_valid_pixels_min_percentage": 70``
     * - ``aoi_min_coverage``
       - User defined threshold for noData values inside the AOI. It may happen due to Sentinel-2 data tile structure that parts of the AOI have noData values. Here the user can define a percentage value of minimum valid pixels inside the AOI.
       - ``"aoi_min_coverage": 90``
+    * - ``valid_pixels_min_percentage``
+      - If cloud masking based on the SCL band is applied, it may happen that images are saved which contain only very few valid pixels. Here the user can define a percentage value of minimum valid pixels that should be left over after masking in order to save the image.
+      - ``"valid_pixels_min_percentage": 70``
     * - ``resampling_method``
       - User definition of the resampling method that should be used. Currently, these options are supported: nearest, bilinear, cubic.
       - ``"resampling_method": "nearest"``, ``"resampling_method": "bilinear"``, ``"resampling_method": "cubic"``
