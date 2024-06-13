@@ -159,6 +159,14 @@ class AoiSettings(BaseModel, extra=Extra.forbid):
         description="Define a minimum percentage of pixels that should be valid (not noData) after noData filtering"
                     " in the aoi.",
         default=0.0, ge=0.0, le=100.0)
+    SCL_masked_pixels_max_percentage: float = Field(
+        title="Maximum percentage of SCL masked pixels after noData filtering.",
+        description="Define a maximum percentage of pixels that are filtered by a cloud mask "
+                    "after "
+                    "noData "
+                    "filtering"
+                    " in the aoi.",
+        default=0.0, ge=0.0, le=100.0)
     valid_pixels_min_percentage: float = Field(
         title="Minimum percentage of valid pixels after noData filtering and cloud masking.",
         description="Define a minimum percentage of pixels that should be valid after noData filtering and cloud "
