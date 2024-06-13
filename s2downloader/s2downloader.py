@@ -474,7 +474,7 @@ def downloadTileID(*, config_dict: dict):
                                 bb=None,
                                 date_range=aoi_settings['date_range'],
                                 props_json=tile_settings,
-                                stac_catalog_url=s2_settings['stac_catalog_url'],
+                                stac_catalog_url=str(s2_settings['stac_catalog_url']),
                                 logger=logger)
 
     data_msg = []
