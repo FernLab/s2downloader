@@ -35,7 +35,7 @@ from rasterio.merge import merge
 from rasterio.windows import from_bounds, Window, bounds
 from rasterio.warp import Resampling
 import urllib.request
-from typing import Union
+from typing import Dict, Union
 
 from pystac import Item
 from pystac_client import Client
@@ -48,6 +48,7 @@ from .config import Config
 def searchDataAtAWS(*,
                     s2_collection: list[str],
                     bb: Union[list[float], None],
+                    polygon: Union[Dict, None],
                     date_range: list[str],
                     props_json: dict,
                     stac_catalog_url: str,
@@ -60,6 +61,8 @@ def searchDataAtAWS(*,
         Contains name of S2 collection at AWS (only tested for [sentinel-s2-l2a-cogs].)
     bb : list[float]
         A list of coordinates of the outer bounding box of all given coordinates.
+    polygon : Dict
+        Polygon defining the AOI.
     date_range: list[str]
         List with the start and end date. If the same it is a single date request.
     props_json: dict
@@ -89,12 +92,12 @@ def searchDataAtAWS(*,
         item_search = catalogue.search(
             collections=s2_collection,  # sentinel-s2-l2a-cogs
             bbox=bb,  # bounding box
-            # intersects=geoj,   # method can be used instead of bbox, but currently throws error
+            intersects=polygon,
             query=props_json,  # cloud and data coverage properties
             datetime=date_range,  # time period
             # sortby="-properties.datetime"  # sort by data descending (minus sign) ->
             # deactivated: error for catalog v1
-            )
+        )
 
         # proceed if items are found
         if len(list(item_search.items())) == 0:
@@ -197,6 +200,7 @@ def downloadMosaic(*, config_dict: dict):
     # search for Sentinel-2 data within the bounding box as defined in query_props.json (no data download yet)
     aws_items = searchDataAtAWS(s2_collection=s2_settings['collections'],
                                 bb=aoi_settings['bounding_box'],
+                                polygon=aoi_settings['polygon'],
                                 date_range=aoi_settings['date_range'],
                                 props_json=tile_settings,
                                 stac_catalog_url=s2_settings['stac_catalog_url'],
@@ -287,7 +291,7 @@ def downloadMosaic(*, config_dict: dict):
             "valid_pixels": valid_pixels_per,
             "data_available": False,
             "error_info": ""
-            }
+        }
         if nonzero_pixels_per >= aoi_settings["aoi_min_coverage"] \
                 and valid_pixels_per >= aoi_settings["SCL_mask_valid_pixels_min_percentage"]:
             try:
@@ -472,6 +476,7 @@ def downloadTileID(*, config_dict: dict):
     # search for Sentinel-2 data within the bounding box as defined in query_props.json (no data download yet)
     aws_items = searchDataAtAWS(s2_collection=s2_settings['collections'],
                                 bb=None,
+                                polygon=None,
                                 date_range=aoi_settings['date_range'],
                                 props_json=tile_settings,
                                 stac_catalog_url=s2_settings['stac_catalog_url'],
@@ -496,7 +501,7 @@ def downloadTileID(*, config_dict: dict):
             "valid_pixels": list(),
             "data_available": list(),
             "error_info": list()
-            }
+        }
         for item in items_per_date[items_date]:
             scenes_info[items_date.replace('-', '')]["item_ids"].append({"id": item.id})
             output_path = os.path.join(result_dir,
