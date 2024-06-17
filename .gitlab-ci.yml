@@ -15,7 +15,7 @@ test_s2downloader:
     - source /root/mambaforge/bin/activate ci_env
 
     # install missing dependencies on the CI container
-    - mamba env update --name ci_env --file tests/CI_docker/context/environment_s2downloader.yml  --prune
+    - mamba env update --name ci_env --file tests/CI_docker/context/environment_s2downloader.yml
 
     # run tests
     - make pytest
