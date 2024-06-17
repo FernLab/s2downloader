@@ -51,7 +51,7 @@ class S2Platform(str, Enum):
     S2B = "sentinel-2b"
 
 
-class TileSettings(BaseModel):
+class TileSettings(BaseModel, extra=Extra.forbid):
     """Template for Tile settings in config file."""
 
     platform: Optional[Dict] = Field(
