@@ -182,14 +182,13 @@ def downloadMosaic(*, config_dict: dict):
     cloudmasking = aoi_settings["apply_SCL_band_mask"]
     tiles_path = config_dict['s2_settings']['tiles_definition_path']
 
-    tile_settings["mgrs:utm_zone"] = {}
     try:
         op_start = time.time()
         tiles_gpd = geopandas.read_file(tiles_path,
                                         bbox=aoi_settings["bounding_box"])
         logger.debug(f"Loading Sentinel-2 tiles took {(time.time() - op_start) * 1000} msecs.")
         utm_zone = getUTMZoneBB(tiles_gpd=tiles_gpd, bbox=aoi_settings['bounding_box'])
-        if utm_zone != 0:
+        if utm_zone != 0 and tile_settings["mgrs:utm_zone"] == {}:
             tile_settings["mgrs:utm_zone"] = {"eq": utm_zone}
     except (IOError, FileNotFoundError) as err:
         logger.warning(f"It is not possible to determine in which UTM zone is the bounding-box: {err}")
