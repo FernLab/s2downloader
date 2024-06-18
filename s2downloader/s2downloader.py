@@ -94,7 +94,7 @@ def searchDataAtAWS(*,
             datetime=date_range,  # time period
             # sortby="-properties.datetime"  # sort by data descending (minus sign) ->
             # deactivated: error for catalog v1
-            )
+        )
 
         # proceed if items are found
         if len(list(item_search.items())) == 0:
@@ -286,7 +286,7 @@ def downloadMosaic(*, config_dict: dict):
             "valid_pixels": valid_pixels_per,
             "data_available": False,
             "error_info": ""
-            }
+        }
         if nonzero_pixels_per >= aoi_settings["aoi_min_coverage"] \
                 and masked_pixels_per <= aoi_settings["SCL_masked_pixels_max_percentage"] \
                 and valid_pixels_per >= aoi_settings["valid_pixels_min_percentage"]:
@@ -496,7 +496,7 @@ def downloadTileID(*, config_dict: dict):
             "valid_pixels": list(),
             "data_available": list(),
             "error_info": list()
-            }
+        }
         for item in items_per_date[items_date]:
             scenes_info[items_date.replace('-', '')]["item_ids"].append({"id": item.id})
             output_path = os.path.join(result_dir,
