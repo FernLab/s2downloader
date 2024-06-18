@@ -2,7 +2,7 @@
 History
 =======
 
-1.0.5 (2024-06-17)
+1.0.5 (2024-06-18)
 ------------------
 * Allow separate filtering of background|nodata and (non-)valid data
 * Fix bug in prioritizing UTM-Zones.
