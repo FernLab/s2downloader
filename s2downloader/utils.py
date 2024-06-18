@@ -91,7 +91,7 @@ def saveRasterToDisk(*, out_image: np.ndarray, raster_crs: pyproj.crs.crs.CRS, o
 def validPixelsFromSCLBand(*,
                            scl_band: np.ndarray,
                            scl_filter_values: list[int],
-                           logger: Logger = None) -> tuple[float, float]:
+                           logger: Logger = None) -> tuple[float, float, float]:
     """Percentage of valid SCL band pixels.
 
     Parameters
@@ -108,6 +108,8 @@ def validPixelsFromSCLBand(*,
     : float
         Percentage of data pixels.
     : float
+        Percentage of masked pixels.
+    : float
         Percentage of non-masked out pixels
 
     Raises
@@ -122,11 +124,15 @@ def validPixelsFromSCLBand(*,
         nonzero_pixels_per = (float(scl_band_nonzero) / float(scl_band.size)) * 100
         logger.info(f"Nonzero pixels: {nonzero_pixels_per} %")
 
+        scl_band_scl_mask = np.where(np.isin(scl_band, scl_filter_values), 1, 0)
+        masked_pixels_per = (float(np.count_nonzero(scl_band_scl_mask)) / float(scl_band_nonzero)) * 100
+        logger.info(f"Masked pixels: {masked_pixels_per} %")
+
         scl_band_mask = np.where(np.isin(scl_band, scl_filter_values), 0, 1)
-        valid_pixels_per = (float(np.count_nonzero(scl_band_mask)) / float(scl_band.size)) * 100
+        valid_pixels_per = (float(np.count_nonzero(scl_band_mask * scl_band)) / float(scl_band.size)) * 100
         logger.info(f"Valid pixels: {valid_pixels_per} %")
 
-        return nonzero_pixels_per, valid_pixels_per
+        return nonzero_pixels_per, masked_pixels_per, valid_pixels_per
     except Exception as e:  # pragma: no cover
         raise Exception(f"Failed to count the number of valid pixels for the SCl band => {e}")
 
