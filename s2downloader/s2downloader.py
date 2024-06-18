@@ -326,7 +326,7 @@ def downloadMosaic(*, config_dict: dict):
 
                     if cloudmasking:
                         # Mask out Clouds
-                        scl_band_mask = np.where(np.isin(scl_band, scl_filter_values.append(0)),
+                        scl_band_mask = np.where(np.isin(scl_band, scl_filter_values + [0]),
                                                  np.uint16(0), np.uint16(1))
                     del scl_band
 
@@ -578,7 +578,7 @@ def downloadTileID(*, config_dict: dict):
 
                         if cloudmasking:
                             # Mask out Clouds
-                            scl_band_mask = np.where(np.isin(scl_band, scl_filter_values.append(0)),
+                            scl_band_mask = np.where(np.isin(scl_band, scl_filter_values + [0]),
                                                      np.uint16(0), np.uint16(1))
                         del scl_band
 
