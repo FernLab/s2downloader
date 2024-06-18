@@ -317,6 +317,51 @@ class TestS2Downloader(unittest.TestCase):
                                  atol=1e-4,
                                  equal_nan=False).all()
 
+    def testS2DownloaderChoose1UTMfrom2(self):
+        """Test downloader for 2 UTMs."""
+
+        config = deepcopy(self.configuration)
+        config["user_settings"]["aoi_settings"]["bounding_box"] = [13.10766141955574, 53.452302211632144,
+                                                                   13.237473951256504, 53.50549339832173]
+        config["user_settings"]["aoi_settings"]["date_range"] = ["2018-07-01", "2018-07-02"]
+        config['user_settings']["tile_settings"]["mgrs:utm_zone"] = {"in": [33]}
+        config['user_settings']["tile_settings"]["bands"] = ["coastal"]
+        config["user_settings"]["aoi_settings"]["apply_SCL_band_mask"] = False
+        config["user_settings"]["aoi_settings"]["aoi_min_coverage"] = 20
+        Config(**config)
+        s2Downloader(config_dict=config)
+
+        # check output
+        # number of files:
+        filecount = sum([len(files) for r, d, files in os.walk(self.output_data_path)])
+        assert filecount == 4
+
+        # features of two files:
+        path = os.path.abspath(
+            os.path.join(self.output_data_path, "20180701_S2A_SCL.tif"))
+        self.assertEqual((str(path), os.path.isfile(path)), (str(path), True))
+        with rasterio.open(path) as expected_res:
+            assert expected_res.dtypes[0] == "uint8"
+            assert expected_res.shape == (614, 876)
+            assert expected_res.bounds == rasterio.coords.BoundingBox(left=374340.0, bottom=5924040.0,
+                                                                      right=383100.0, top=5930180.0)
+            assert expected_res.read_crs() == CRS().from_epsg(code=32633)
+
+        config['user_settings']["tile_settings"]["mgrs:utm_zone"] = {"in": [32]}
+        Config(**config)
+        s2Downloader(config_dict=config)
+
+        # features of two files:
+        path = os.path.abspath(
+            os.path.join(self.output_data_path, "20180701_S2A_SCL.tif"))
+        self.assertEqual((str(path), os.path.isfile(path)), (str(path), True))
+        with rasterio.open(path) as expected_res:
+            assert expected_res.dtypes[0] == "uint8"
+            assert expected_res.shape == (642, 896)
+            assert expected_res.bounds == rasterio.coords.BoundingBox(left=772360.0, bottom=5930460.0,
+                                                                      right=781320.0, top=5936880.0)
+            assert expected_res.read_crs() == CRS().from_epsg(code=32632)
+
     def testS2Downloader2UTMsSouthernHemisphere(self):
         """Test downloader for 2 UTM tiles in southern hemisphere and west of Greenwich."""
 
