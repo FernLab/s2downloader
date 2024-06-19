@@ -420,7 +420,7 @@ def loadConfiguration(*, path: str) -> dict:
     try:
         with open(path) as config_fp:
             config = json.load(config_fp)
-            config = Config(**config).dict(by_alias=True)
+            config = Config(**config).model_dump(by_alias=True)
     except JSONDecodeError as e:
         raise IOError(f'Failed to load the configuration json file => {e}')
     return config

@@ -671,7 +671,7 @@ def s2Downloader(*, config_dict: dict):
         Failed to save raster to disk.
     """
     try:
-        config_dict = Config(**config_dict).dict(by_alias=True)
+        config_dict = Config(**config_dict).model_dump(by_alias=True)
         if len(config_dict['user_settings']['aoi_settings']['bounding_box']) == 0:
             downloadTileID(config_dict=config_dict)
         else:
