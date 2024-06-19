@@ -654,8 +654,8 @@ class TestS2Downloader(unittest.TestCase):
             assert False
 
         if not os.path.exists(
-            os.path.join(
-                self.output_data_path, "S2B_32UQD_20210908_0_L2A_thumbnail.jpg")):
+                os.path.join(
+                    self.output_data_path, "S2B_32UQD_20210908_0_L2A_thumbnail.jpg")):
             assert False
 
         with rasterio.open(scene_path) as expected_res:
