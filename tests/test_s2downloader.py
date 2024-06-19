@@ -273,6 +273,7 @@ class TestS2Downloader(unittest.TestCase):
         """Test downloader for 2 UTMs."""
 
         config = deepcopy(self.configuration)
+        config["user_settings"]["tile_settings"]["bands"] = ["blue"]
         config["user_settings"]["aoi_settings"]["bounding_box"] = [11.53953018718721,
                                                                    51.9893919386015,
                                                                    12.22833075284612,
@@ -284,7 +285,7 @@ class TestS2Downloader(unittest.TestCase):
         # check output
         # number of files:
         filecount = sum([len(files) for r, d, files in os.walk(self.output_data_path)])
-        assert filecount == 6
+        assert filecount == 4
 
         # features of two files:
         path = os.path.abspath(
@@ -363,14 +364,16 @@ class TestS2Downloader(unittest.TestCase):
             assert expected_res.read_crs() == CRS().from_epsg(code=32632)
 
     def testS2Downloader2UTMsSouthernHemisphere(self):
-        """Test downloader for 2 UTM tiles in southern hemisphere and west of Greenwich."""
+        """Test downloader for 2 UTM tiles in southern hemisphere and west of Greenwich combined with SCL-masking."""
 
         config = deepcopy(self.configuration)
+        config["user_settings"]["tile_settings"]["bands"] = ["blue"]
         config["user_settings"]["aoi_settings"]["bounding_box"] = [-72.21253483033124,
                                                                    -41.341630665653824,
                                                                    -71.50872541102595,
                                                                    -41.00765157647477]
-
+        config["user_settings"]["aoi_settings"]["apply_SCL_band_mask"] = True
+        config["user_settings"]["aoi_settings"]["SCL_filter_values"] = [6]
         config["user_settings"]["aoi_settings"]["date_range"] = ['2022-12-31']
         Config(**config)
         s2Downloader(config_dict=config)
@@ -378,7 +381,7 @@ class TestS2Downloader(unittest.TestCase):
         # check output
         # number of files:
         filecount = sum([len(files) for r, d, files in os.walk(self.output_data_path)])
-        assert filecount == 6
+        assert filecount == 4
 
         # features of two files:
         path = os.path.abspath(
@@ -410,6 +413,7 @@ class TestS2Downloader(unittest.TestCase):
                                  rtol=0,
                                  atol=1e-4,
                                  equal_nan=False).all()
+            assert numpy.count_nonzero(expected_res.read()) == 21661720.0
 
     def testS2DownloaderTileIDEQ(self):
         """Test downloading a single TileID."""
@@ -575,6 +579,7 @@ class TestS2Downloader(unittest.TestCase):
         scene_tif_path = os.path.join(self.output_data_path, "20210905_S2B_rededge1.tif")
 
         config["user_settings"]["result_settings"]["download_data"] = False
+        config["user_settings"]["tile_settings"]["bands"] = ["rededge1"]
         s2Downloader(config_dict=config)
         scenes_info_path = os.path.join(self.output_data_path, find_files(self.output_data_path,
                                                                           "scenes_info_*.json")[0])
@@ -587,6 +592,7 @@ class TestS2Downloader(unittest.TestCase):
 
         os.remove(scenes_info_path)
         config["user_settings"]["result_settings"]["download_data"] = True
+        config["user_settings"]["tile_settings"]["bands"] = ["rededge1"]
         s2Downloader(config_dict=config)
         if not os.path.exists(scene_tif_path):
             assert False
