@@ -2,6 +2,10 @@
 History
 =======
 
+1.0.5 (2024-06-18)
+------------------
+* Allow separate filtering of background|nodata and (non-)valid data
+
 1.0.4 (2024-06-12)
 ------------------
 * Fix bug in SCL-filtering.

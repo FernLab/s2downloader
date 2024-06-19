@@ -185,14 +185,13 @@ def downloadMosaic(*, config_dict: dict):
     cloudmasking = aoi_settings["apply_SCL_band_mask"]
     tiles_path = config_dict['s2_settings']['tiles_definition_path']
 
-    tile_settings["mgrs:utm_zone"] = {}
     try:
         op_start = time.time()
         tiles_gpd = geopandas.read_file(tiles_path,
                                         bbox=aoi_settings["bounding_box"])
         logger.debug(f"Loading Sentinel-2 tiles took {(time.time() - op_start) * 1000} msecs.")
         utm_zone = getUTMZoneBB(tiles_gpd=tiles_gpd, bbox=aoi_settings['bounding_box'])
-        if utm_zone != 0:
+        if utm_zone != 0 and tile_settings["mgrs:utm_zone"] == {}:
             tile_settings["mgrs:utm_zone"] = {"eq": utm_zone}
     except (IOError, FileNotFoundError) as err:
         logger.warning(f"It is not possible to determine in which UTM zone is the bounding-box: {err}")
@@ -216,7 +215,6 @@ def downloadMosaic(*, config_dict: dict):
 
     items_per_date = groupItemsPerDate(items_list=aws_items)
     scl_filter_values = aoi_settings["SCL_filter_values"]
-    scl_filter_values.append(0)
     scenes_info = {}
     for items_date in items_per_date.keys():
         items = items_per_date[items_date]
@@ -279,7 +277,7 @@ def downloadMosaic(*, config_dict: dict):
                                             scl_trans_win[5])
         else:
             raise Exception("Number of items per date is invalid.")
-        nonzero_pixels_per, valid_pixels_per = \
+        nonzero_pixels_per, masked_pixels_per, valid_pixels_per = \
             validPixelsFromSCLBand(
                 scl_band=scl_band,
                 scl_filter_values=scl_filter_values,
@@ -288,12 +286,14 @@ def downloadMosaic(*, config_dict: dict):
         scenes_info[items_date.replace('-', '')] = {
             "item_ids": list(),
             "nonzero_pixels": nonzero_pixels_per,
+            "masked_pixels": masked_pixels_per,
             "valid_pixels": valid_pixels_per,
             "data_available": False,
             "error_info": ""
         }
         if nonzero_pixels_per >= aoi_settings["aoi_min_coverage"] \
-                and valid_pixels_per >= aoi_settings["SCL_mask_valid_pixels_min_percentage"]:
+                and masked_pixels_per <= aoi_settings["SCL_masked_pixels_max_percentage"] \
+                and valid_pixels_per >= aoi_settings["valid_pixels_min_percentage"]:
             try:
                 if (download_thumbnails or download_overviews) or download_data:
                     msg = f"Getting {''.join(data_msg)} for: {items[0].id}"
@@ -330,7 +330,7 @@ def downloadMosaic(*, config_dict: dict):
 
                     if cloudmasking:
                         # Mask out Clouds
-                        scl_band_mask = np.where(np.isin(scl_band, scl_filter_values),
+                        scl_band_mask = np.where(np.isin(scl_band, scl_filter_values + [0]),
                                                  np.uint16(0), np.uint16(1))
                     del scl_band
 
@@ -492,12 +492,12 @@ def downloadTileID(*, config_dict: dict):
 
     items_per_date = groupItemsPerDate(items_list=aws_items)
     scl_filter_values = aoi_settings["SCL_filter_values"]
-    scl_filter_values.append(0)
     scenes_info = {}
     for items_date in items_per_date.keys():
         scenes_info[items_date.replace('-', '')] = {
             "item_ids": list(),
             "nonzero_pixels": list(),
+            "masked_pixels": list(),
             "valid_pixels": list(),
             "data_available": list(),
             "error_info": list()
@@ -534,17 +534,19 @@ def downloadTileID(*, config_dict: dict):
                     scl_band = scl_src.read()
             scl_crs = scl_src.crs
 
-            nonzero_pixels_per, valid_pixels_per = \
+            nonzero_pixels_per, masked_pixels_per, valid_pixels_per = \
                 validPixelsFromSCLBand(
                     scl_band=scl_band,
                     scl_filter_values=scl_filter_values,
                     logger=logger)
 
             scenes_info[items_date.replace('-', '')]["nonzero_pixels"].append(nonzero_pixels_per)
+            scenes_info[items_date.replace('-', '')]["masked_pixels"].append(masked_pixels_per)
             scenes_info[items_date.replace('-', '')]["valid_pixels"].append(valid_pixels_per)
 
             if nonzero_pixels_per >= aoi_settings["aoi_min_coverage"] \
-                    and valid_pixels_per >= aoi_settings["SCL_mask_valid_pixels_min_percentage"]:
+                    and masked_pixels_per <= aoi_settings["SCL_masked_pixels_max_percentage"] \
+                    and valid_pixels_per >= aoi_settings["valid_pixels_min_percentage"]:
                 try:
                     if (download_thumbnails or download_overviews) or download_data:
                         msg = f"Getting {''.join(data_msg)} for: {item.id}"
@@ -581,7 +583,7 @@ def downloadTileID(*, config_dict: dict):
 
                         if cloudmasking:
                             # Mask out Clouds
-                            scl_band_mask = np.where(np.isin(scl_band, scl_filter_values),
+                            scl_band_mask = np.where(np.isin(scl_band, scl_filter_values + [0]),
                                                      np.uint16(0), np.uint16(1))
                         del scl_band
 

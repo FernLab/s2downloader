@@ -64,8 +64,9 @@
                 9,
                 10
             ],
-            "SCL_mask_valid_pixels_min_percentage": 10,
             "aoi_min_coverage": 90,
+            "SCL_masked_pixels_max_percentage": 100,
+            "valid_pixels_min_percentage": 10,
             "resampling_method": "cubic",
             "date_range": [
                 "2021-09-04",
