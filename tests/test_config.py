@@ -287,6 +287,13 @@ class TestConfig(unittest.TestCase):
         with pytest.raises(ValueError):
             Config(**config)
 
+    def testStacCatalogURL(self):
+        """Test the stac catalog URL"""
+        config = deepcopy(self.configuration)
+        config['s2_settings']["stac_catalog_url"] = "hts://earth-search.aws.element84.com/v1"
+        with pytest.raises(ValueError):
+            Config(**config)
+
     def testLoggingLevel(self):
         """Test configuration for results logging_level Parameter."""
 

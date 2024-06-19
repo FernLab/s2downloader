@@ -33,7 +33,8 @@ from json import JSONDecodeError
 import pydantic
 # third party packages
 from geojson_pydantic import Polygon
-from pydantic import BaseModel, Field, StrictBool, HttpUrl, field_validator, model_validator
+from pydantic import BaseModel, Field, StrictBool, field_validator, HttpUrl, model_validator, TypeAdapter
+from pydantic_core import ValidationError
 from typing import Optional, List, Dict, Union
 
 
@@ -356,7 +357,7 @@ class S2Settings(BaseModel, extra='forbid'):
         default=["sentinel-2-l2a"]
     )
 
-    stac_catalog_url: Optional[HttpUrl] = Field(
+    stac_catalog_url: Optional[str] = Field(
         title="STAC catalog URL.",
         description="URL to access the STAC catalog.",
         default="https://earth-search.aws.element84.com/v1"
@@ -367,6 +368,16 @@ class S2Settings(BaseModel, extra='forbid'):
         description="Path to a shapefile.zip describing the tiles and its projections.",
         default="data/sentinel_2_index_shapefile_attr.zip"
     )
+
+    @field_validator('stac_catalog_url')
+    def check_stac_catalog_url(cls, v):
+        """Check if the URL is valid."""
+        ta = TypeAdapter(HttpUrl)
+        try:
+            ta.validate_strings(v, strict=True)
+        except ValidationError as err:
+            raise ValueError(f"The stac_catalog_string is invalid:{err}.")
+        return v
 
     @field_validator('tiles_definition_path')
     def check_tiles_definition(cls, v):
