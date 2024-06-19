@@ -88,7 +88,7 @@ def searchDataAtAWS(*,
         logger = logging.getLogger(__name__)
     try:
         # search AWS collection
-        catalogue = Client.open(stac_catalog_url)
+        catalogue = Client.open(url=stac_catalog_url)
         item_search = catalogue.search(
             collections=s2_collection,  # sentinel-s2-l2a-cogs
             bbox=bb,  # bounding box
@@ -202,7 +202,7 @@ def downloadMosaic(*, config_dict: dict):
                                 polygon=aoi_settings['polygon'],
                                 date_range=aoi_settings['date_range'],
                                 props_json=tile_settings,
-                                stac_catalog_url=s2_settings['stac_catalog_url'],
+                                stac_catalog_url=str(s2_settings['stac_catalog_url']),
                                 logger=logger)
 
     data_msg = []
@@ -479,7 +479,7 @@ def downloadTileID(*, config_dict: dict):
                                 polygon=None,
                                 date_range=aoi_settings['date_range'],
                                 props_json=tile_settings,
-                                stac_catalog_url=s2_settings['stac_catalog_url'],
+                                stac_catalog_url=str(s2_settings['stac_catalog_url']),
                                 logger=logger)
 
     data_msg = []

@@ -32,7 +32,7 @@ from json import JSONDecodeError
 
 import pydantic
 # third party packages
-from pydantic import BaseModel, Field, validator, StrictBool, Extra, HttpUrl, root_validator
+from pydantic import BaseModel, Field, StrictBool, Extra, HttpUrl, field_validator, model_validator
 from typing import Optional, List, Dict
 
 
@@ -93,7 +93,7 @@ class TileSettings(BaseModel, extra=Extra.forbid):
         default=["blue", "green", "rededge1"]
     )
 
-    @validator("nodata_pixel_percentage", "cloud_cover")
+    @field_validator("nodata_pixel_percentage", "cloud_cover")
     def checkCoverage(cls, v: dict):
         """Check if coverage equations are set correctly."""
         if len(v.keys()) != 1:
@@ -106,7 +106,7 @@ class TileSettings(BaseModel, extra=Extra.forbid):
                 raise ValueError(f"The value ({str(value)}) should be an integer between 0 and 100.")
         return v
 
-    @validator("bands")
+    @field_validator("bands")
     def checkBands(cls, v):
         """Check if bands is set correctly."""
         if len(v) == 0 or not set(v).issubset(["coastal", "blue", "green", "red", "rededge1", "rededge2", "rededge3",
@@ -117,11 +117,11 @@ class TileSettings(BaseModel, extra=Extra.forbid):
             raise ValueError("Remove duplicates.")
         return v
 
-    @validator("utm_zone", "latitude_band", "grid_square")
-    def checkTileInfo(cls, v: dict, field: pydantic.fields.ModelField):
+    @field_validator("utm_zone", "latitude_band", "grid_square")
+    def checkTileInfo(cls, v: dict, field: pydantic.ValidationInfo):
         """Check if tile info is set correctly."""
         v_type = str
-        if field.name == "utm_zone":
+        if field.field_name == "utm_zone":
             v_type = int
         if len(v.keys()) > 0:
             for key in v.keys():
@@ -176,13 +176,12 @@ class AoiSettings(BaseModel, extra=Extra.forbid):
     date_range: List[str] = Field(
         title="Date range.",
         description="List with the start and end date. If the same it is a single date request.",
-        unique_items=False,
-        min_items=1,
-        max_items=2,
+        min_length=1,
+        max_length=2,
         default=["2021-09-01", "2021-09-05"]
     )
 
-    @validator("bounding_box")
+    @field_validator("bounding_box")
     def validateBB(cls, v):
         """Check if the Bounding Box is valid."""
         if len(v) != 0:
@@ -203,7 +202,7 @@ class AoiSettings(BaseModel, extra=Extra.forbid):
 
         return v
 
-    @validator("SCL_filter_values")
+    @field_validator("SCL_filter_values")
     def checkSCLFilterValues(cls, v):
         """Check if SCL_filter_values is set correctly."""
         if not set(v).issubset([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]):
@@ -215,7 +214,7 @@ class AoiSettings(BaseModel, extra=Extra.forbid):
                              "set apply_SCL_band_mask to 'False'.")
         return v
 
-    @validator("date_range")
+    @field_validator("date_range")
     def checkDateRange(cls, v):
         """Check data range."""
         limit_date = datetime(2017, 4, 1)
@@ -280,14 +279,14 @@ class ResultsSettings(BaseModel, extra=Extra.forbid):
         default="INFO"
     )
 
-    @validator('logging_level')
+    @field_validator('logging_level')
     def checkLogLevel(cls, v):
         """Check if logging level is correct."""
         if v not in ["DEBUG", "INFO", "WARN", "ERROR"]:
             raise ValueError("Logging level, it should be one of: DEBUG, INFO, WARN, or ERROR.")
         return v
 
-    @validator('results_dir')
+    @field_validator('results_dir')
     def checkFolder(cls, v):
         """Check if output folder location is defined - string should not be empty."""
         if v == "":
@@ -296,7 +295,7 @@ class ResultsSettings(BaseModel, extra=Extra.forbid):
             v = os.path.realpath(v)
         return v
 
-    @validator('target_resolution')
+    @field_validator('target_resolution')
     def checkTargeResolution(cls, v):
         """Check if the target resolution is either 60, 20 or 10 meters."""
         if not (v == 60 or v == 20 or v == 10):
@@ -319,13 +318,13 @@ class UserSettings(BaseModel, extra=Extra.forbid):
         title="Result Settings.", description=""
     )
 
-    @root_validator(skip_on_failure=True)
+    @model_validator(mode='before')
     def checkBboxAndSetUTMZone(cls, v):
         """Check BBOX UTM zone coverage and set UTM zone."""
-        bb = v["aoi_settings"].__dict__["bounding_box"]
-        utm_zone = v["tile_settings"].__dict__["utm_zone"]
-        latitude_band = v["tile_settings"].__dict__["latitude_band"]
-        grid_square = v["tile_settings"].__dict__["grid_square"]
+        bb = v["aoi_settings"]["bounding_box"]
+        utm_zone = v["tile_settings"]["mgrs:utm_zone"]
+        latitude_band = v["tile_settings"]["mgrs:latitude_band"]
+        grid_square = v["tile_settings"]["mgrs:grid_square"]
 
         if len(bb) != 0:
             if len(utm_zone.keys()) != 0 and len(latitude_band.keys()) != 0 and len(grid_square.keys()) != 0:
@@ -359,7 +358,7 @@ class S2Settings(BaseModel, extra=Extra.forbid):
         default="data/sentinel_2_index_shapefile_attr.zip"
     )
 
-    @validator('tiles_definition_path')
+    @field_validator('tiles_definition_path')
     def check_tiles_definition(cls, v):
         """Check if the tiles definition path exists."""
         v_abs = os.path.abspath(v)

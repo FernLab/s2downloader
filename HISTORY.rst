@@ -2,6 +2,10 @@
 History
 =======
 
+1.0.6 (2024-06-19)
+------------------
+* Update Pydantic to version 2.* and unpin all the libraries.
+
 1.0.5 (2024-06-18)
 ------------------
 * Allow separate filtering of background|nodata and (non-)valid data
