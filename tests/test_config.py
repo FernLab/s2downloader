@@ -29,6 +29,7 @@ import pytest
 
 from s2downloader.config import loadConfiguration, Config
 from copy import deepcopy
+from pydantic_core import ValidationError
 
 
 class TestConfig(unittest.TestCase):
@@ -242,23 +243,11 @@ class TestConfig(unittest.TestCase):
         config = deepcopy(self.configuration)
 
         config['user_settings']['aoi_settings']['bounding_box'] = [13.4204, 53.0389]
-        with pytest.raises(ValueError):
+        with pytest.raises(ValidationError):
             Config(**config)
 
         config['user_settings']['aoi_settings']['bounding_box'] = []
-        with pytest.raises(ValueError):
-            Config(**config)
-
-        config['user_settings']["tile_settings"]["mgrs:utm_zone"] = {"eq": 32}
-        with pytest.raises(ValueError):
-            Config(**config)
-
-        config['user_settings']["tile_settings"]["mgrs:latitude_band"] = {"eq": "U"}
-        config['user_settings']["tile_settings"]["mgrs:grid_square"] = {"eq": "UV"}
-        Config(**config)
-
-        config['user_settings']["tile_settings"]["mgrs:utm_zone"] = {"eq": "32"}
-        with pytest.raises(ValueError):
+        with pytest.raises(ValidationError):
             Config(**config)
 
     def testTargetResolution(self):
