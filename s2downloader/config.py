@@ -33,8 +33,8 @@ from json import JSONDecodeError
 import pydantic
 # third party packages
 from geojson_pydantic import Polygon
-from pydantic import BaseModel, Field, StrictBool, Extra, HttpUrl, field_validator, model_validator
-from typing import Optional, List, Dict
+from pydantic import BaseModel, Field, StrictBool, HttpUrl, field_validator, model_validator
+from typing import Optional, List, Dict, Union
 
 
 class ResamplingMethodName(str, Enum):
@@ -146,7 +146,15 @@ class AoiSettings(BaseModel, extra='forbid'):
 
     bounding_box: List[float] = Field(
         title="Bounding Box for AOI.",
-        description="SW and NE corner coordinates of AOI Bounding Box.")
+        description="SW and NE corner coordinates of AOI Bounding Box.",
+        min_length=4,
+        max_length=4
+    )
+    polygon: Union[Polygon, None] = Field(
+        title="Polygon for the AOI.",
+        description="Polygon defined as in GeoJson.",
+        default=None
+    )
     apply_SCL_band_mask: Optional[StrictBool] = Field(
         title="Apply a filter mask from SCL.",
         description="Define if SCL masking should be applied.",
@@ -185,21 +193,18 @@ class AoiSettings(BaseModel, extra='forbid'):
     @field_validator("bounding_box")
     def validateBB(cls, v):
         """Check if the Bounding Box is valid."""
-        if len(v) != 0:
-            if len(v) != 4:
-                raise ValueError("Bounding Box needs two pairs of lat/lon coordinates.")
-            if v[0] >= v[2] or v[1] >= v[3]:
-                raise ValueError("Bounding Box coordinates are not valid.")
+        if v[0] >= v[2] or v[1] >= v[3]:
+            raise ValueError("Bounding Box coordinates are not valid.")
 
-            coords_nw = (v[3], v[0])
-            coords_ne = (v[3], v[2])
-            coords_sw = (v[1], v[0])
+        coords_nw = (v[3], v[0])
+        coords_ne = (v[3], v[2])
+        coords_sw = (v[1], v[0])
 
-            ew_dist = geopy.distance.geodesic(coords_nw, coords_ne).km
-            ns_dist = geopy.distance.geodesic(coords_nw, coords_sw).km
+        ew_dist = geopy.distance.geodesic(coords_nw, coords_ne).km
+        ns_dist = geopy.distance.geodesic(coords_nw, coords_sw).km
 
-            if ew_dist > 500 or ns_dist > 500:
-                raise ValueError("Bounding Box is too large. It should be max 500*500km.")
+        if ew_dist > 500 or ns_dist > 500:
+            raise ValueError("Bounding Box is too large. It should be max 500*500km.")
 
         return v
 
@@ -324,8 +329,8 @@ class UserSettings(BaseModel, extra='forbid'):
         """Check BBOX UTM zone coverage and set UTM zone."""
 
         bb = v["aoi_settings"]["bounding_box"] if "bounding_box" in v["aoi_settings"] else None
-        polygon = v["aoi_settings"]["polygon"] if "polyogn" in v["aoi_settings"] else None
-        utm_zone = v["tile_settings"]["mgrs:utm_zone"] if "mgrs:utm_zone" in v["tile_settings"]["mgrs:utm_zone"] else\
+        polygon = v["aoi_settings"]["polygon"] if "polygon" in v["aoi_settings"] else None
+        utm_zone = v["tile_settings"]["mgrs:utm_zone"] if "mgrs:utm_zone" in v["tile_settings"]["mgrs:utm_zone"] else \
             None
         latitude_band = v["tile_settings"]["mgrs:latitude_band"] if "mgrs:latitude_band" in v["tile_settings"][
             "mgrs:latitude_band"] else None
