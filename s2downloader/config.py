@@ -337,7 +337,7 @@ class UserSettings(BaseModel, extra='forbid'):
         if len(bb) != 0:
             if polygon is not None:
                 raise ValueError("Expected bbox OR polygon, not both.")
-            if len(utm_zone.keys()) != 0 or len(latitude_band.keys()) != 0 or len(grid_square.keys()) != 0:
+            if len(utm_zone.keys()) != 0 and len(latitude_band.keys()) != 0 and len(grid_square.keys()) != 0:
                 raise ValueError("Both AOI and TileID info are set, only one should be set")
         else:
             if (polygon is None and
