@@ -32,6 +32,7 @@ from json import JSONDecodeError
 
 import pydantic
 # third party packages
+from geojson_pydantic import Polygon
 from pydantic import BaseModel, Field, StrictBool, Extra, HttpUrl, field_validator, model_validator
 from typing import Optional, List, Dict
 
@@ -51,7 +52,7 @@ class S2Platform(str, Enum):
     S2B = "sentinel-2b"
 
 
-class TileSettings(BaseModel, extra=Extra.forbid):
+class TileSettings(BaseModel, extra='forbid'):
     """Template for Tile settings in config file."""
 
     platform: Optional[Dict] = Field(
@@ -140,7 +141,7 @@ class TileSettings(BaseModel, extra=Extra.forbid):
         return v
 
 
-class AoiSettings(BaseModel, extra=Extra.forbid):
+class AoiSettings(BaseModel, extra='forbid'):
     """Template for AOI settings in config file."""
 
     bounding_box: List[float] = Field(
@@ -241,7 +242,7 @@ class AoiSettings(BaseModel, extra=Extra.forbid):
             raise ValueError(f"{error_msg}.")
 
 
-class ResultsSettings(BaseModel, extra=Extra.forbid):
+class ResultsSettings(BaseModel, extra='forbid'):
     """Template for raster_saving_settings in config file."""
 
     request_id: Optional[int] = Field(
@@ -303,7 +304,7 @@ class ResultsSettings(BaseModel, extra=Extra.forbid):
         return v
 
 
-class UserSettings(BaseModel, extra=Extra.forbid):
+class UserSettings(BaseModel, extra='forbid'):
     """Template for user_path_settings in config file."""
 
     aoi_settings: AoiSettings = Field(
@@ -321,23 +322,32 @@ class UserSettings(BaseModel, extra=Extra.forbid):
     @model_validator(mode='before')
     def checkBboxAndSetUTMZone(cls, v):
         """Check BBOX UTM zone coverage and set UTM zone."""
-        bb = v["aoi_settings"]["bounding_box"]
-        utm_zone = v["tile_settings"]["mgrs:utm_zone"]
-        latitude_band = v["tile_settings"]["mgrs:latitude_band"]
-        grid_square = v["tile_settings"]["mgrs:grid_square"]
 
-        if len(bb) != 0:
-            if len(utm_zone.keys()) != 0 and len(latitude_band.keys()) != 0 and len(grid_square.keys()) != 0:
+        bb = v["aoi_settings"]["bounding_box"] if "bounding_box" in v["aoi_settings"] else None
+        polygon = v["aoi_settings"]["polygon"] if "polyogn" in v["aoi_settings"] else None
+        utm_zone = v["tile_settings"]["mgrs:utm_zone"] if "mgrs:utm_zone" in v["tile_settings"]["mgrs:utm_zone"] else\
+            None
+        latitude_band = v["tile_settings"]["mgrs:latitude_band"] if "mgrs:latitude_band" in v["tile_settings"][
+            "mgrs:latitude_band"] else None
+        grid_square = v["tile_settings"]["mgrs:grid_square"] if "mgrs:grid_square" in v["tile_settings"][
+            "mgrs:grid_square"] else None
+
+        if bb is not None:
+            if polygon is not None:
+                raise ValueError("Expected bbox OR polygon, not both.")
+            if utm_zone is not None and latitude_band is not None and grid_square is not None:
                 raise ValueError("Both AOI and TileID info are set, only one should be set")
         else:
-            if len(utm_zone.keys()) == 0 or len(latitude_band.keys()) == 0 or len(grid_square.keys()) == 0:
-                raise ValueError("Either AOI or TileID info (utm_zone, latitude_band and grid_square)"
-                                 " should be provided.")
-
+            if polygon is None:
+                raise ValueError("Expected either bbox OR polygon, please set one of them.")
+            else:
+                if utm_zone is None or latitude_band is None or grid_square is None:
+                    raise ValueError("Either AOI or TileID info (utm_zone, latitude_band and grid_square)"
+                                     " should be provided.")
         return v
 
 
-class S2Settings(BaseModel, extra=Extra.forbid):
+class S2Settings(BaseModel, extra='forbid'):
     """Template for S2 settings in config file."""
 
     collections: List[str] = Field(
