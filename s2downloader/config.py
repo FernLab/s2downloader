@@ -32,7 +32,7 @@ from json import JSONDecodeError
 
 import pydantic
 # third party packages
-from pydantic import BaseModel, Field, StrictBool, Extra, HttpUrl, field_validator, model_validator
+from pydantic import BaseModel, Field, StrictBool, HttpUrl, field_validator, model_validator
 from typing import Optional, List, Dict
 
 
@@ -51,7 +51,7 @@ class S2Platform(str, Enum):
     S2B = "sentinel-2b"
 
 
-class TileSettings(BaseModel, extra=Extra.forbid):
+class TileSettings(BaseModel, extra='forbid'):
     """Template for Tile settings in config file."""
 
     platform: Optional[Dict] = Field(
@@ -140,7 +140,7 @@ class TileSettings(BaseModel, extra=Extra.forbid):
         return v
 
 
-class AoiSettings(BaseModel, extra=Extra.forbid):
+class AoiSettings(BaseModel, extra='forbid'):
     """Template for AOI settings in config file."""
 
     bounding_box: List[float] = Field(
@@ -241,7 +241,7 @@ class AoiSettings(BaseModel, extra=Extra.forbid):
             raise ValueError(f"{error_msg}.")
 
 
-class ResultsSettings(BaseModel, extra=Extra.forbid):
+class ResultsSettings(BaseModel, extra='forbid'):
     """Template for raster_saving_settings in config file."""
 
     request_id: Optional[int] = Field(
@@ -303,7 +303,7 @@ class ResultsSettings(BaseModel, extra=Extra.forbid):
         return v
 
 
-class UserSettings(BaseModel, extra=Extra.forbid):
+class UserSettings(BaseModel, extra='forbid'):
     """Template for user_path_settings in config file."""
 
     aoi_settings: AoiSettings = Field(
@@ -337,7 +337,7 @@ class UserSettings(BaseModel, extra=Extra.forbid):
         return v
 
 
-class S2Settings(BaseModel, extra=Extra.forbid):
+class S2Settings(BaseModel, extra='forbid'):
     """Template for S2 settings in config file."""
 
     collections: List[str] = Field(
@@ -410,7 +410,7 @@ def loadConfiguration(*, path: str) -> dict:
     try:
         with open(path) as config_fp:
             config = json.load(config_fp)
-            config = Config(**config).dict(by_alias=True)
+            config = Config(**config).model_dump(by_alias=True)
     except JSONDecodeError as e:
         raise IOError(f'Failed to load the configuration json file => {e}')
     return config
