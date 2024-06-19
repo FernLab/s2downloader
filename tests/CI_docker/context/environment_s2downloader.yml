@@ -19,7 +19,7 @@ dependencies:
   - shapely
   - rtree
   - python-dateutil
-  - pydantic=1.10.10
+  - pydantic
   - geopy
 
   - pip:
@@ -50,5 +50,5 @@ dependencies:
     - twine
 
     # code requirements
-    - pystac==1.6.1
-    - pystac-client==0.6.0
+    - pystac
+    - pystac-client
