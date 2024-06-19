@@ -243,11 +243,23 @@ class TestConfig(unittest.TestCase):
         config = deepcopy(self.configuration)
 
         config['user_settings']['aoi_settings']['bounding_box'] = [13.4204, 53.0389]
-        with pytest.raises(ValidationError):
+        with pytest.raises(ValueError):
             Config(**config)
 
         config['user_settings']['aoi_settings']['bounding_box'] = []
-        with pytest.raises(ValidationError):
+        with pytest.raises(ValueError):
+            Config(**config)
+
+        config['user_settings']["tile_settings"]["mgrs:utm_zone"] = {"eq": 32}
+        with pytest.raises(ValueError):
+            Config(**config)
+
+        config['user_settings']["tile_settings"]["mgrs:latitude_band"] = {"eq": "U"}
+        config['user_settings']["tile_settings"]["mgrs:grid_square"] = {"eq": "UV"}
+        Config(**config)
+
+        config['user_settings']["tile_settings"]["mgrs:utm_zone"] = {"eq": "32"}
+        with pytest.raises(ValueError):
             Config(**config)
 
     def testTargetResolution(self):
