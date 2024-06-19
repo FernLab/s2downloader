@@ -29,7 +29,6 @@ import pytest
 
 from s2downloader.config import loadConfiguration, Config
 from copy import deepcopy
-from pydantic_core import ValidationError
 
 
 class TestConfig(unittest.TestCase):

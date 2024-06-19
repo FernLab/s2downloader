@@ -328,7 +328,6 @@ class UserSettings(BaseModel, extra='forbid'):
     @model_validator(mode='before')
     def checkBboxAndSetUTMZone(cls, v):
         """Check BBOX UTM zone coverage and set UTM zone."""
-
         bb = v["aoi_settings"]["bounding_box"]
         polygon = v["aoi_settings"]["polygon"] if "polygon" in v["aoi_settings"] else None
         utm_zone = v["tile_settings"]["mgrs:utm_zone"]
