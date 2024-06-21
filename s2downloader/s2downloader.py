@@ -31,10 +31,12 @@ import os
 import geopandas
 import numpy as np
 import rasterio
+from rasterio.features import rasterize
 from rasterio.merge import merge
 from rasterio.windows import from_bounds, Window, bounds
 from rasterio.warp import Resampling
 import urllib.request
+from shapely.geometry import Polygon
 from typing import Dict, Union
 
 from pystac import Item
@@ -62,7 +64,7 @@ def searchDataAtAWS(*,
     bb : list[float]
         A list of coordinates of the outer bounding box of all given coordinates.
     polygon : Dict
-        Polygon defining the AOI.
+        AOI defined as a Polygon.
     date_range: list[str]
         List with the start and end date. If the same it is a single date request.
     props_json: dict
@@ -160,6 +162,11 @@ def downloadMosaic(*, config_dict: dict):
     # read the variables from the config:
     tile_settings = config_dict['user_settings']['tile_settings']
     aoi_settings = config_dict['user_settings']['aoi_settings']
+    aoi = aoi_settings['bounding_box']
+    aoi_is_bb = True
+    if "polygon" in aoi_settings and aoi_settings['polygon'] is not None:
+        aoi = aoi_settings['polygon']
+        aoi_is_bb = False
     result_settings = config_dict['user_settings']['result_settings']
     s2_settings = config_dict['s2_settings']
 
@@ -220,8 +227,7 @@ def downloadMosaic(*, config_dict: dict):
         items = items_per_date[items_date]
         num_tiles = len(items)
         sensor_name = items[0].id[0:3]
-        bounds_utm = getBoundsUTM(bounds=aoi_settings['bounding_box'],
-                                  bb_crs=items[0].properties['proj:epsg'])
+        bounds_utm = getBoundsUTM(aoi=aoi, bb_crs=items[0].properties['proj:epsg'])
         scl_src = None
         scl_crs = 0
         raster_crs = 0
@@ -277,10 +283,17 @@ def downloadMosaic(*, config_dict: dict):
                                             scl_trans_win[5])
         else:
             raise Exception("Number of items per date is invalid.")
+
+        aoi_mask = None
+        if not aoi_is_bb:
+            poly = Polygon(aoi_settings['polygon'])
+            aoi_mask = rasterio.features.rasterize([poly], out_shape=scl_band.shape)
+            scl_band = scl_band * aoi_mask
         nonzero_pixels_per, masked_pixels_per, valid_pixels_per = \
             validPixelsFromSCLBand(
                 scl_band=scl_band,
                 scl_filter_values=scl_filter_values,
+                aoi_mask=aoi_mask,
                 logger=logger)
 
         scenes_info[items_date.replace('-', '')] = {
@@ -394,6 +407,8 @@ def downloadMosaic(*, config_dict: dict):
                                                                0,
                                                                band_src.transform[4] / band_scale_factor,
                                                                raster_trans_win[5])
+                        if not aoi_is_bb:
+                            raster_band = raster_band * aoi_mask
                         if cloudmasking:
                             op_start = time.time()
                             raster_band = raster_band * scl_band_mask
@@ -672,7 +687,9 @@ def s2Downloader(*, config_dict: dict):
     """
     try:
         config_dict = Config(**config_dict).model_dump(by_alias=True)
-        if len(config_dict['user_settings']['aoi_settings']['bounding_box']) == 0:
+        if (len(config_dict['user_settings']['aoi_settings']['bounding_box']) == 0 and
+                "polygon" in config_dict['user_settings']['aoi_settings'] and
+                config_dict['user_settings']['aoi_settings']["polygon"] is None):
             downloadTileID(config_dict=config_dict)
         else:
             downloadMosaic(config_dict=config_dict)
