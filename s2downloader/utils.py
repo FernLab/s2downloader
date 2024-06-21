@@ -29,8 +29,9 @@ import pyproj
 import pystac
 import rasterio
 import rasterio.io
-from shapely.geometry import box
+from shapely.geometry import box, Polygon
 from datetime import datetime
+from typing import Union
 
 
 def saveRasterToDisk(*, out_image: np.ndarray, raster_crs: pyproj.crs.crs.CRS, out_transform: affine.Affine,
@@ -91,6 +92,7 @@ def saveRasterToDisk(*, out_image: np.ndarray, raster_crs: pyproj.crs.crs.CRS, o
 def validPixelsFromSCLBand(*,
                            scl_band: np.ndarray,
                            scl_filter_values: list[int],
+                           aoi_mask: np.ndarray = None,
                            logger: Logger = None) -> tuple[float, float, float]:
     """Percentage of valid SCL band pixels.
 
@@ -99,7 +101,9 @@ def validPixelsFromSCLBand(*,
     scl_band : np.ndarray
         The SCL band.
     scl_filter_values: list
-        List with the values of the SCL Band to filter out
+        List with the values of the SCL Band to filter out.
+    aoi_mask : np.ndarray
+        AOI mask in case it is defined as a Polygon.
     logger: Logger
         Logger handler.
 
@@ -120,8 +124,11 @@ def validPixelsFromSCLBand(*,
     if logger is None:
         logger = logging.getLogger(__name__)
     try:
+        aoi_size = scl_band.size
+        if aoi_mask is not None:
+            aoi_size = np.count_nonzero(aoi_mask)
         scl_band_nonzero = np.count_nonzero(scl_band)
-        nonzero_pixels_per = (float(scl_band_nonzero) / float(scl_band.size)) * 100
+        nonzero_pixels_per = (float(scl_band_nonzero) / float(aoi_size)) * 100
         logger.info(f"Nonzero pixels: {nonzero_pixels_per} %")
 
         scl_band_scl_mask = np.where(np.isin(scl_band, scl_filter_values), 1, 0)
@@ -129,7 +136,7 @@ def validPixelsFromSCLBand(*,
         logger.info(f"Masked pixels: {masked_pixels_per} %")
 
         scl_band_mask = np.where(np.isin(scl_band, scl_filter_values), 0, 1)
-        valid_pixels_per = (float(np.count_nonzero(scl_band_mask * scl_band)) / float(scl_band.size)) * 100
+        valid_pixels_per = (float(np.count_nonzero(scl_band_mask * scl_band)) / float(aoi_size)) * 100
         logger.info(f"Valid pixels: {valid_pixels_per} %")
 
         return nonzero_pixels_per, masked_pixels_per, valid_pixels_per
@@ -160,13 +167,13 @@ def groupItemsPerDate(*, items_list: list[pystac.item.Item]) -> dict:
     return items_per_date
 
 
-def getBoundsUTM(*, bounds: tuple, bb_crs: int) -> tuple:
-    """Get the bounds of a bounding box in UTM coordinates.
+def getBoundsUTM(*, aoi: Union[list, dict], bb_crs: int) -> tuple:
+    """Get the bounds of the AOI in UTM coordinates.
 
     Parameters
     ----------
-    bounds : tuple
-        Bounds defined as lat/long.
+    aoi : Union[list, dict]
+        AOI defined either as a bounding box or a Polygon.
     bb_crs : int
         UTM zone number.
 
@@ -175,10 +182,26 @@ def getBoundsUTM(*, bounds: tuple, bb_crs: int) -> tuple:
     : tuple
         Bounds reprojected to the UTM zone.
     """
-    bounding_box = box(*bounds)
-    bbox = geopandas.GeoSeries([bounding_box], crs=4326)
-    bbox = bbox.to_crs(crs=bb_crs)
-    return tuple(bbox.bounds.values[0])
+    source_crs = 'epsg:4326'  # Global lat-lon coordinate system used by `geometry m
+    target_crs = f'epsg:{bb_crs}'  # Coordinate system of the S-2 scene
+    latlon_to_s2_transformer = pyproj.Transformer.from_crs(source_crs, target_crs)
+
+    if type(aoi) is list:
+        bounding_box = box(*aoi)
+        bbox = geopandas.GeoSeries([bounding_box], crs=4326)
+        bbox = bbox.to_crs(crs=bb_crs)
+        bounds = tuple(bbox.bounds.values[0])
+    else:
+        projected_geometry = {
+            "type": "Polygon",
+            "coordinates": [[]]
+        }
+        projected_coordinates = []
+        for point in aoi["coordinates"][0]:
+            projected_x, projected_y = latlon_to_s2_transformer.transform(point[0], point[1])
+            projected_coordinates.append([projected_x, projected_y])
+        bounds = Polygon(projected_geometry).bounds
+    return bounds
 
 
 def getUTMZoneBB(*, tiles_gpd: geopandas.GeoDataFrame, bbox: list[float], logger: Logger = None) -> int:
