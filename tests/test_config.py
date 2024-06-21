@@ -237,7 +237,7 @@ class TestConfig(unittest.TestCase):
             Config(**config)
 
     def testS2BoundingBox(self):
-        """Test configuration and output for BoundingBox Parameter."""
+        """Test configuration for BoundingBox Parameter."""
 
         config = deepcopy(self.configuration)
 
@@ -260,6 +260,57 @@ class TestConfig(unittest.TestCase):
         config['user_settings']["tile_settings"]["mgrs:utm_zone"] = {"eq": "32"}
         with pytest.raises(ValueError):
             Config(**config)
+
+    def testS2Polygon(self):
+        """Test configuration for Polygon Parameter."""
+        config = deepcopy(self.configuration)
+
+        config['user_settings']['aoi_settings']['polygon'] = None
+        Config(**config)
+
+        config['user_settings']['aoi_settings']['polygon'] = {
+            "type": "Polygon",
+            "coordinates": [
+                [
+                    [
+                        10.923350030393237,
+                        52.74845224598377
+                    ],
+                    [
+                        10.923350030393237,
+                        51.607414432719594
+                    ],
+                    [
+                        13.436597931135765,
+                        51.607414432719594
+                    ],
+                    [
+                        13.436597931135765,
+                        52.74845224598377
+                    ],
+                    [
+                        10.923350030393237,
+                        52.74845224598377
+                    ]
+                ]
+            ]
+        }
+        with pytest.raises(ValueError):
+            Config(**config)
+
+        config['user_settings']['aoi_settings']['bounding_box'] = []
+        Config(**config)
+
+        config['user_settings']["tile_settings"]["mgrs:utm_zone"] = {"eq": 32}
+        Config(**config)
+
+        config['user_settings']["tile_settings"]["mgrs:latitude_band"] = {"eq": "U"}
+        config['user_settings']["tile_settings"]["mgrs:grid_square"] = {"eq": "UV"}
+        with pytest.raises(ValueError):
+            Config(**config)
+
+        config['user_settings']['aoi_settings']['polygon'] = None
+        Config(**config)
 
     def testTargetResolution(self):
         """Test configuration for results target_resolution Parameter."""
