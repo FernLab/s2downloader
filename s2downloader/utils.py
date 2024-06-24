@@ -33,7 +33,6 @@ from pyproj.crs.crs import CRS
 from shapely.geometry import box, Polygon
 from shapely.ops import transform
 from datetime import datetime
-from typing import Union
 
 
 def saveRasterToDisk(*, out_image: np.ndarray, raster_crs: CRS, out_transform: affine.Affine,
@@ -169,13 +168,41 @@ def groupItemsPerDate(*, items_list: list[pystac.item.Item]) -> dict:
     return items_per_date
 
 
-def getBoundsUTM(*, aoi: Union[list, Polygon], bb_crs: int) -> tuple:
-    """Get the bounds of the AOI in UTM coordinates.
+def projectPolygon(poly: Polygon, source_crs: int, target_crs: int) -> Polygon:
+    """Project polygon.
 
     Parameters
     ----------
-    aoi : Union[list, dict]
+    poly : Polygon
         AOI defined either as a bounding box or a Polygon.
+    source_crs : int
+        Source CRS code.
+    target_crs : int
+        Target CRS code.
+
+    Returns
+    -------
+    : Polygon
+        Projected polygon to the target CRS.
+    """
+    source_proj = Proj(f'epsg:{source_crs}')
+    target_proj = Proj(f'epsg:{target_crs}')
+    transformer = Transformer.from_proj(source_proj, target_proj, always_xy=True)
+
+    def project_coords(x, y):
+        """Function to project a pair of coordinates (x,y)."""
+        return transformer.transform(x, y)
+
+    return transform(project_coords, poly)
+
+
+def getBoundsUTM(*, bounds: tuple, bb_crs: int) -> tuple:
+    """Get the bounds of a bounding box in UTM coordinates.
+
+    Parameters
+    ----------
+    bounds : tuple
+        Bounds defined as lat/long.
     bb_crs : int
         UTM zone number.
 
@@ -184,23 +211,10 @@ def getBoundsUTM(*, aoi: Union[list, Polygon], bb_crs: int) -> tuple:
     : tuple
         Bounds reprojected to the UTM zone.
     """
-    source_proj = Proj('epsg:4326')  # Global lat-lon coordinate system used by `geometry m
-    target_proj = Proj(f'epsg:{bb_crs}')  # Coordinate system of the S-2 scene
-    transformer = Transformer.from_proj(source_proj, target_proj, always_xy=True)
-
-    def project_coords(x, y):
-        """Function to project a pair of coordinates (x,y)."""
-        return transformer.transform(x, y)
-
-    if type(aoi) is list:
-        bounding_box = box(*aoi)
-        bbox = geopandas.GeoSeries([bounding_box], crs=4326)
-        bbox = bbox.to_crs(crs=bb_crs)
-        bounds = tuple(bbox.bounds.values[0])
-    else:
-        projected_polygon = transform(project_coords, aoi)
-        bounds = [*projected_polygon.bounds]
-    return bounds
+    bounding_box = box(*bounds)
+    bbox = geopandas.GeoSeries([bounding_box], crs=4326)
+    bbox = bbox.to_crs(crs=bb_crs)
+    return tuple(bbox.bounds.values[0])
 
 
 def getUTMZoneBB(*, tiles_gpd: geopandas.GeoDataFrame, bbox: list[float], logger: Logger = None) -> int:
