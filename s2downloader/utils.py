@@ -190,7 +190,7 @@ def projectPolygon(poly: Polygon, source_crs: int, target_crs: int) -> Polygon:
     transformer = Transformer.from_proj(source_proj, target_proj, always_xy=True)
 
     def project_coords(x, y):
-        """Function to project a pair of coordinates (x,y)."""
+        """Project a pair of coordinates (x,y)."""
         return transformer.transform(x, y)
 
     return transform(project_coords, poly)
