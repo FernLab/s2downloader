@@ -25,16 +25,18 @@ import geopandas
 import logging
 from logging import Logger
 import numpy as np
-import pyproj
 import pystac
 import rasterio
 import rasterio.io
+from pyproj import Proj, Transformer
+from pyproj.crs.crs import CRS
 from shapely.geometry import box, Polygon
+from shapely.ops import transform
 from datetime import datetime
 from typing import Union
 
 
-def saveRasterToDisk(*, out_image: np.ndarray, raster_crs: pyproj.crs.crs.CRS, out_transform: affine.Affine,
+def saveRasterToDisk(*, out_image: np.ndarray, raster_crs: CRS, out_transform: affine.Affine,
                      output_raster_path: str):
     """Save raster imagery data to disk.
 
@@ -167,7 +169,7 @@ def groupItemsPerDate(*, items_list: list[pystac.item.Item]) -> dict:
     return items_per_date
 
 
-def getBoundsUTM(*, aoi: Union[list, dict], bb_crs: int) -> tuple:
+def getBoundsUTM(*, aoi: Union[list, Polygon], bb_crs: int) -> tuple:
     """Get the bounds of the AOI in UTM coordinates.
 
     Parameters
@@ -182,9 +184,13 @@ def getBoundsUTM(*, aoi: Union[list, dict], bb_crs: int) -> tuple:
     : tuple
         Bounds reprojected to the UTM zone.
     """
-    source_crs = 'epsg:4326'  # Global lat-lon coordinate system used by `geometry m
-    target_crs = f'epsg:{bb_crs}'  # Coordinate system of the S-2 scene
-    latlon_to_s2_transformer = pyproj.Transformer.from_crs(source_crs, target_crs)
+    source_proj = Proj('epsg:4326')  # Global lat-lon coordinate system used by `geometry m
+    target_proj = Proj(f'epsg:{bb_crs}')  # Coordinate system of the S-2 scene
+    transformer = Transformer.from_proj(source_proj, target_proj, always_xy=True)
+
+    def project_coords(x, y):
+        """Function to project a pair of coordinates (x,y)."""
+        return transformer.transform(x, y)
 
     if type(aoi) is list:
         bounding_box = box(*aoi)
@@ -192,15 +198,8 @@ def getBoundsUTM(*, aoi: Union[list, dict], bb_crs: int) -> tuple:
         bbox = bbox.to_crs(crs=bb_crs)
         bounds = tuple(bbox.bounds.values[0])
     else:
-        projected_geometry = {
-            "type": "Polygon",
-            "coordinates": [[]]
-        }
-        projected_coordinates = []
-        for point in aoi["coordinates"][0]:
-            projected_x, projected_y = latlon_to_s2_transformer.transform(point[0], point[1])
-            projected_coordinates.append([projected_x, projected_y])
-        bounds = Polygon(projected_geometry).bounds
+        projected_polygon = transform(project_coords, aoi)
+        bounds = [*projected_polygon.bounds]
     return bounds
 
 
