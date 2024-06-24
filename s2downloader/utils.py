@@ -196,12 +196,12 @@ def projectPolygon(poly: Polygon, source_crs: int, target_crs: int) -> Polygon:
     return transform(project_coords, poly)
 
 
-def getBoundsUTM(*, bounds: list, bb_crs: int) -> tuple:
+def getBoundsUTM(*, bounds: tuple, bb_crs: int) -> tuple:
     """Get the bounds of a bounding box in UTM coordinates.
 
     Parameters
     ----------
-    bounds : list
+    bounds : tuple
         Bounds defined as lat/long.
     bb_crs : int
         UTM zone number.
