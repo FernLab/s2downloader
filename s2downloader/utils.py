@@ -231,8 +231,8 @@ def getUTMZoneBB(*, tiles_gpd: geopandas.GeoDataFrame, bbox: list[float], logger
 
     Returns
     -------
-    : tuple
-        Bounds reprojected to the UTM zone.
+    : int
+        The UTM zone.
 
     """
     if logger is None:
