@@ -33,10 +33,11 @@ import numpy as np
 import rasterio
 from rasterio.features import rasterize
 from rasterio.merge import merge
+from rasterio.transform import from_origin
 from rasterio.windows import from_bounds, Window, bounds
 from rasterio.warp import Resampling
 import urllib.request
-from shapely.geometry import Polygon
+from shapely.geometry import shape
 from typing import Dict, Union
 
 from pystac import Item
@@ -163,9 +164,11 @@ def downloadMosaic(*, config_dict: dict):
     tile_settings = config_dict['user_settings']['tile_settings']
     aoi_settings = config_dict['user_settings']['aoi_settings']
     aoi = aoi_settings['bounding_box']
+    bbox = aoi
     aoi_is_bb = True
     if "polygon" in aoi_settings and aoi_settings['polygon'] is not None:
-        aoi = aoi_settings['polygon']
+        aoi = shape(aoi_settings['polygon'])
+        bbox = [*aoi.bounds]
         aoi_is_bb = False
     result_settings = config_dict['user_settings']['result_settings']
     s2_settings = config_dict['s2_settings']
@@ -195,9 +198,9 @@ def downloadMosaic(*, config_dict: dict):
     try:
         op_start = time.time()
         tiles_gpd = geopandas.read_file(tiles_path,
-                                        bbox=aoi_settings["bounding_box"])
+                                        bbox=bbox)
         logger.debug(f"Loading Sentinel-2 tiles took {(time.time() - op_start) * 1000} msecs.")
-        utm_zone = getUTMZoneBB(tiles_gpd=tiles_gpd, bbox=aoi_settings['bounding_box'])
+        utm_zone = getUTMZoneBB(tiles_gpd=tiles_gpd, bbox=bbox)
         if utm_zone != 0 and tile_settings["mgrs:utm_zone"] == {}:
             tile_settings["mgrs:utm_zone"] = {"eq": utm_zone}
     except (IOError, FileNotFoundError) as err:
@@ -205,7 +208,7 @@ def downloadMosaic(*, config_dict: dict):
 
     # search for Sentinel-2 data within the bounding box as defined in query_props.json (no data download yet)
     aws_items = searchDataAtAWS(s2_collection=s2_settings['collections'],
-                                bb=aoi_settings['bounding_box'],
+                                bb=aoi_settings['bounding_box'] if aoi_is_bb else None,
                                 polygon=aoi_settings['polygon'],
                                 date_range=aoi_settings['date_range'],
                                 props_json=tile_settings,
@@ -286,8 +289,17 @@ def downloadMosaic(*, config_dict: dict):
 
         aoi_mask = None
         if not aoi_is_bb:
-            poly = Polygon(aoi_settings['polygon'])
-            aoi_mask = rasterio.features.rasterize([poly], out_shape=scl_band.shape)
+            raster_shape = np.shape(scl_band)[1:3]
+            xmin, ymin, xmax, ymax = aoi.bounds
+            xres = (xmax - xmin) / raster_shape[1]
+            yres = (ymax - ymin) / raster_shape[0]
+            transform = from_origin(xmin, ymax, xres, yres)
+
+            aoi_mask = rasterize([aoi],
+                                 out_shape=raster_shape,
+                                 transform=transform,
+                                 fill=0,
+                                 dtype=np.uint8)
             scl_band = scl_band * aoi_mask
         nonzero_pixels_per, masked_pixels_per, valid_pixels_per = \
             validPixelsFromSCLBand(
