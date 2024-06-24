@@ -234,7 +234,7 @@ def downloadMosaic(*, config_dict: dict):
             aoi_utm = projectPolygon(poly=shape(aoi_settings['polygon']),
                                      source_crs=4326,
                                      target_crs=items[0].properties['proj:epsg']).buffer(target_resolution * 1.5)
-            bounds_utm = [*aoi_utm.bounds]
+            bounds_utm = aoi_utm.bounds
         scl_src = None
         scl_crs = 0
         raster_crs = 0
