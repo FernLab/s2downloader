@@ -162,11 +162,11 @@ def downloadMosaic(*, config_dict: dict):
     # read the variables from the config:
     tile_settings = config_dict['user_settings']['tile_settings']
     aoi_settings = config_dict['user_settings']['aoi_settings']
-    bbox = aoi_settings['bounding_box']
+    bbox = tuple(aoi_settings['bounding_box'])
     aoi_is_bb = True
     aoi_utm = None
     if "polygon" in aoi_settings and aoi_settings['polygon'] is not None:
-        bbox = [*shape(aoi_settings['polygon']).bounds]
+        bbox = shape(aoi_settings['polygon']).bounds
         aoi_is_bb = False
     result_settings = config_dict['user_settings']['result_settings']
     s2_settings = config_dict['s2_settings']
