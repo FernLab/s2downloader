@@ -37,7 +37,7 @@ from rasterio.windows import from_bounds, Window, bounds
 from rasterio.warp import Resampling
 import urllib.request
 from shapely.geometry import shape
-from shapely import bounds
+from shapely import bounds as shp_bounds
 from typing import Dict, Union
 
 from pystac import Item
@@ -166,7 +166,7 @@ def downloadMosaic(*, config_dict: dict):
     bbox = tuple(aoi_settings['bounding_box'])
     aoi_is_bb = True
     if "polygon" in aoi_settings and aoi_settings['polygon'] is not None:
-        bbox = bounds(shape(aoi_settings['polygon']))
+        bbox = tuple(shp_bounds(shape(aoi_settings['polygon'])))
         aoi_is_bb = False
     result_settings = config_dict['user_settings']['result_settings']
     s2_settings = config_dict['s2_settings']
@@ -235,7 +235,7 @@ def downloadMosaic(*, config_dict: dict):
             aoi_utm = projectPolygon(poly=shape(aoi_settings['polygon']),
                                      source_crs=4326,
                                      target_crs=items[0].properties['proj:epsg']).buffer(target_resolution * 1.5)
-            bounds_utm = bounds(aoi_utm)
+            bounds_utm = tuple(shp_bounds(aoi_utm))
         scl_src = None
         scl_crs = 0
         raster_crs = 0

@@ -217,14 +217,14 @@ def getBoundsUTM(*, bounds: tuple, bb_crs: int) -> tuple:
     return tuple(bbox.bounds.values[0])
 
 
-def getUTMZoneBB(*, tiles_gpd: geopandas.GeoDataFrame, bbox: list[float], logger: Logger = None) -> int:
+def getUTMZoneBB(*, tiles_gpd: geopandas.GeoDataFrame, bbox: tuple, logger: Logger = None) -> int:
     """Get the UTM zone for the bounding box.
 
     Parameters
     ----------
     tiles_gpd : geopandas.GeoDataFrame
         Path to the tiles shapefile.
-    bbox : list[float]
+    bbox : tuple
         The bounds defined as lat/long.
     logger: Logger
         Logger handler.
