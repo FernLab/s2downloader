@@ -33,7 +33,6 @@ import numpy as np
 import rasterio
 from rasterio.features import rasterize
 from rasterio.merge import merge
-from rasterio.transform import from_origin
 from rasterio.windows import from_bounds, Window, bounds
 from rasterio.warp import Resampling
 import urllib.request
@@ -44,7 +43,7 @@ from pystac import Item
 from pystac_client import Client
 
 from .utils import (saveRasterToDisk, validPixelsFromSCLBand, getBoundsUTM,
-                    groupItemsPerDate, getUTMZoneBB, remove_duplicates_and_ensure_data_consistency)
+                    groupItemsPerDate, getUTMZoneBB, remove_duplicates_and_ensure_data_consistency, projectPolygon)
 from .config import Config
 
 
@@ -163,12 +162,11 @@ def downloadMosaic(*, config_dict: dict):
     # read the variables from the config:
     tile_settings = config_dict['user_settings']['tile_settings']
     aoi_settings = config_dict['user_settings']['aoi_settings']
-    aoi = aoi_settings['bounding_box']
-    bbox = aoi
+    bbox = aoi_settings['bounding_box']
     aoi_is_bb = True
+    aoi_utm = None
     if "polygon" in aoi_settings and aoi_settings['polygon'] is not None:
-        aoi = shape(aoi_settings['polygon'])
-        bbox = [*aoi.bounds]
+        bbox = [*shape(aoi_settings['polygon']).bounds]
         aoi_is_bb = False
     result_settings = config_dict['user_settings']['result_settings']
     s2_settings = config_dict['s2_settings']
@@ -230,7 +228,13 @@ def downloadMosaic(*, config_dict: dict):
         items = items_per_date[items_date]
         num_tiles = len(items)
         sensor_name = items[0].id[0:3]
-        bounds_utm = getBoundsUTM(aoi=aoi, bb_crs=items[0].properties['proj:epsg'])
+        if aoi_is_bb:
+            bounds_utm = getBoundsUTM(bounds=bbox, bb_crs=items[0].properties['proj:epsg'])
+        else:
+            aoi_utm = projectPolygon(poly=shape(aoi_settings['polygon']),
+                                     source_crs=4326,
+                                     target_crs=items[0].properties['proj:epsg'])
+            bounds_utm = [*aoi_utm.bounds]
         scl_src = None
         scl_crs = 0
         raster_crs = 0
@@ -289,18 +293,13 @@ def downloadMosaic(*, config_dict: dict):
 
         aoi_mask = None
         if not aoi_is_bb:
-            raster_shape = np.shape(scl_band)[1:3]
-            xmin, ymin, xmax, ymax = aoi.bounds
-            xres = (xmax - xmin) / raster_shape[1]
-            yres = (ymax - ymin) / raster_shape[0]
-            transform = from_origin(xmin, ymax, xres, yres)
-
-            aoi_mask = rasterize([aoi],
+            raster_shape = np.shape(scl_band[0])
+            aoi_mask = rasterize([aoi_utm],
                                  out_shape=raster_shape,
-                                 transform=transform,
+                                 transform=scl_trans,
                                  fill=0,
-                                 dtype=np.uint8)
-            scl_band = scl_band * aoi_mask
+                                 dtype=np.uint16)
+            scl_band[0] = scl_band[0] * aoi_mask
         nonzero_pixels_per, masked_pixels_per, valid_pixels_per = \
             validPixelsFromSCLBand(
                 scl_band=scl_band,
