@@ -31,7 +31,7 @@ import os
 import geopandas
 import numpy as np
 import rasterio
-from rasterio.features import rasterize
+from rasterio.features import geometry_mask
 from rasterio.merge import merge
 from rasterio.windows import from_bounds, Window, bounds
 from rasterio.warp import Resampling
@@ -233,7 +233,7 @@ def downloadMosaic(*, config_dict: dict):
         else:
             aoi_utm = projectPolygon(poly=shape(aoi_settings['polygon']),
                                      source_crs=4326,
-                                     target_crs=items[0].properties['proj:epsg'])
+                                     target_crs=items[0].properties['proj:epsg']).buffer(target_resolution * 1.5)
             bounds_utm = [*aoi_utm.bounds]
         scl_src = None
         scl_crs = 0
@@ -294,12 +294,11 @@ def downloadMosaic(*, config_dict: dict):
         aoi_mask = None
         if not aoi_is_bb:
             raster_shape = np.shape(scl_band[0])
-            aoi_mask = rasterize([aoi_utm],
-                                 out_shape=raster_shape,
-                                 transform=scl_trans,
-                                 fill=0,
-                                 dtype=np.uint16)
-            scl_band[0] = scl_band[0] * aoi_mask
+            aoi_mask = geometry_mask([aoi_utm],
+                                     transform=scl_trans,
+                                     invert=True,
+                                     out_shape=raster_shape)
+            scl_band[0] = np.where(aoi_mask, scl_band[0], np.nan)
         nonzero_pixels_per, masked_pixels_per, valid_pixels_per = \
             validPixelsFromSCLBand(
                 scl_band=scl_band,
