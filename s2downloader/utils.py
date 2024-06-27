@@ -128,8 +128,7 @@ def validPixelsFromSCLBand(*,
         aoi_size = scl_band.size
         scl_band_nonzero = np.count_nonzero(scl_band)
         if aoi_mask is not None:
-            aoi_size = aoi_size - np.count_nonzero(np.isnan(aoi_mask))
-            scl_band_nonzero = scl_band_nonzero - np.count_nonzero(np.isnan(aoi_mask))
+            aoi_size = aoi_size - np.count_nonzero(aoi_mask is False)
         nonzero_pixels_per = (float(scl_band_nonzero) / float(aoi_size)) * 100
         logger.info(f"Nonzero pixels: {nonzero_pixels_per} %")
 
@@ -137,10 +136,7 @@ def validPixelsFromSCLBand(*,
         masked_pixels_per = (float(np.count_nonzero(scl_band_scl_mask)) / float(scl_band_nonzero)) * 100
         logger.info(f"Masked pixels: {masked_pixels_per} %")
 
-        if aoi_mask is not None:
-            scl_band_mask = np.where(np.isin(scl_band, scl_filter_values + [np.nan]), 0, 1)
-        else:
-            scl_band_mask = np.where(np.isin(scl_band, scl_filter_values), 0, 1)
+        scl_band_mask = np.where(np.isin(scl_band, scl_filter_values), 0, 1)
         valid_pixels_per = (float(np.count_nonzero(scl_band_mask * scl_band)) / float(aoi_size)) * 100
         logger.info(f"Valid pixels: {valid_pixels_per} %")
 
