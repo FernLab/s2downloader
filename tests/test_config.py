@@ -237,7 +237,7 @@ class TestConfig(unittest.TestCase):
             Config(**config)
 
     def testS2BoundingBox(self):
-        """Test configuration and output for BoundingBox Parameter."""
+        """Test configuration for BoundingBox Parameter."""
 
         config = deepcopy(self.configuration)
 
@@ -260,6 +260,89 @@ class TestConfig(unittest.TestCase):
         config['user_settings']["tile_settings"]["mgrs:utm_zone"] = {"eq": "32"}
         with pytest.raises(ValueError):
             Config(**config)
+
+    def testS2Polygon(self):
+        """Test configuration for Polygon Parameter."""
+        config = deepcopy(self.configuration)
+
+        config['user_settings']['aoi_settings']['polygon'] = None
+        Config(**config)
+
+        config['user_settings']['aoi_settings']['polygon'] = {
+            "coordinates": [
+                [
+                    [
+                        13.06273559413006,
+                        52.377432380433305
+                    ],
+                    [
+                        13.065105498655981,
+                        52.37747622057046
+                    ],
+                    [
+                        13.067164203597116,
+                        52.37813381740361
+                    ],
+                    [
+                        13.067188142026396,
+                        52.37955127060573
+                    ],
+                    [
+                        13.067116326737562,
+                        52.38111480022582
+                    ],
+                    [
+                        13.070084692001785,
+                        52.38121708528095
+                    ],
+                    [
+                        13.068887770524185,
+                        52.38285361393676
+                    ],
+                    [
+                        13.065560328817526,
+                        52.38351113068933
+                    ],
+                    [
+                        13.061418980504953,
+                        52.38355496479147
+                    ],
+                    [
+                        13.060509320181893,
+                        52.381743118963925
+                    ],
+                    [
+                        13.060700827618234,
+                        52.38004809910265
+                    ],
+                    [
+                        13.061658364800877,
+                        52.37865988781914
+                    ],
+                    [
+                        13.06273559413006,
+                        52.377432380433305
+                    ]
+                ]
+            ],
+            "type": "Polygon"
+        }
+        with pytest.raises(ValueError):
+            Config(**config)
+
+        config['user_settings']['aoi_settings']['bounding_box'] = []
+        Config(**config)
+
+        config['user_settings']["tile_settings"]["mgrs:utm_zone"] = {"eq": 32}
+        Config(**config)
+
+        config['user_settings']["tile_settings"]["mgrs:latitude_band"] = {"eq": "U"}
+        config['user_settings']["tile_settings"]["mgrs:grid_square"] = {"eq": "UV"}
+        with pytest.raises(ValueError):
+            Config(**config)
+
+        config['user_settings']['aoi_settings']['polygon'] = None
+        Config(**config)
 
     def testTargetResolution(self):
         """Test configuration for results target_resolution Parameter."""

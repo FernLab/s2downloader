@@ -345,6 +345,9 @@ class UserSettings(BaseModel, extra='forbid'):
                     (len(utm_zone.keys()) == 0 or len(latitude_band.keys()) == 0 or len(grid_square.keys()) == 0)):
                 raise ValueError("Either AOI (bbox OR polygon) or TileID info (utm_zone, latitude_band and "
                                  "grid_square) should be provided.")
+            if (polygon is not None and len(utm_zone.keys()) != 0 and len(latitude_band.keys()) != 0 and
+                    len(grid_square.keys()) != 0):
+                raise ValueError("Both Polygon and TileID info are set, only one should be set")
         return v
 
 

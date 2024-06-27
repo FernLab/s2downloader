@@ -31,17 +31,20 @@ import os
 import geopandas
 import numpy as np
 import rasterio
+from rasterio.features import geometry_mask
 from rasterio.merge import merge
 from rasterio.windows import from_bounds, Window, bounds
 from rasterio.warp import Resampling
 import urllib.request
+from shapely.geometry import shape
+from shapely import bounds as shp_bounds
 from typing import Dict, Union
 
 from pystac import Item
 from pystac_client import Client
 
 from .utils import (saveRasterToDisk, validPixelsFromSCLBand, getBoundsUTM,
-                    groupItemsPerDate, getUTMZoneBB, remove_duplicates_and_ensure_data_consistency)
+                    groupItemsPerDate, getUTMZoneBB, remove_duplicates_and_ensure_data_consistency, projectPolygon)
 from .config import Config
 
 
@@ -62,7 +65,7 @@ def searchDataAtAWS(*,
     bb : list[float]
         A list of coordinates of the outer bounding box of all given coordinates.
     polygon : Dict
-        Polygon defining the AOI.
+        AOI defined as a Polygon.
     date_range: list[str]
         List with the start and end date. If the same it is a single date request.
     props_json: dict
@@ -160,6 +163,11 @@ def downloadMosaic(*, config_dict: dict):
     # read the variables from the config:
     tile_settings = config_dict['user_settings']['tile_settings']
     aoi_settings = config_dict['user_settings']['aoi_settings']
+    bbox = tuple(aoi_settings['bounding_box'])
+    aoi_is_bb = True
+    if "polygon" in aoi_settings and aoi_settings['polygon'] is not None:
+        bbox = tuple(shp_bounds(shape(aoi_settings['polygon'])))
+        aoi_is_bb = False
     result_settings = config_dict['user_settings']['result_settings']
     s2_settings = config_dict['s2_settings']
 
@@ -188,9 +196,9 @@ def downloadMosaic(*, config_dict: dict):
     try:
         op_start = time.time()
         tiles_gpd = geopandas.read_file(tiles_path,
-                                        bbox=aoi_settings["bounding_box"])
+                                        bbox=bbox)
         logger.debug(f"Loading Sentinel-2 tiles took {(time.time() - op_start) * 1000} msecs.")
-        utm_zone = getUTMZoneBB(tiles_gpd=tiles_gpd, bbox=aoi_settings['bounding_box'])
+        utm_zone = getUTMZoneBB(tiles_gpd=tiles_gpd, bbox=bbox)
         if utm_zone != 0 and tile_settings["mgrs:utm_zone"] == {}:
             tile_settings["mgrs:utm_zone"] = {"eq": utm_zone}
     except (IOError, FileNotFoundError) as err:
@@ -198,7 +206,7 @@ def downloadMosaic(*, config_dict: dict):
 
     # search for Sentinel-2 data within the bounding box as defined in query_props.json (no data download yet)
     aws_items = searchDataAtAWS(s2_collection=s2_settings['collections'],
-                                bb=aoi_settings['bounding_box'],
+                                bb=aoi_settings['bounding_box'] if aoi_is_bb else None,
                                 polygon=aoi_settings['polygon'],
                                 date_range=aoi_settings['date_range'],
                                 props_json=tile_settings,
@@ -220,8 +228,14 @@ def downloadMosaic(*, config_dict: dict):
         items = items_per_date[items_date]
         num_tiles = len(items)
         sensor_name = items[0].id[0:3]
-        bounds_utm = getBoundsUTM(bounds=aoi_settings['bounding_box'],
-                                  bb_crs=items[0].properties['proj:epsg'])
+        aoi_utm = None
+        if aoi_is_bb:
+            bounds_utm = getBoundsUTM(bounds=bbox, bb_crs=items[0].properties['proj:epsg'])
+        else:
+            aoi_utm = projectPolygon(poly=shape(aoi_settings['polygon']),
+                                     source_crs=4326,
+                                     target_crs=items[0].properties['proj:epsg']).buffer(target_resolution * 1.5)
+            bounds_utm = tuple(shp_bounds(aoi_utm))
         scl_src = None
         scl_crs = 0
         raster_crs = 0
@@ -277,10 +291,20 @@ def downloadMosaic(*, config_dict: dict):
                                             scl_trans_win[5])
         else:
             raise Exception("Number of items per date is invalid.")
+
+        aoi_mask = None
+        if not aoi_is_bb:
+            raster_shape = np.shape(scl_band[0])
+            aoi_mask = geometry_mask([aoi_utm],
+                                     transform=scl_trans,
+                                     invert=True,
+                                     out_shape=raster_shape)
+            scl_band[0] = np.where(aoi_mask, scl_band[0], 0)
         nonzero_pixels_per, masked_pixels_per, valid_pixels_per = \
             validPixelsFromSCLBand(
                 scl_band=scl_band,
                 scl_filter_values=scl_filter_values,
+                aoi_mask=aoi_mask,
                 logger=logger)
 
         scenes_info[items_date.replace('-', '')] = {
@@ -394,6 +418,8 @@ def downloadMosaic(*, config_dict: dict):
                                                                0,
                                                                band_src.transform[4] / band_scale_factor,
                                                                raster_trans_win[5])
+                        if not aoi_is_bb:
+                            raster_band = raster_band * aoi_mask
                         if cloudmasking:
                             op_start = time.time()
                             raster_band = raster_band * scl_band_mask
@@ -672,7 +698,9 @@ def s2Downloader(*, config_dict: dict):
     """
     try:
         config_dict = Config(**config_dict).model_dump(by_alias=True)
-        if len(config_dict['user_settings']['aoi_settings']['bounding_box']) == 0:
+        if (len(config_dict['user_settings']['aoi_settings']['bounding_box']) == 0 and
+                "polygon" in config_dict['user_settings']['aoi_settings'] and
+                config_dict['user_settings']['aoi_settings']["polygon"] is None):
             downloadTileID(config_dict=config_dict)
         else:
             downloadMosaic(config_dict=config_dict)
