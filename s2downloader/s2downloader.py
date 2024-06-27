@@ -299,7 +299,7 @@ def downloadMosaic(*, config_dict: dict):
                                      transform=scl_trans,
                                      invert=True,
                                      out_shape=raster_shape)
-            scl_band[0] = np.where(aoi_mask, scl_band[0], np.nan)
+            scl_band[0] = np.where(aoi_mask, scl_band[0], 0)
         nonzero_pixels_per, masked_pixels_per, valid_pixels_per = \
             validPixelsFromSCLBand(
                 scl_band=scl_band,
