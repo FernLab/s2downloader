@@ -324,6 +324,142 @@ class TestS2Downloader(unittest.TestCase):
                                  atol=1e-4,
                                  equal_nan=False).all()
 
+    def testS2DownloaderPolygonSCLMasking(self):
+        """Test the SCL masking funktion with a polygon"""
+
+        config = deepcopy(self.configuration)
+
+        config["user_settings"]["aoi_settings"]["bounding_box"] = []
+        config["user_settings"]["aoi_settings"]["date_range"] = ["2022-11-13", "2022-11-15"]
+        config["user_settings"]["aoi_settings"]["apply_SCL_band_mask"] = True
+        config["user_settings"]["aoi_settings"]["SCL_filter_values"] = [6]
+        config["user_settings"]["aoi_settings"]["aoi_min_coverage"] = 40
+        config["user_settings"]["tile_settings"]["bands"] = ["blue"]
+        config["user_settings"]["aoi_settings"]["polygon"] = {
+            "coordinates": [
+                [
+                    [
+                        12.372813890692186,
+                        52.39177608469933
+                    ],
+                    [
+                        12.395726318929974,
+                        52.37029771627479
+                    ],
+                    [
+                        12.439587252984921,
+                        52.36510137895499
+                    ],
+                    [
+                        12.50276009084007,
+                        52.376192820350695
+                    ],
+                    [
+                        12.50276009084007,
+                        52.402760977453624
+                    ],
+                    [
+                        12.477392759576304,
+                        52.429812092951295
+                    ],
+                    [
+                        12.448588564078165,
+                        52.39067744502387
+                    ],
+                    [
+                        12.392289454694065,
+                        52.426319339598905
+                    ],
+                    [
+                        12.372813890692186,
+                        52.39177608469933
+                    ]
+                ]
+            ],
+            "type": "Polygon"
+        }
+
+        Config(**config)
+        s2Downloader(config_dict=config)
+
+        # check output
+        # number of files:
+        filecount = sum([len(files) for r, d, files in os.walk(self.output_data_path)])
+        assert filecount == 4
+
+        # features of SCL band:
+        path = os.path.abspath(
+            os.path.join(self.output_data_path, "20221114_S2A_SCL.tif"))
+        self.assertEqual((str(path), os.path.isfile(path)), (str(path), True))
+        with rasterio.open(path) as expected_res:
+            assert expected_res.dtypes[0] == "uint8"
+            assert expected_res.shape == (734, 896)
+            assert expected_res.bounds == rasterio.coords.BoundingBox(left=729460.0,
+                                                                      bottom=5807220.0,
+                                                                      right=738420.0,
+                                                                      top=5814560.0)
+            assert expected_res.read_crs() == CRS().from_epsg(code=32632)
+            assert numpy.isclose([729460.0, 10.0, 0.0, 5814560.0, 0.0, -10.0],
+                                 expected_res.read_transform(),
+                                 rtol=0,
+                                 atol=1e-4,
+                                 equal_nan=False).all()
+            scl_np_array = expected_res.read()
+            unique, counts = numpy.unique(scl_np_array, return_counts=True)
+            pixel_count_dict = dict(zip(unique, counts))
+            assert pixel_count_dict == {
+                numpy.uint8(0): numpy.int64(387083),
+                numpy.uint8(4): numpy.int64(54092),
+                numpy.uint8(5): numpy.int64(70305),
+                numpy.uint8(6): numpy.int64(144919),
+                numpy.uint8(7): numpy.int64(1265)
+            }
+            assert (
+                       pixel_count_dict[numpy.uint8(4)] +
+                       pixel_count_dict[numpy.uint8(5)] +
+                       pixel_count_dict[numpy.uint8(7)] +
+                       pixel_count_dict[numpy.uint8(6)]
+                   ) / scl_np_array.size == numpy.float64(0.4114274158232775)
+            assert pixel_count_dict[numpy.uint8(6)] / (
+                pixel_count_dict[numpy.uint8(4)] +
+                pixel_count_dict[numpy.uint8(5)] +
+                pixel_count_dict[numpy.uint8(7)] +
+                pixel_count_dict[numpy.uint8(6)]
+            ) == numpy.float64(0.535584538456137)
+            assert 1 - (
+                (pixel_count_dict[numpy.uint8(6)] +
+                 pixel_count_dict[numpy.uint8(0)]
+                 ) / scl_np_array.size
+            ) == numpy.float64(0.19107325321136626)
+
+        # check pixel percentage
+        scenes_info_path = os.path.join(self.output_data_path, find_files(self.output_data_path,
+                                                                          "scenes_info_*.json")[0])
+        with open(scenes_info_path) as info_json:
+            info_dict = json.load(info_json)
+            assert info_dict["20221114"]["nonzero_pixels"] == 41.14274158232775
+            assert info_dict["20221114"]["masked_pixels"] == 53.5584538456137
+            assert info_dict["20221114"]["valid_pixels"] == 19.107325321136628
+
+        # features of blue masked band:
+        path = os.path.abspath(
+            os.path.join(self.output_data_path, "20221114_S2A_blue.tif"))
+        self.assertEqual((str(path), os.path.isfile(path)), (str(path), True))
+        with rasterio.open(path) as expected_res:
+            assert expected_res.dtypes[0] == "uint16"
+            assert expected_res.shape == (734, 896)
+            assert expected_res.bounds == rasterio.coords.BoundingBox(left=729460.0,
+                                                                      bottom=5807220.0,
+                                                                      right=738420.0,
+                                                                      top=5814560.0)
+            assert expected_res.read_crs() == CRS().from_epsg(code=32632)
+            assert numpy.isclose([729460.0, 10.0, 0.0, 5814560.0, 0.0, -10.0],
+                                 expected_res.read_transform(),
+                                 rtol=0,
+                                 atol=1e-4,
+                                 equal_nan=False).all()
+            assert numpy.count_nonzero(expected_res.read()) == 125662
+
     def testS2DownloaderCenterUTM(self):
         """Test within a single tile in the center."""
 
