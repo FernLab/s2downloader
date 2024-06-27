@@ -186,6 +186,7 @@ class TestS2Downloader(unittest.TestCase):
 
         config = deepcopy(self.configuration)
         config['user_settings']['aoi_settings']['bounding_box'] = []
+        config['user_settings']['aoi_settings']['aoi_min_coverage'] = 65
         config['user_settings']['aoi_settings']['polygon'] = {
             "coordinates": [
                 [
