@@ -2,6 +2,11 @@
 History
 =======
 
+1.1.0 (coming soon)
+-------------------
+
+* Support AOI defined as a Polygon.
+
 1.0.6 (2024-06-19)
 ------------------
 * Update Pydantic to version 2.* and unpin all the libraries.

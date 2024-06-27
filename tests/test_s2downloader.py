@@ -99,7 +99,7 @@ class TestS2Downloader(unittest.TestCase):
         else:
             print("Successfully deleted the directory %s" % cls.output_data_path)
 
-    def testS2DownloaderDefault(self):
+    def testS2DownloaderBBDefault(self):
         """Test configuration default settings."""
 
         config = deepcopy(self.configuration)
@@ -176,6 +176,149 @@ class TestS2Downloader(unittest.TestCase):
                                                                       top=5811560.0)
             assert expected_res.read_crs() == CRS().from_epsg(code=32632)
             assert numpy.isclose([776160.0, 10.0, 0.0, 5811560.0, 0.0, -10.0],
+                                 expected_res.read_transform(),
+                                 rtol=0,
+                                 atol=1e-4,
+                                 equal_nan=False).all()
+
+    def testS2DownloaderPolyDefault(self):
+        """Test configuration default settings with the AOI as a Polygon."""
+
+        config = deepcopy(self.configuration)
+        config['user_settings']['aoi_settings']['bounding_box'] = []
+        config['user_settings']['aoi_settings']['aoi_min_coverage'] = 65
+        config['user_settings']['aoi_settings']['polygon'] = {
+            "coordinates": [
+                [
+                    [
+                        13.06273559413006,
+                        52.377432380433305
+                    ],
+                    [
+                        13.065105498655981,
+                        52.37747622057046
+                    ],
+                    [
+                        13.067164203597116,
+                        52.37813381740361
+                    ],
+                    [
+                        13.067188142026396,
+                        52.37955127060573
+                    ],
+                    [
+                        13.067116326737562,
+                        52.38111480022582
+                    ],
+                    [
+                        13.070084692001785,
+                        52.38121708528095
+                    ],
+                    [
+                        13.068887770524185,
+                        52.38285361393676
+                    ],
+                    [
+                        13.065560328817526,
+                        52.38351113068933
+                    ],
+                    [
+                        13.061418980504953,
+                        52.38355496479147
+                    ],
+                    [
+                        13.060509320181893,
+                        52.381743118963925
+                    ],
+                    [
+                        13.060700827618234,
+                        52.38004809910265
+                    ],
+                    [
+                        13.061658364800877,
+                        52.37865988781914
+                    ],
+                    [
+                        13.06273559413006,
+                        52.377432380433305
+                    ]
+                ]
+            ],
+            "type": "Polygon"
+        }
+
+        Config(**config)
+        s2Downloader(config_dict=config)
+
+        # check output
+        # number of files:
+        filecount = sum([len(files) for r, d, files in os.walk(self.output_data_path)])
+        assert filecount == 6
+
+        # features of two files:
+        path = os.path.abspath(
+            os.path.join(self.output_data_path, "20210905_S2B_SCL.tif"))
+        self.assertEqual((str(path), os.path.isfile(path)), (str(path), True))
+        with rasterio.open(path) as expected_res:
+            assert expected_res.dtypes[0] == "uint8"
+            assert expected_res.shape == (72, 68)
+            assert expected_res.bounds == rasterio.coords.BoundingBox(left=776300.0,
+                                                                      bottom=5810780.0,
+                                                                      right=776980.0,
+                                                                      top=5811500.0)
+            assert expected_res.read_crs() == CRS().from_epsg(code=32632)
+            assert numpy.isclose([776300.0, 10.0, 0.0, 5811500.0, 0.0, -10.0],
+                                 expected_res.read_transform(),
+                                 rtol=0,
+                                 atol=1e-4,
+                                 equal_nan=False).all()
+
+        path = os.path.abspath(
+            os.path.join(self.output_data_path, "20210905_S2B_blue.tif"))
+        self.assertEqual((str(path), os.path.isfile(path)), (str(path), True))
+        with rasterio.open(path) as expected_res:
+            assert expected_res.dtypes[0] == "uint16"
+            assert expected_res.shape == (72, 68)
+            assert expected_res.bounds == rasterio.coords.BoundingBox(left=776300.0,
+                                                                      bottom=5810780.0,
+                                                                      right=776980.0,
+                                                                      top=5811500.0)
+            assert expected_res.read_crs() == CRS().from_epsg(code=32632)
+            assert numpy.isclose([776300.0, 10.0, 0.0, 5811500.0, 0.0, -10.0],
+                                 expected_res.read_transform(),
+                                 rtol=0,
+                                 atol=1e-4,
+                                 equal_nan=False).all()
+
+        path = os.path.abspath(
+            os.path.join(self.output_data_path, "20210905_S2B_coastal.tif"))
+        self.assertEqual((str(path), os.path.isfile(path)), (str(path), True))
+        with rasterio.open(path) as expected_res:
+            assert expected_res.dtypes[0] == "uint16"
+            assert expected_res.shape == (72, 68)
+            assert expected_res.bounds == rasterio.coords.BoundingBox(left=776300.0,
+                                                                      bottom=5810780.0,
+                                                                      right=776980.0,
+                                                                      top=5811500.0)
+            assert expected_res.read_crs() == CRS().from_epsg(code=32632)
+            assert numpy.isclose([776300.0, 10.0, 0.0, 5811500.0, 0.0, -10.0],
+                                 expected_res.read_transform(),
+                                 rtol=0,
+                                 atol=1e-4,
+                                 equal_nan=False).all()
+
+        path = os.path.abspath(
+            os.path.join(self.output_data_path, "20210905_S2B_rededge1.tif"))
+        self.assertEqual((str(path), os.path.isfile(path)), (str(path), True))
+        with rasterio.open(path) as expected_res:
+            assert expected_res.dtypes[0] == "uint16"
+            assert expected_res.shape == (72, 68)
+            assert expected_res.bounds == rasterio.coords.BoundingBox(left=776300.0,
+                                                                      bottom=5810780.0,
+                                                                      right=776980.0,
+                                                                      top=5811500.0)
+            assert expected_res.read_crs() == CRS().from_epsg(code=32632)
+            assert numpy.isclose([776300.0, 10.0, 0.0, 5811500.0, 0.0, -10.0],
                                  expected_res.read_transform(),
                                  rtol=0,
                                  atol=1e-4,
@@ -654,8 +797,8 @@ class TestS2Downloader(unittest.TestCase):
             assert False
 
         if not os.path.exists(
-            os.path.join(
-                self.output_data_path, "S2B_32UQD_20210908_0_L2A_thumbnail.jpg")):
+                os.path.join(
+                    self.output_data_path, "S2B_32UQD_20210908_0_L2A_thumbnail.jpg")):
             assert False
 
         with rasterio.open(scene_path) as expected_res:

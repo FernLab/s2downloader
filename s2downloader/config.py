@@ -32,8 +32,10 @@ from json import JSONDecodeError
 
 import pydantic
 # third party packages
-from pydantic import BaseModel, Field, StrictBool, HttpUrl, field_validator, model_validator
-from typing import Optional, List, Dict
+from geojson_pydantic import Polygon
+from pydantic import BaseModel, Field, StrictBool, field_validator, HttpUrl, model_validator, TypeAdapter
+from pydantic_core import ValidationError
+from typing import Optional, List, Dict, Union
 
 
 class ResamplingMethodName(str, Enum):
@@ -145,7 +147,14 @@ class AoiSettings(BaseModel, extra='forbid'):
 
     bounding_box: List[float] = Field(
         title="Bounding Box for AOI.",
-        description="SW and NE corner coordinates of AOI Bounding Box.")
+        description="SW and NE corner coordinates of AOI Bounding Box.",
+        max_length=4
+    )
+    polygon: Union[Polygon, None] = Field(
+        title="Polygon for the AOI.",
+        description="Polygon defined as in GeoJson.",
+        default=None
+    )
     apply_SCL_band_mask: Optional[StrictBool] = Field(
         title="Apply a filter mask from SCL.",
         description="Define if SCL masking should be applied.",
@@ -187,16 +196,15 @@ class AoiSettings(BaseModel, extra='forbid'):
         if len(v) != 0:
             if len(v) != 4:
                 raise ValueError("Bounding Box needs two pairs of lat/lon coordinates.")
+
             if v[0] >= v[2] or v[1] >= v[3]:
                 raise ValueError("Bounding Box coordinates are not valid.")
-
             coords_nw = (v[3], v[0])
             coords_ne = (v[3], v[2])
             coords_sw = (v[1], v[0])
 
             ew_dist = geopy.distance.geodesic(coords_nw, coords_ne).km
             ns_dist = geopy.distance.geodesic(coords_nw, coords_sw).km
-
             if ew_dist > 500 or ns_dist > 500:
                 raise ValueError("Bounding Box is too large. It should be max 500*500km.")
 
@@ -322,18 +330,24 @@ class UserSettings(BaseModel, extra='forbid'):
     def checkBboxAndSetUTMZone(cls, v):
         """Check BBOX UTM zone coverage and set UTM zone."""
         bb = v["aoi_settings"]["bounding_box"]
+        polygon = v["aoi_settings"]["polygon"] if "polygon" in v["aoi_settings"] else None
         utm_zone = v["tile_settings"]["mgrs:utm_zone"]
         latitude_band = v["tile_settings"]["mgrs:latitude_band"]
         grid_square = v["tile_settings"]["mgrs:grid_square"]
 
         if len(bb) != 0:
+            if polygon is not None:
+                raise ValueError("Expected bbox OR polygon, not both.")
             if len(utm_zone.keys()) != 0 and len(latitude_band.keys()) != 0 and len(grid_square.keys()) != 0:
                 raise ValueError("Both AOI and TileID info are set, only one should be set")
         else:
-            if len(utm_zone.keys()) == 0 or len(latitude_band.keys()) == 0 or len(grid_square.keys()) == 0:
-                raise ValueError("Either AOI or TileID info (utm_zone, latitude_band and grid_square)"
-                                 " should be provided.")
-
+            if (polygon is None and
+                    (len(utm_zone.keys()) == 0 or len(latitude_band.keys()) == 0 or len(grid_square.keys()) == 0)):
+                raise ValueError("Either AOI (bbox OR polygon) or TileID info (utm_zone, latitude_band and "
+                                 "grid_square) should be provided.")
+            if (polygon is not None and len(utm_zone.keys()) != 0 and len(latitude_band.keys()) != 0 and
+                    len(grid_square.keys()) != 0):
+                raise ValueError("Both Polygon and TileID info are set, only one should be set")
         return v
 
 
@@ -346,7 +360,7 @@ class S2Settings(BaseModel, extra='forbid'):
         default=["sentinel-2-l2a"]
     )
 
-    stac_catalog_url: Optional[HttpUrl] = Field(
+    stac_catalog_url: Optional[str] = Field(
         title="STAC catalog URL.",
         description="URL to access the STAC catalog.",
         default="https://earth-search.aws.element84.com/v1"
@@ -357,6 +371,16 @@ class S2Settings(BaseModel, extra='forbid'):
         description="Path to a shapefile.zip describing the tiles and its projections.",
         default="data/sentinel_2_index_shapefile_attr.zip"
     )
+
+    @field_validator('stac_catalog_url')
+    def check_stac_catalog_url(cls, v):
+        """Check if the URL is valid."""
+        ta = TypeAdapter(HttpUrl)
+        try:
+            ta.validate_strings(v, strict=True)
+        except ValidationError as err:
+            raise ValueError(f"The stac_catalog_string is invalid:{err}.")
+        return v
 
     @field_validator('tiles_definition_path')
     def check_tiles_definition(cls, v):

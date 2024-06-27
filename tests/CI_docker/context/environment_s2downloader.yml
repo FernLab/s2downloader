@@ -21,6 +21,7 @@ dependencies:
   - python-dateutil
   - pydantic
   - geopy
+  - geojson-pydantic
 
   - pip:
     # setup requirements

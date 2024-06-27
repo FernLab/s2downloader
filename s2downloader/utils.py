@@ -25,15 +25,17 @@ import geopandas
 import logging
 from logging import Logger
 import numpy as np
-import pyproj
 import pystac
 import rasterio
 import rasterio.io
-from shapely.geometry import box
+from pyproj import Proj, Transformer
+from pyproj.crs.crs import CRS
+from shapely.geometry import box, Polygon
+from shapely.ops import transform
 from datetime import datetime
 
 
-def saveRasterToDisk(*, out_image: np.ndarray, raster_crs: pyproj.crs.crs.CRS, out_transform: affine.Affine,
+def saveRasterToDisk(*, out_image: np.ndarray, raster_crs: CRS, out_transform: affine.Affine,
                      output_raster_path: str):
     """Save raster imagery data to disk.
 
@@ -91,6 +93,7 @@ def saveRasterToDisk(*, out_image: np.ndarray, raster_crs: pyproj.crs.crs.CRS, o
 def validPixelsFromSCLBand(*,
                            scl_band: np.ndarray,
                            scl_filter_values: list[int],
+                           aoi_mask: np.ndarray = None,
                            logger: Logger = None) -> tuple[float, float, float]:
     """Percentage of valid SCL band pixels.
 
@@ -99,7 +102,9 @@ def validPixelsFromSCLBand(*,
     scl_band : np.ndarray
         The SCL band.
     scl_filter_values: list
-        List with the values of the SCL Band to filter out
+        List with the values of the SCL Band to filter out.
+    aoi_mask : np.ndarray
+        AOI mask in case it is defined as a Polygon.
     logger: Logger
         Logger handler.
 
@@ -120,8 +125,11 @@ def validPixelsFromSCLBand(*,
     if logger is None:
         logger = logging.getLogger(__name__)
     try:
+        aoi_size = scl_band.size
         scl_band_nonzero = np.count_nonzero(scl_band)
-        nonzero_pixels_per = (float(scl_band_nonzero) / float(scl_band.size)) * 100
+        if aoi_mask is not None:
+            aoi_size = aoi_size - np.count_nonzero(aoi_mask is False)
+        nonzero_pixels_per = (float(scl_band_nonzero) / float(aoi_size)) * 100
         logger.info(f"Nonzero pixels: {nonzero_pixels_per} %")
 
         scl_band_scl_mask = np.where(np.isin(scl_band, scl_filter_values), 1, 0)
@@ -129,7 +137,7 @@ def validPixelsFromSCLBand(*,
         logger.info(f"Masked pixels: {masked_pixels_per} %")
 
         scl_band_mask = np.where(np.isin(scl_band, scl_filter_values), 0, 1)
-        valid_pixels_per = (float(np.count_nonzero(scl_band_mask * scl_band)) / float(scl_band.size)) * 100
+        valid_pixels_per = (float(np.count_nonzero(scl_band_mask * scl_band)) / float(aoi_size)) * 100
         logger.info(f"Valid pixels: {valid_pixels_per} %")
 
         return nonzero_pixels_per, masked_pixels_per, valid_pixels_per
@@ -160,6 +168,34 @@ def groupItemsPerDate(*, items_list: list[pystac.item.Item]) -> dict:
     return items_per_date
 
 
+def projectPolygon(poly: Polygon, source_crs: int, target_crs: int) -> Polygon:
+    """Project polygon.
+
+    Parameters
+    ----------
+    poly : Polygon
+        AOI defined either as a bounding box or a Polygon.
+    source_crs : int
+        Source CRS code.
+    target_crs : int
+        Target CRS code.
+
+    Returns
+    -------
+    : Polygon
+        Projected polygon to the target CRS.
+    """
+    source_proj = Proj(f'epsg:{source_crs}')
+    target_proj = Proj(f'epsg:{target_crs}')
+    transformer = Transformer.from_proj(source_proj, target_proj, always_xy=True)
+
+    def project_coords(x, y):
+        """Project a pair of coordinates (x,y)."""
+        return transformer.transform(x, y)
+
+    return transform(project_coords, poly)
+
+
 def getBoundsUTM(*, bounds: tuple, bb_crs: int) -> tuple:
     """Get the bounds of a bounding box in UTM coordinates.
 
@@ -181,22 +217,22 @@ def getBoundsUTM(*, bounds: tuple, bb_crs: int) -> tuple:
     return tuple(bbox.bounds.values[0])
 
 
-def getUTMZoneBB(*, tiles_gpd: geopandas.GeoDataFrame, bbox: list[float], logger: Logger = None) -> int:
+def getUTMZoneBB(*, tiles_gpd: geopandas.GeoDataFrame, bbox: tuple, logger: Logger = None) -> int:
     """Get the UTM zone for the bounding box.
 
     Parameters
     ----------
     tiles_gpd : geopandas.GeoDataFrame
         Path to the tiles shapefile.
-    bbox : list[float]
+    bbox : tuple
         The bounds defined as lat/long.
     logger: Logger
         Logger handler.
 
     Returns
     -------
-    : tuple
-        Bounds reprojected to the UTM zone.
+    : int
+        The UTM zone.
 
     """
     if logger is None:
@@ -217,7 +253,7 @@ def getUTMZoneBB(*, tiles_gpd: geopandas.GeoDataFrame, bbox: list[float], logger
     if len(s2_tiles_g) != 1:
         f = ""
         for f in s2_tiles_g['EPSG']:
-            tiles_polygon = s2_tiles.loc[s2_tiles.EPSG == f[0]].geometry.unary_union
+            tiles_polygon = s2_tiles.loc[s2_tiles.EPSG == f[0]].geometry.union_all()
             if tiles_polygon.contains(bounding_box):
                 fits_one_epgs = True
                 break
