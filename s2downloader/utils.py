@@ -257,7 +257,7 @@ def getUTMZoneBB(*, tiles_gpd: geopandas.GeoDataFrame, bbox: tuple, logger: Logg
     if len(s2_tiles_g) != 1:
         f = ""
         for f in s2_tiles_g['EPSG']:
-            tiles_polygon = s2_tiles.loc[s2_tiles.EPSG == f[0]].geometry.unary_union
+            tiles_polygon = s2_tiles.loc[s2_tiles.EPSG == f[0]].geometry.union_all()
             if tiles_polygon.contains(bounding_box):
                 fits_one_epgs = True
                 break
