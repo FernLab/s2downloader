@@ -415,21 +415,21 @@ class TestS2Downloader(unittest.TestCase):
                 numpy.uint8(7): numpy.int64(1265)
             }
             assert (
-                       pixel_count_dict[numpy.uint8(4)] +
-                       pixel_count_dict[numpy.uint8(5)] +
-                       pixel_count_dict[numpy.uint8(7)] +
-                       pixel_count_dict[numpy.uint8(6)]
+                           pixel_count_dict[numpy.uint8(4)] +
+                           pixel_count_dict[numpy.uint8(5)] +
+                           pixel_count_dict[numpy.uint8(7)] +
+                           pixel_count_dict[numpy.uint8(6)]
                    ) / scl_np_array.size == numpy.float64(0.4114274158232775)
             assert pixel_count_dict[numpy.uint8(6)] / (
-                pixel_count_dict[numpy.uint8(4)] +
-                pixel_count_dict[numpy.uint8(5)] +
-                pixel_count_dict[numpy.uint8(7)] +
-                pixel_count_dict[numpy.uint8(6)]
+                    pixel_count_dict[numpy.uint8(4)] +
+                    pixel_count_dict[numpy.uint8(5)] +
+                    pixel_count_dict[numpy.uint8(7)] +
+                    pixel_count_dict[numpy.uint8(6)]
             ) == numpy.float64(0.535584538456137)
             assert 1 - (
-                (pixel_count_dict[numpy.uint8(6)] +
-                 pixel_count_dict[numpy.uint8(0)]
-                 ) / scl_np_array.size
+                    (pixel_count_dict[numpy.uint8(6)] +
+                     pixel_count_dict[numpy.uint8(0)]
+                     ) / scl_np_array.size
             ) == numpy.float64(0.19107325321136626)
 
         # check pixel percentage
