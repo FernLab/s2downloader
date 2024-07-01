@@ -145,10 +145,11 @@ class TileSettings(BaseModel, extra='forbid'):
 class AoiSettings(BaseModel, extra='forbid'):
     """Template for AOI settings in config file."""
 
-    bounding_box: List[float] = Field(
+    bounding_box: Union[List[float], None] = Field(
         title="Bounding Box for AOI.",
         description="SW and NE corner coordinates of AOI Bounding Box.",
-        max_length=4
+        max_length=4,
+        default=None
     )
     polygon: Union[Polygon, None] = Field(
         title="Polygon for the AOI.",
@@ -329,13 +330,14 @@ class UserSettings(BaseModel, extra='forbid'):
     @model_validator(mode='before')
     def checkBboxAndSetUTMZone(cls, v):
         """Check BBOX UTM zone coverage and set UTM zone."""
-        bb = v["aoi_settings"]["bounding_box"]
+        bb = v["aoi_settings"]["bounding_box"] if ("bounding_box" in v["aoi_settings"] and
+                                                   len(v["aoi_settings"]["bounding_box"])) else None
         polygon = v["aoi_settings"]["polygon"] if "polygon" in v["aoi_settings"] else None
         utm_zone = v["tile_settings"]["mgrs:utm_zone"]
         latitude_band = v["tile_settings"]["mgrs:latitude_band"]
         grid_square = v["tile_settings"]["mgrs:grid_square"]
 
-        if len(bb) != 0:
+        if bb is not None:
             if polygon is not None:
                 raise ValueError("Expected bbox OR polygon, not both.")
             if len(utm_zone.keys()) != 0 and len(latitude_band.keys()) != 0 and len(grid_square.keys()) != 0:
