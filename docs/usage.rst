@@ -161,7 +161,7 @@ Tile Settings
 AOI Settings
 ############
 
-**Note:** Please make sure that you either only specify a Bounding Box or an AOI with an empty Bounding Box. A Bounding Box will always be four coordinates, a rectangle and in parallel with lon/lat. A polygon can have multiple shapes and orientations.
+**Note:** Please make sure that you either provide only a Bounding Box or an AOI. A Bounding Box will always be four coordinates, a rectangle and in parallel with lon/lat. A polygon can have multiple shapes and orientations.
 
 .. list-table::
     :header-rows: 1
