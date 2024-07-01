@@ -47,7 +47,7 @@ Input and Output
 Expected Input Configuration
 ----------------------------
 
-The package expects a configuration file in ``json`` format, like the `default_config.json <https://git.gfz-potsdam.de/fernlab/products/misac/misac-2/s2downloader/-/blob/main/data/default_config.json>`_ in the repository. A valid configuration for downloading data might look like follows:
+The package expects a configuration file in ``json`` format, like the `default_config.json <https://git.gfz-potsdam.de/fernlab/products/data-portal/s2downloader/-/blob/main/data/default_config.json>`_ in the repository. A valid configuration for downloading data might look like follows:
 
 .. code-block:: json
 
@@ -126,7 +126,7 @@ User Settings
 Tile Settings
 #############
 
-**Note:** To get the correct UTM zone, latitude band and grid square for downloading complete tiles either the tile grid `sentinel_2_index_shapefile_attr.zip <https://git.gfz-potsdam.de/fernlab/products/misac/misac-2/s2downloader/-/blob/main/data/sentinel_2_index_shapefile_attr.zip>`_ can be displayed in a GIS or this `web map <https://eatlas.org.au/data/uuid/f7468d15-12be-4e3f-a246-b2882a324f59>`_ can be used.
+**Note:** To get the correct UTM zone, latitude band and grid square for downloading complete tiles either the tile grid `sentinel_2_index_shapefile_attr.zip <https://git.gfz-potsdam.de/fernlab/products/data-portal/s2downloader/-/blob/main/data/sentinel_2_index_shapefile_attr.zip>`_ can be displayed in a GIS or this `web map <https://eatlas.org.au/data/uuid/f7468d15-12be-4e3f-a246-b2882a324f59>`_ can be used.
 
 .. list-table::
     :header-rows: 1
@@ -161,6 +161,8 @@ Tile Settings
 AOI Settings
 ############
 
+**Note:** Please make sure that you either only specify a Bounding Box or an AOI with an empty Bounding Box. A Bounding Box will always be four coordinates, a rectangle and in parallel with lon/lat. A polygon can have multiple shapes and orientations.
+
 .. list-table::
     :header-rows: 1
     :class: tight-table
@@ -169,8 +171,11 @@ AOI Settings
       - Description
       - Examples
     * - ``Bounding Box``
-      - The BoundingBox of the AOI in lat/lon format.
+      - The BoundingBox in lon/lat format.
       - ``"bounding_box": [13.058397, 52.376620, 13.073049, 52.383835]``
+    * - ``Polygon``
+      - A polygon which defines an AOI to which the results are cropped. The format is one geometry feature of a geojson in lon/lat coordinates.
+      - ``"polygon": "coordinates": [[[12.438319245776597, 52.41747810004975], [12.404920243911363, 52.38094275671861], [12.479968200292518, 52.37964316533544], [12.438319245776597, 52.41747810004975]]], "type": "Polygon"}``
     * - ``apply_SCL_band_mask``
       - Boolean Variable. If set to true the SCL band of Sentinel-2 is used to mask out pixels. The SCL band is saved along to an extra file.
       - ``"apply_SCL_band_mask": true``
@@ -245,8 +250,8 @@ S2 Settings
 Expected Output
 ---------------
 
-With AOI
-########
+With Bounding Box or AOI
+########################
 
 The following files are saved within the defined output folder:
 
