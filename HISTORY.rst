@@ -2,10 +2,10 @@
 History
 =======
 
-1.1.0 (coming soon)
+1.1.0 (2024-07-01)
 -------------------
-
 * Support AOI defined as a Polygon.
+* Establish tests for SCL-filtering and background masking.
 
 1.0.6 (2024-06-19)
 ------------------
