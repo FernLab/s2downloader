@@ -175,7 +175,7 @@ AOI Settings
       - ``"bounding_box": [13.058397, 52.376620, 13.073049, 52.383835]``
     * - ``Polygon``
       - A polygon which defines an AOI to which the results are cropped. The format is one geometry feature of a geojson in lon/lat coordinates.
-      - ``"polygon": "coordinates": [[[12.438319245776597, 52.41747810004975], [12.404920243911363, 52.38094275671861], [12.479968200292518, 52.37964316533544], [12.438319245776597, 52.41747810004975]]], "type": "Polygon"}``
+      - ``"polygon": {"coordinates": [[[12.438319245776597, 52.41747810004975], [12.404920243911363, 52.38094275671861], [12.479968200292518, 52.37964316533544], [12.438319245776597, 52.41747810004975]]], "type": "Polygon"}``
     * - ``apply_SCL_band_mask``
       - Boolean Variable. If set to true the SCL band of Sentinel-2 is used to mask out pixels. The SCL band is saved along to an extra file.
       - ``"apply_SCL_band_mask": true``
