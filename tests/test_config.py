@@ -257,6 +257,9 @@ class TestConfig(unittest.TestCase):
         config['user_settings']["tile_settings"]["mgrs:grid_square"] = {"eq": "UV"}
         Config(**config)
 
+        del config['user_settings']['aoi_settings']['bounding_box']
+        Config(**config)
+
         config['user_settings']["tile_settings"]["mgrs:utm_zone"] = {"eq": "32"}
         with pytest.raises(ValueError):
             Config(**config)
@@ -331,6 +334,9 @@ class TestConfig(unittest.TestCase):
             Config(**config)
 
         config['user_settings']['aoi_settings']['bounding_box'] = []
+        Config(**config)
+
+        del config['user_settings']['aoi_settings']['bounding_box']
         Config(**config)
 
         config['user_settings']["tile_settings"]["mgrs:utm_zone"] = {"eq": 32}
