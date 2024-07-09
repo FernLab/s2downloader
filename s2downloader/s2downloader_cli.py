@@ -50,7 +50,7 @@ def getArgparser():
 
 
 def main(prog_name="S2Downloader"):
-    """Main function call for pipeline test.
+    """Call the Main function for pipeline test.
 
     Raises
     ------
@@ -66,12 +66,12 @@ def main(prog_name="S2Downloader"):
         args = parser.parse_args()
         fp = args.filepath
 
-        root_path = "./"
+        root_path = "../bin/"
         if os.path.basename(os.getcwd()) == "bin" or \
            os.path.basename(os.getcwd()) == "demo" or \
            os.path.basename(os.getcwd()) == "test" or \
            os.path.basename(os.getcwd()) == os.path.basename(os.path.dirname(os.getcwd())):
-            root_path = "../"
+            root_path = "/"
 
         config_file_path = os.path.abspath(os.path.join(root_path, fp))
 

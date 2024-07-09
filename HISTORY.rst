@@ -2,6 +2,10 @@
 History
 =======
 
+1.2.0 (2024-07-09)
+-------------------
+* Adapt to PyPi structure.
+
 1.1.0 (2024-07-01)
 -------------------
 * Support AOI defined as a Polygon.
