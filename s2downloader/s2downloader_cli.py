@@ -50,7 +50,7 @@ def getArgparser():
 
 
 def main(prog_name="S2Downloader"):
-    """Main function call for pipeline test.
+    """Call the Main function for pipeline test.
 
     Raises
     ------
