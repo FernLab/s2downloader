@@ -73,7 +73,7 @@ setup(
     description="Downloader for Sentinel-2 from aws.",
     entry_points={
         'console_scripts': [
-            's2downloader=bin.s2downloader_cli:main',
+            's2downloader=s2downloader.s2downloader_cli:main',
         ],
     },
     extras_require={
@@ -85,7 +85,14 @@ setup(
     install_requires=req,
     license="Apache Software License 2.0",
     include_package_data=True,
-    keywords='s2downloader',
+    keywords=['s2downloader',
+              'remote sensing',
+              'sentinel-2',
+              'copernicus',
+              'multispectral',
+              'satellite imagery',
+              'geospatial',
+              'mosaic'],
     long_description=readme,
     long_description_content_type='text/x-rst',
     project_urls={
@@ -94,7 +101,6 @@ setup(
         "Documentation": "https://fernlab.git-pages.gfz-potsdam.de/products/data-portal/s2downloader/doc/",
         "Change log": "https://git.gfz-potsdam.de/fernlab/products/data-portal/s2downloader/-/blob/main/HISTORY.rst"
     },
-
     name='s2downloader',
     packages=find_packages(include=['s2downloader', 's2downloader.*']),
     setup_requires=req_setup,

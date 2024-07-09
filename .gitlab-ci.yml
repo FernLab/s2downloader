@@ -127,7 +127,7 @@ pages:  # this job must be called 'pages' to advise GitLab to upload content to 
     - main
 
 deploy_pypi:
-  stage: test
+  stage: deploy
   dependencies:
     - test_s2downloader
   script:
@@ -135,8 +135,8 @@ deploy_pypi:
     - pip install -U twine build
     - python -m build --sdist
     - twine check dist/*
-    - twine upload --repository testpypi dist/*  # requires creds as environment variables
- # only:
-   # - /^v\d+\.\d+\.\d+([abc]\d*)?$/  # PEP-440 compliant version (tags)
+    - twine upload dist/*  # requires creds as environment variables
+  only:
+    - /^v\d+\.\d+\.\d+([abc]\d*)?$/  # PEP-440 compliant version (tags)
   except:
     - dev
