@@ -87,6 +87,14 @@ setup(
     include_package_data=True,
     keywords='s2downloader',
     long_description=readme,
+    long_description_content_type='text/x-rst',
+    project_urls={
+        "Source code": "https://git.gfz-potsdam.de/fernlab/products/data-portal/s2downloader",
+        "Issue Tracker": "https://git.gfz-potsdam.de/fernlab/products/data-portal/s2downloader/-/issues",
+        "Documentation": "https://fernlab.git-pages.gfz-potsdam.de/products/data-portal/s2downloader/doc/",
+        "Change log": "https://git.gfz-potsdam.de/fernlab/products/data-portal/s2downloader/-/blob/main/HISTORY.rst"
+    },
+
     name='s2downloader',
     packages=find_packages(include=['s2downloader', 's2downloader.*']),
     setup_requires=req_setup,
