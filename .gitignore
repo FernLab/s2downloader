@@ -114,3 +114,4 @@ ENV/
 *.iws
 ## mpeltonen/sbt-idea plugin
 .idea_modules/
+/meta.yaml

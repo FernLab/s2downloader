@@ -20,5 +20,5 @@
 # limitations under the License.
 """Version module for S2Downloader."""
 
-__version__ = '1.2.0'
-__versionalias__ = '2024-07-09_01'
+__version__ = '1.2.1'
+__versionalias__ = '2024-07-12_01'

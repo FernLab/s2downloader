@@ -2,6 +2,11 @@
 History
 =======
 
+1.2.1 (2024-07-12)
+-------------------
+* Add some classifiers for PyPi.
+* Fix image URL.
+
 1.2.0 (2024-07-09)
 -------------------
 * Adapt to PyPi structure.
