@@ -2,6 +2,10 @@
 History
 =======
 
+1.2.2 (2024-07-23)
+-------------------
+* Add GitHub release pipeline to CI.
+
 1.2.1 (2024-07-12)
 -------------------
 * Add some classifiers for PyPi.
