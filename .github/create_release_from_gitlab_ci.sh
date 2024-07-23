@@ -2,7 +2,7 @@
 
 # NOTE: The environment variables are present during the CI job.
 
-URL_RELEASES=https://api.github.com/repos/$GITHUB_USER/$GITHUB_REPONAME/releases
+URL_RELEASES=https://api.github.com/repos/$GITHUB_PROJNAME/releases
 
 # create the release
 API_JSON=$(printf '{"tag_name":"%s",
