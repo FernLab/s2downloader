@@ -102,7 +102,7 @@ setup(
     },
     name='s2downloader',
     packages=find_packages(include=['s2downloader', 's2downloader.*']),
-    package_data={'s2downloader/data': ['s2downloader/data/default_config.json']},
+    package_data={'data': ['data/*']},
     setup_requires=req_setup,
     test_suite='tests',
     tests_require=req_test,
