@@ -24,19 +24,6 @@
 """The setup script."""
 
 from setuptools import setup, find_packages
-import os
-
-
-# Helper function to include all files in the data directory without subdirectories
-def package_files(directory):
-    paths = []
-    for (path, directories, filenames) in os.walk(directory):
-        for filename in filenames:
-            paths.append(os.path.join(path, filename))
-    return paths
-
-
-data_files = package_files('data')
 
 with open('README.rst') as readme_file:
     readme = readme_file.read()
@@ -115,7 +102,6 @@ setup(
     name='s2downloader',
     packages=find_packages(include=['s2downloader', 's2downloader.*']),
     include_package_data=True,
-    data_files=[('data', data_files)],
     setup_requires=req_setup,
     test_suite='tests',
     tests_require=req_test,
