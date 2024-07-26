@@ -176,12 +176,13 @@ def downloadMosaic(*, config_dict: dict):
     download_thumbnails = result_settings['download_thumbnails']
     download_overviews = result_settings['download_overviews']
     target_resolution = result_settings['target_resolution']
+    logging_dir = result_settings['path_to_logfile']
     logging_level = logging.getLevelName(result_settings['logging_level'])
 
     logFormatter = logging.Formatter("[%(levelname)-5.5s]  %(message)s")
     logger = logging.getLogger(__name__)
 
-    fileHandler = logging.FileHandler("{0}/{1}.log".format(result_dir, "s2DataDownloader"), mode='w')
+    fileHandler = logging.FileHandler("{0}/{1}.log".format(logging_dir, "s2DataDownloader"), mode='w')
     fileHandler.setFormatter(logFormatter)
     logger.addHandler(fileHandler)
 

@@ -287,6 +287,11 @@ class ResultsSettings(BaseModel, extra='forbid'):
         description="Logging level, it should be one of: DEBUG, INFO, WARN, or ERROR.",
         default="INFO"
     )
+    path_to_logfile: Optional[str] = Field(
+        title="Path to the logfile directory.",
+        description="Path to the directory, where the logfile should be stored. Logfile name is s2DataDownloader.log",
+        default=results_dir
+    )
 
     @field_validator('logging_level')
     def checkLogLevel(cls, v):
@@ -295,9 +300,9 @@ class ResultsSettings(BaseModel, extra='forbid'):
             raise ValueError("Logging level, it should be one of: DEBUG, INFO, WARN, or ERROR.")
         return v
 
-    @field_validator('results_dir')
+    @field_validator('results_dir', 'path_to_logfile')
     def checkFolder(cls, v):
-        """Check if output folder location is defined - string should not be empty."""
+        """Check if folder location is defined - string should not be empty."""
         if v == "":
             raise ValueError("Empty string is not allowed.")
         if os.path.isabs(v) is False:

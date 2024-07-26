@@ -52,7 +52,8 @@
             "download_data": true,
             "download_thumbnails": false,
             "download_overviews": false,
-            "logging_level": "INFO"
+            "logging_level": "INFO",
+            "path_to_logfile": "data/data_output/"
         }
     },
     "s2_settings": {
