@@ -2,6 +2,13 @@
 History
 =======
 
+1.2.3 (2024-07-29)
+-------------------
+* Add logpath to default_config.json
+* Add default_config and data to package
+* remove non necessary dependencies
+* install dependencies via conda if possible
+
 1.2.2 (2024-07-23)
 -------------------
 * Add GitHub release pipeline to CI.
