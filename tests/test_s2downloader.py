@@ -76,6 +76,7 @@ class TestS2Downloader(unittest.TestCase):
             os.path.abspath(os.path.join(cls.root_path, "tests/temp_results")))
 
         cls.output_data_path = cls.configuration['user_settings']['result_settings']['results_dir']
+        cls.configuration['user_settings']['result_settings']['path_to_logfile'] = cls.output_data_path
         cls.configuration['user_settings']['aoi_settings']['SCL_filter_values'] = [3, 6]
         cls.configuration['user_settings']['aoi_settings']['date_range'] = ["2021-09-04", "2021-09-05"]
 

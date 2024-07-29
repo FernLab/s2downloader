@@ -29,7 +29,7 @@
                 13.073049,
                 52.383835
             ],
-            "apply_SCL_band_mask": true,
+            "apply_SCL_band_mask": false,
             "SCL_filter_values": [
                 3,
                 7,
@@ -52,7 +52,8 @@
             "download_data": true,
             "download_thumbnails": false,
             "download_overviews": false,
-            "logging_level": "INFO"
+            "logging_level": "INFO",
+            "path_to_logfile": "data/data_output/"
         }
     },
     "s2_settings": {

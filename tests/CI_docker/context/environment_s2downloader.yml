@@ -6,50 +6,38 @@ channels: &id1
 dependencies:
   - python=3.10.*
   - pip
-  - pyicu
-  - gdal
   - numpy
   - affine
   - pyproj
   - geojson
-  - matplotlib
+  - geojson-pydantic
   - rasterio
-  - pandas
   - geopandas>=0.11
   - shapely
-  - rtree
-  - python-dateutil
-  - pydantic
+  - pystac
   - geopy
-  - geojson-pydantic
+  - pystac-client
+  - pydantic
+  # setup requirements
+  - tox
+  # test requirements
+  - pytest
+  - pytest-cov
+  - urlchecker
+  # lint requirements
+  - flake8
+  - pycodestyle
+  - pydocstyle
+  # doc requirements
+  - sphinx>=4.1.1
+  - sphinx-argparse
+  # - sphinx_autodoc_typehints
+  - sphinx_rtd_theme
+  - numpydoc
+  # deployment requirements
+  - twine
+ # code requirements
+
 
   - pip:
-    # setup requirements
-    - tox
-
-    # test requirements
-    - pytest
-    - pytest-cov
-    - pytest-runner
-    - pytest-reporter-html1
-    - urlchecker
-
-    # lint requirements
-    - flake8
-    - pycodestyle
-    - pydocstyle
-    - pylint
-
-    # doc requirements
-    - sphinx>=4.1.1
-    - sphinx-argparse
-    # - sphinx_autodoc_typehints
-    - sphinx_rtd_theme
-    - numpydoc
-
-    # deployment requirements
-    - twine
-
-    # code requirements
-    - pystac
-    - pystac-client
+          - pytest-reporter-html1

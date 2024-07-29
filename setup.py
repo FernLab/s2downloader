@@ -35,11 +35,10 @@ version = {}
 with open("s2downloader/version.py") as version_file:
     exec(version_file.read(), version)
 
-req = ['gdal', 'affine', 'pyproj', 'numpy', 'matplotlib', 'geojson', 'rasterio', 'geopy',
-       'pandas', 'geopandas>=0.11', 'shapely', 'rtree', 'python-dateutil', 'pystac',
-       'pystac-client', 'pydantic', 'geojson-pydantic']
+req = ['numpy', 'affine', 'pyproj', 'geojson', 'geojson-pydantic', 'rasterio', 'geopandas>=0.11',
+       'shapely', 'pystac', 'geopy', 'pystac-client', 'pydantic']
 
-req_setup = ['pytest-runner']
+req_setup = []
 
 req_test = ['pytest>=3', 'pytest-cov', 'pytest-reporter-html1', 'urlchecker']
 
@@ -58,7 +57,7 @@ req_dev = ['twine'] + req_setup + req_test + req_doc + req_lint
 setup(
     author="FernLab",
     author_email='fernlab@gfz-potsdam.de',
-    python_requires='>=3.7',
+    python_requires='>=3.10',
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Science/Research',
@@ -84,7 +83,6 @@ setup(
     },
     install_requires=req,
     license="Apache Software License 2.0",
-    include_package_data=True,
     keywords=['s2downloader',
               'remote sensing',
               'sentinel-2',
@@ -103,6 +101,7 @@ setup(
     },
     name='s2downloader',
     packages=find_packages(include=['s2downloader', 's2downloader.*']),
+    include_package_data=True,
     setup_requires=req_setup,
     test_suite='tests',
     tests_require=req_test,
