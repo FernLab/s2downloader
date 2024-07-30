@@ -83,21 +83,21 @@ class TestUtils(unittest.TestCase):
         tiles_gpd = geopandas.read_file(self.tiles_path)
 
         # Pure 32 UTM zone
-        bb = [10.3564989947897175, 52.2069411524857401, 10.7103272880104043, 52.3674037585556391]
+        bb = (10.3564989947897175, 52.2069411524857401, 10.7103272880104043, 52.3674037585556391)
         utm_zone = getUTMZoneBB(tiles_gpd=tiles_gpd, bbox=bb)
         assert utm_zone == 32
 
         # 32 and 33 UTM zone tiles, but within 32 UTM zone overlap
-        bb = [11.53953018718721, 51.9893919386015, 12.22833075284612, 52.36055456486244]
+        bb = (11.53953018718721, 51.9893919386015, 12.22833075284612, 52.36055456486244)
         utm_zone = getUTMZoneBB(tiles_gpd=tiles_gpd, bbox=bb)
         assert utm_zone == 32
 
         # 32 and 33 UTM zone tiles, but within 33 UTM zone
-        bb = [13.4697892262127823, 52.2322959775096649, 13.7618500803157531, 52.3647370564987682]
+        bb = (13.4697892262127823, 52.2322959775096649, 13.7618500803157531, 52.3647370564987682)
         utm_zone = getUTMZoneBB(tiles_gpd=tiles_gpd, bbox=bb)
         assert utm_zone == 33
 
         # Pure 33 UTM zone
-        bb = [14.9487927124571911, 52.2439379656995300, 15.2357887972764274, 52.3856451927234446]
+        bb = (14.9487927124571911, 52.2439379656995300, 15.2357887972764274, 52.3856451927234446)
         utm_zone = getUTMZoneBB(tiles_gpd=tiles_gpd, bbox=bb)
         assert utm_zone == 33
