@@ -27,6 +27,7 @@ import shutil
 import unittest
 
 import geopandas
+import pytest
 
 from s2downloader.config import loadConfiguration
 from s2downloader.utils import getUTMZoneBB
@@ -75,6 +76,7 @@ class TestUtils(unittest.TestCase):
         else:
             print("Successfully deleted the directory %s" % cls.output_data_path)
 
+    @pytest.mark.subset
     def testGetUTMZoneBB(self):
         """Test getUTMZoneBB for different bounding boxes."""
 

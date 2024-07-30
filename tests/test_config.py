@@ -73,6 +73,7 @@ class TestConfig(unittest.TestCase):
         else:
             print("Successfully deleted the directory %s" % cls.output_data_path)
 
+    @pytest.mark.subset
     def testS2DownloaderAOISettingsDateRange(self):
         """Test configuration to test time range for the tile settings"""
 
@@ -119,6 +120,7 @@ class TestConfig(unittest.TestCase):
         with pytest.raises(ValueError):
             Config(**config)
 
+    @pytest.mark.subset
     def testS2DownloaderDataCoverage(self):
         """Test configuration to test coverage for the tile settings"""
 
@@ -146,6 +148,7 @@ class TestConfig(unittest.TestCase):
         with pytest.raises(ValueError):
             Config(**config)
 
+    @pytest.mark.subset
     def testS2DownloaderCloudCoverage(self):
         """Test configuration to test coverage for the tile settings"""
 
@@ -173,6 +176,7 @@ class TestConfig(unittest.TestCase):
         with pytest.raises(ValueError):
             Config(**config)
 
+    @pytest.mark.subset
     def testS2DownloaderTileSettingsBands(self):
         """Test configuration to test bands for the tile settings"""
 
@@ -205,6 +209,7 @@ class TestConfig(unittest.TestCase):
         with pytest.raises(ValueError):
             Config(**config)
 
+    @pytest.mark.subset
     def testS2DownloaderSCLFilterValues(self):
         """Test configuration to test SCL filter values for mask"""
 
@@ -236,6 +241,7 @@ class TestConfig(unittest.TestCase):
         with pytest.raises(ValueError):
             Config(**config)
 
+    @pytest.mark.subset
     def testS2BoundingBox(self):
         """Test configuration for BoundingBox Parameter."""
 
@@ -264,6 +270,7 @@ class TestConfig(unittest.TestCase):
         with pytest.raises(ValueError):
             Config(**config)
 
+    @pytest.mark.subset
     def testS2Polygon(self):
         """Test configuration for Polygon Parameter."""
         config = deepcopy(self.configuration)
@@ -350,6 +357,7 @@ class TestConfig(unittest.TestCase):
         config['user_settings']['aoi_settings']['polygon'] = None
         Config(**config)
 
+    @pytest.mark.subset
     def testTargetResolution(self):
         """Test configuration for results target_resolution Parameter."""
 
@@ -376,6 +384,7 @@ class TestConfig(unittest.TestCase):
         with pytest.raises(ValueError):
             Config(**config)
 
+    @pytest.mark.subset
     def testStacCatalogURL(self):
         """Test the stac catalog URL"""
         config = deepcopy(self.configuration)
@@ -383,6 +392,7 @@ class TestConfig(unittest.TestCase):
         with pytest.raises(ValueError):
             Config(**config)
 
+    @pytest.mark.subset
     def testLoggingLevel(self):
         """Test configuration for results logging_level Parameter."""
 
