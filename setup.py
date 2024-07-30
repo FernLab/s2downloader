@@ -97,7 +97,8 @@ setup(
         "Source code": "https://git.gfz-potsdam.de/fernlab/products/data-portal/s2downloader",
         "Issue Tracker": "https://git.gfz-potsdam.de/fernlab/products/data-portal/s2downloader/-/issues",
         "Documentation": "https://fernlab.git-pages.gfz-potsdam.de/products/data-portal/s2downloader/doc/",
-        "Change log": "https://git.gfz-potsdam.de/fernlab/products/data-portal/s2downloader/-/blob/main/HISTORY.rst"
+        "Change log": "https://git.gfz-potsdam.de/fernlab/products/data-portal/s2downloader/-/blob/main/HISTORY.rst",
+        "Zenodo": "https://zenodo.org/record/13123061"
     },
     name='s2downloader',
     packages=find_packages(include=['s2downloader', 's2downloader.*']),
