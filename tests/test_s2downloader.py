@@ -183,6 +183,7 @@ class TestS2Downloader(unittest.TestCase):
                                  atol=1e-4,
                                  equal_nan=False).all()
 
+    @pytest.mark.subset
     def testS2DownloaderPolyDefault(self):
         """Test configuration default settings with the AOI as a Polygon."""
 
