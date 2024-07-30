@@ -35,7 +35,7 @@ version = {}
 with open("s2downloader/version.py") as version_file:
     exec(version_file.read(), version)
 
-req = ['numpy', 'affine', 'pyproj', 'geojson', 'geojson-pydantic', 'rasterio', 'geopandas>=0.11',
+req = ['numpy', 'affine', 'pyproj', 'geojson', 'geojson-pydantic', 'rasterio', 'geopandas>=1.0',
        'shapely', 'pystac', 'geopy', 'pystac-client', 'pydantic']
 
 req_setup = []
@@ -63,10 +63,6 @@ setup(
         'Intended Audience :: Science/Research',
         'License :: OSI Approved :: Apache Software License',
         'Natural Language :: English',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.7',
-        'Programming Language :: Python :: 3.8',
-        'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10'
     ],
     description="Downloader for Sentinel-2 from aws.",

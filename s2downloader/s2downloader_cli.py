@@ -78,7 +78,7 @@ def main(prog_name="S2Downloader"):
         try:
             with open(config_file_path) as config_fp:
                 config_dict = json.load(config_fp)
-                config = Config(**config_dict).dict(by_alias=True)
+                config = Config(**config_dict).model_dump(by_alias=True)
         except JSONDecodeError as e:
             raise IOError(f'Failed to load the configuration json file => {e}')
 

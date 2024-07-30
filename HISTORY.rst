@@ -2,6 +2,13 @@
 History
 =======
 
+1.2.4 (2024-07-30)
+-------------------
+* Create a subset of tests and run the large ones only on main
+* Add DOI
+* use newer version of geopandas
+* only support python >= 3.10
+
 1.2.3 (2024-07-29)
 -------------------
 * Add logpath to default_config.json

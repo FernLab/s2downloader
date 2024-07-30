@@ -287,10 +287,9 @@ class ResultsSettings(BaseModel, extra='forbid'):
         description="Logging level, it should be one of: DEBUG, INFO, WARN, or ERROR.",
         default="INFO"
     )
-    path_to_logfile: Optional[str] = Field(
+    path_to_logfile: str = Field(
         title="Path to the logfile directory.",
-        description="Path to the directory, where the logfile should be stored. Logfile name is s2DataDownloader.log",
-        default=results_dir
+        description="Path to the directory, where the logfile should be stored. Logfile name is s2DataDownloader.log"
     )
 
     @field_validator('logging_level')

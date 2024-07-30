@@ -7,7 +7,7 @@ stages:
   - deploy
   - cleanup
 
-
+# run all tests only on the main branch
 test_s2downloader:
   stage: test
   coverage: '/TOTAL\s+\d+\s+\d+\s+(\d+%)/'
@@ -35,7 +35,42 @@ test_s2downloader:
         path: coverage.xml
       junit: report.xml
     expire_in: 30 days
+
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+
+
+# run a subset of tests on every branch
+test_subset:
+  stage: test
+  coverage: '/TOTAL\s+\d+\s+\d+\s+(\d+%)/'
+  script:
+    - source activate ci_env
+
+    # install missing dependencies on the CI container
+    - mamba env update --name ci_env --file tests/CI_docker/context/environment_s2downloader.yml
+
+    # run tests
+    - pytest -m "subset" tests --verbosity=3 --color=yes --tb=short --cov=s2downloader --cov-report html:htmlcov --cov-report term-missing --cov-report xml:coverage.xml --template=html1/index.html --report=report.html --junitxml report.xml
+
+    # create the docs
+    - make docs
+
+  artifacts:
+    expose_as: 'Test and coverage report'
+    paths:
+    - htmlcov/
+    - report.html
+    - docs/_build/html/
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage.xml
+      junit: report.xml
+    expire_in: 30 days
     when: always
+
+
 
 
 test_styles:
