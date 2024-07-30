@@ -35,7 +35,7 @@ version = {}
 with open("s2downloader/version.py") as version_file:
     exec(version_file.read(), version)
 
-req = ['numpy', 'affine', 'pyproj', 'geojson', 'geojson-pydantic', 'rasterio', 'geopandas>=0.14',
+req = ['numpy', 'affine', 'pyproj', 'geojson', 'geojson-pydantic', 'rasterio', 'geopandas>=1.0',
        'shapely', 'pystac', 'geopy', 'pystac-client', 'pydantic']
 
 req_setup = []
