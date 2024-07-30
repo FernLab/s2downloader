@@ -100,6 +100,7 @@ class TestS2Downloader(unittest.TestCase):
         else:
             print("Successfully deleted the directory %s" % cls.output_data_path)
 
+    @pytest.mark.subset
     def testS2DownloaderBBDefault(self):
         """Test configuration default settings."""
 
