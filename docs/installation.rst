@@ -8,6 +8,13 @@ Installation
 Using Conda or Mamba (recommended)
 -----------------------------------------
 
+Create a conda environment:
+
+```
+conda create --name myenv python --no-default-packages
+conda activate myenv
+```
+
 Installing `s2downloader` from the `conda-forge` channel can be achieved by adding `conda-forge` to your channels with:
 
 ```
@@ -37,7 +44,7 @@ pip install s2downloader
 
 .. note::
 
-    S2Downloader has been tested with Python 3.6+., i.e., should be fully compatible to all Python versions from 3.6 onwards.
+    S2Downloader has been tested with Python 3.10+., i.e., should be fully compatible to all Python versions from 3.10 onwards.
 
 
 .. _pip: https://pip.pypa.io
