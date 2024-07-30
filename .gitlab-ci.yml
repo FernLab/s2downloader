@@ -51,7 +51,7 @@ test_subset:
     - mamba env update --name ci_env --file tests/CI_docker/context/environment_s2downloader.yml
 
     # run tests
-    - pytest -m "subset"
+    - pytest -m "subset" tests --verbosity=3 --color=yes --tb=short --cov=s2downloader --cov-report html:htmlcov --cov-report term-missing --cov-report xml:coverage.xml --template=html1/index.html --report=report.html --junitxml report.xml
 
     # create the docs
     - make docs
