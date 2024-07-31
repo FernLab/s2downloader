@@ -154,9 +154,72 @@ Tile Settings
       - The amount of clouds that are allowed at the **entire** Sentinel-2 scene. Leave empty to only validate the AOI for cloud coverage.
       - ``"eo:cloud_cover": {"eq": 0}``, ``"eo:cloud_cover": {"lt": 20}``
     * - ``bands``
-      - Defines which Sentinel-2 bands to download. You may choose from these options: ["coastal", "blue", "green", "red", "rededge1", "rededge2", "rededge3", "nir", "nir08", "nir09", "swir16", "swir22"].
+      - Defines which Sentinel-2 bands to download. You may choose from these options: ["coastal", "blue", "green", "red", "rededge1", "rededge2", "rededge3", "nir", "nir08", "nir09", "cirrus", "swir16", "swir22"]. See the table below for more information about the bands.
       - ``"bands": ["coastal", "rededge1", "nir"]``
 
+Sentinel-2 Bands
+================
+
+.. list-table:: Sentinel-2 Bands Information
+   :widths: 15 35 30 20
+   :header-rows: 1
+
+   * - Band Name
+     - Description
+     - Wavelength (µm)
+     - Resolution (m)
+   * - coastal
+     - Coastal aerosol (band 1)
+     - 0.433
+     - 60
+   * - blue
+     - Blue (band 2)
+     - 0.49
+     - 10
+   * - green
+     - Green (band 3)
+     - 0.56
+     - 10
+   * - red
+     - Red (band 4)
+     - 0.665
+     - 10
+   * - rededge1
+     - Vegetation red edge 1 (band 5)
+     - 0.704
+     - 20
+   * - rededge2
+     - Vegetation red edge 2 (band 6)
+     - 0.74
+     - 20
+   * - rededge3
+     - Vegetation red edge 3 (band 7)
+     - 0.783
+     - 20
+   * - nir
+     - NIR 1 (band 8)
+     - 0.842
+     - 10
+   * - nir08
+     - Narrow NIR (band 8A)
+     - 0.865
+     - 20
+   * - nir09
+     - Water vapour (band 9)
+     - 0.945
+     - 60
+   * - cirrus
+     - SWIR - Cirrus (band 10)
+     - 1.3735
+     - 60
+   * - swir16
+     - SWIR 1 (band 11)
+     - 1.61
+     - 20
+   * - swir22
+     - SWIR 2 (band 12)
+     - 2.19
+     - 20
 
 AOI Settings
 ############

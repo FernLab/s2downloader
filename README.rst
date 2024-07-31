@@ -1,8 +1,20 @@
+.. figure:: https://fernlab.git-pages.gfz-potsdam.de/products/data-portal/s2downloader/images/s2downloader_logo.png
+    :target: https://git.gfz-potsdam.de/fernlab/products/data-portal/s2downloader
+    :align: center
+
 ============
 S2Downloader
 ============
 
+* Free software: EUPL 1.2
+* **Documentation:** https://fernlab.git-pages.gfz-potsdam.de/products/data-portal/s2downloader/doc/
+* Information on how to **cite the S2Downloader Python package** can be found in the
+  `CITATION <https://git.gfz-potsdam.de/fernlab/products/data-portal/s2downloader/-/blob/main/CITATION>`__ file.
+* Submit feedback by filing an issue `here <https://git.gfz-potsdam.de/fernlab/products/data-portal/s2downloader/issues>`__
+
+===============================
 Downloader for Sentinel-2 data.
+===============================
 
 .. image:: https://git.gfz-potsdam.de/fernlab/products/data-portal/s2downloader/badges/main/pipeline.svg
         :target: https://git.gfz-potsdam.de/fernlab/products/data-portal/s2downloader/pipelines
@@ -18,10 +30,6 @@ Downloader for Sentinel-2 data.
         :alt: DOI
 
 
-For detailed information, refer to the `documentation <https://fernlab.git-pages.gfz-potsdam.de/products/data-portal/s2downloader/doc/>`_. See also the latest coverage_ report and the pytest_ HTML report.
-
-
-
 Feature overview
 ----------------
 
@@ -34,7 +42,7 @@ Features
 
 * download atmospheric corrected L2A Sentinel-2 thumbnail, overview, and data from AWS
 * provide single date or time range for finding data at the server
-* select which individual bands to download, the following bands are supported: ``"coastal"``, ``"blue"``, ``"green"``, ``"red"``, ``"rededge1"``, ``"rededge2"``, ``"rededge3"``, ``"nir"``, ``"nir08"``, ``"nir09"``, ``"swir16"``, ``"swir22"``
+* select which individual bands to download, all bands are supported: ``"coastal"``, ``"blue"``, ``"green"``, ``"red"``, ``"rededge1"``, ``"rededge2"``, ``"rededge3"``, ``"nir"``, ``"nir08"``, ``"nir09"``, ``"cirrus"``, ``"swir16"``, ``"swir22"``
 * provide UTM zone, latitude band and grid square to download whole tiles
 
 
