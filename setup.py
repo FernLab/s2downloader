@@ -61,7 +61,7 @@ setup(
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Science/Research',
-        'License :: OSI Approved :: Apache Software License',
+        'License :: OSI Approved :: European Union Public Licence 1.2 (EUPL 1.2)',
         'Natural Language :: English',
         'Programming Language :: Python :: 3.10'
     ],
