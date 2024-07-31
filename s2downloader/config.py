@@ -112,9 +112,9 @@ class TileSettings(BaseModel, extra='forbid'):
     def checkBands(cls, v):
         """Check if bands is set correctly."""
         if len(v) == 0 or not set(v).issubset(["coastal", "blue", "green", "red", "rededge1", "rededge2", "rededge3",
-                                               "nir", "nir08", "nir09", "swir16", "swir22"]):
+                                               "nir", "nir08", "nir09", "cirrus", "swir16", "swir22"]):
             raise ValueError("Only the following band names are supported: coastal, blue, green, red, rededge1,"
-                             " rededge2, rededge3, nir, nir08, nir09, swir16, swir22.")
+                             " rededge2, rededge3, nir, nir08, nir09, cirrus, swir16, swir22.")
         if len(v) != len(set(v)):
             raise ValueError("Remove duplicates.")
         return v
