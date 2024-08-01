@@ -158,6 +158,7 @@ pages:  # this job must be called 'pages' to advise GitLab to upload content to 
   only:
     - documentation
     - main
+    - test_ci
 
 deploy_pypi:
   stage: deploy
