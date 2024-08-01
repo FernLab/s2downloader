@@ -5,7 +5,7 @@ channels: &id1
 
 dependencies:
   - python=3.12.*
-  - pip
+  - pip<=24.0
   - numpy>=2.0
   - affine
   - pyproj
