@@ -191,7 +191,7 @@ class TestConfig(unittest.TestCase):
         Config(**config)
 
         config['user_settings']['tile_settings']['bands'] = \
-            ["coastal"]
+            ["cirrus"]
         Config(**config)
 
         config['user_settings']['tile_settings']['bands'] = \

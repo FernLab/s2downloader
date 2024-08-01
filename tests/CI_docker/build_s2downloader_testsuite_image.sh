@@ -9,52 +9,42 @@ with open("../../s2downloader/version.py") as version_file:
 print(version["__version__"])
 '
 version=`python -c "$python_script"`
-tag="s2downloader_ci:$version"
-gitlab_runner="s2downloader_gitlab_CI_runner"
+runner_version="v$version"
+runner_tag="s2downloader_ci:$runner_version"
+gitlab_runner="s2downloader_ci_gitlab_ci_runner_$runner_version"
 
 echo "#### Build runner docker image"
-docker rmi ${tag}
-docker build ${context_dir} \
-    --no-cache \
-    -f ${context_dir}/${dockerfile} \
-    -m 20G \
-    -t ${tag}
+docker rmi ${runner_tag}
+docker build --network=host -f ${context_dir}/${dockerfile} -m 20G -t ${runner_tag} ${context_dir}
 
 # create the gitlab-runner docker container for the current project
-# NOTE: The 'gitlab-runner' and 'gitlab-ci-multi-runner' services will run within this container.
-#       The runner uses a 'config.toml' configuration file at /etc/gitlab-runner within the container which can be
-#       modified through additional parameters of the 'gitlab-runner register' command.
-echo "#### Create gitlab-runner (daemon) container with tag; ${tag}"
+# Remove packages
+rm -fr context/s2downloader
+
+echo "#### Create gitlab-runner (daemon) container"
 docker stop ${gitlab_runner}
 docker rm ${gitlab_runner}
-docker run \
-    -d \
-    --name ${gitlab_runner} \
-    --restart always \
-    -v /var/run/docker.sock:/var/run/docker.sock \
-    gitlab/gitlab-runner:latest
+docker run -d --name ${gitlab_runner} --network host --restart always -v /var/run/docker.sock:/var/run/docker.sock gitlab/gitlab-runner:latest
 
+echo "#### Register container at gitlab"
 # register the runner at the corresponding GitLab repository via a registration-token
-echo "#### Register container at gitlab, get token here https://git.gfz-potsdam.de/<group>/s2downloader/-/settings/ci_cd"
-read -p "Please enter gitlab token: " token
-echo ""
-read -p "Please enter gitlab runner name: " runner_name
-echo "New gitlab runner image will named  ${gitlab_runner}"
 # NOTE: In case of locally stored images (like here), the docker pull policy 'never' must be used
 #       (see https://docs.gitlab.com/runner/executors/docker.html#how-pull-policies-work).
-docker exec -it ${gitlab_runner} /bin/bash -c    "\
-export RUNNER_EXECUTOR=docker && \
-gitlab-ci-multi-runner register \
-  --non-interactive \
-  --executor 'docker' \
-  --docker-image '${tag}' \
-  --url 'https://git.gfz-potsdam.de/ci' \
-  --registration-token '${token}' \
-  --description '${runner_name}' \
-  --tag-list s2downloader_ci_client \
-  --run-untagged='true' \
-  --locked='true' \
-  --access-level='not_protected' \
-  --docker-pull-policy='never'
-  "
-ls
+read -p "Please enter gitlab token: " token
+echo ""
+
+url='https://git.gfz-potsdam.de'
+
+cmd="gitlab-runner --debug register \
+        --executor 'docker' \
+        --docker-image '${runner_tag}' \
+        --url '${url}' \
+        --token '${token}' \
+        --description '${gitlab_runner}' \
+        --docker-pull-policy='never'
+"
+echo "Running the following command:"
+echo "${cmd}"
+docker exec -it ${gitlab_runner} /bin/bash -c "${cmd}"
+echo 'Done'
+echo 'NOTE: If the runner stays inactive, re-create the runner and register it again.'
