@@ -2,14 +2,13 @@
 
 context_dir="./context"
 dockerfile="s2downloader_ci.docker"
-while IFS= read -r line
-do
-  key=`cut -d ":" -f1 <<< $line`
-  value=`cut -d ":" -f2 <<< $line`
-  if [[ "$key" == "Version" ]]; then
-      version="`echo $value | sed 's/ *$//'`"
-  fi
-done < "$input"
+python_script='
+version = {}
+with open("../../s2downloader/version.py") as version_file:
+    exec(version_file.read(), version)
+print(version["__version__"])
+'
+version=`python -c "$python_script"`
 runner_version="v$version"
 runner_tag="s2downloader_ci:$runner_version"
 gitlab_runner="s2downloader_ci_gitlab_ci_runner_$runner_version"
