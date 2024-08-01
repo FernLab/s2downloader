@@ -35,9 +35,9 @@ test_s2downloader:
         path: coverage.xml
       junit: report.xml
     expire_in: 30 days
-
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "main"'
+  only:
+    - main
+    - test_ci
 
 
 # run a subset of tests on every branch
