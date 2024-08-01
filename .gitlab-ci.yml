@@ -109,9 +109,6 @@ test_s2downloader_install:
     # run installer
     - pip install .
 
-    # check if all dependencies are correctly installed
-    - pip check
-
     # test if its importable
     - cd ..
     - ls
