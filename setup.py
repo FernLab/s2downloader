@@ -35,7 +35,7 @@ version = {}
 with open("s2downloader/version.py") as version_file:
     exec(version_file.read(), version)
 
-req = ['numpy', 'affine', 'pyproj', 'geojson', 'geojson-pydantic', 'rasterio', 'geopandas>=1.0',
+req = ['numpy>=2.0', 'affine', 'pyproj', 'geojson', 'geojson-pydantic', 'rasterio', 'geopandas>=1.0',
        'shapely', 'pystac', 'geopy', 'pystac-client', 'pydantic']
 
 req_setup = []
@@ -47,7 +47,7 @@ req_doc = [
     'sphinx-argparse',
     'sphinx-autodoc-typehints',
     'sphinx_rtd_theme',
-    'numpydoc'
+    'numpydoc>=1.7'
 ]
 
 req_lint = ['flake8', 'pycodestyle', 'pydocstyle']

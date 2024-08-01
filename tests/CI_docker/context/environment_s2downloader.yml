@@ -6,7 +6,7 @@ channels: &id1
 dependencies:
   - python=3.10.*
   - pip
-  - numpy
+  - numpy>=2.0
   - affine
   - pyproj
   - geojson
@@ -33,7 +33,7 @@ dependencies:
   - sphinx-argparse
   # - sphinx_autodoc_typehints
   - sphinx_rtd_theme
-  - numpydoc
+  - numpydoc>=1.7
   # deployment requirements
   - twine
  # code requirements
