@@ -4,13 +4,13 @@ S2Downloader
 
 width at 100px
 --------------
-.. image:: https://fernlab.git-pages.gfz-potsdam.de/products/data-portal/s2downloader/images/s2downloader_logo.png
+.. image:: docs/images/s2downloader_logo.svg
   :alt: demo image
   :width: 100px
 
 width at 10px
 --------------
-.. image:: https://fernlab.git-pages.gfz-potsdam.de/products/data-portal/s2downloader/images/s2downloader_logo.png
+.. image:: docs/images/s2downloader_logo.svg
   :alt: demo image
   :width: 10px
 
