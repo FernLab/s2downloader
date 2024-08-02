@@ -124,7 +124,7 @@ Credits
 
 .. list-table::
     :class: borderless
-    :widths: 1 20
+    :widths: 10 50
 
     * - |FERNLOGO|
 
