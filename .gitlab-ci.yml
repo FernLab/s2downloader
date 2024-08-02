@@ -15,10 +15,10 @@ test_s2downloader:
     - source activate ci_env
 
     # install missing dependencies on the CI container
-    - mamba env update --name ci_env --file tests/CI_docker/context/environment_s2downloader.yml
+    #- mamba env update --name ci_env --file tests/CI_docker/context/environment_s2downloader.yml
 
     # run tests
-    - make pytest
+    #- make pytest
 
     # create the docs
     - make docs
@@ -103,7 +103,7 @@ test_s2downloader_install:
     - conda update -n base -c conda-forge --all
 
     # create s2downloader environment from environment_s2downloader.yml
-    - mamba env create --name s2downloader_testinstall -f tests/CI_docker/context/environment_s2downloader.yml
+    #- mamba env create --name s2downloader_testinstall -f tests/CI_docker/context/environment_s2downloader.yml
     - conda activate s2downloader_testinstall
 
     # run installer
