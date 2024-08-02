@@ -120,11 +120,11 @@ Credits
 
 .. |FERNLOGO| image:: docs/images/fernlab_logo.svg
   :target: https://fernlab.gfz-potsdam.de/
-  :width: 40 %
+  :width: 20 %
 
 .. list-table::
     :class: borderless
-    :widths: 10 50
+    :widths: 5 50
 
     * - |FERNLOGO|
 
