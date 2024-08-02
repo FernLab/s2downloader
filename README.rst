@@ -118,7 +118,8 @@ Contributions are always welcome. Please contact us, if you wish to contribute t
 Credits
 -------
 
-.. |FERNLOGO| image:: https://git.gfz-potsdam.de/fernlab/products/data-portal/s2downloader/raw/main/docs/images/fernlab_logo.png
+.. |FERNLOGO| image:: images/fernlab_logo.svg
+  :target: https://fernlab.gfz-potsdam.de/
   :width: 40 %
 
 .. list-table::
