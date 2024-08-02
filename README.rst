@@ -1,11 +1,12 @@
-.. figure:: https://fernlab.git-pages.gfz-potsdam.de/products/data-portal/s2downloader/images/s2downloader_logo.png
+.. |S2LOGO| figure:: https://fernlab.git-pages.gfz-potsdam.de/products/data-portal/s2downloader/images/s2downloader_logo.png
     :target: https://git.gfz-potsdam.de/fernlab/products/data-portal/s2downloader
     :align: center
-    :width: 100px
+    :width: 10px
 
-============
-S2Downloader
-============
+=====================
+S2Downloader |S2LOGO|
+=====================
+
 
 * Free software: EUPL 1.2
 * **Documentation:** https://fernlab.git-pages.gfz-potsdam.de/products/data-portal/s2downloader/doc/
