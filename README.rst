@@ -2,9 +2,17 @@
 S2Downloader
 ============
 
-.. raw:: html
+width at 100px
+--------------
+.. image:: https://www.zookcabins.com/wp-content/uploads/blog-posts/planning-hunting-cabin/beautiful-custom-log-cabin-hunting-lodge.jpg
+  :alt: demo image
+  :width: 100px
 
-    <img src="https://upload.wikimedia.org/wikipedia/commons/0/0c/Cow_female_black_white.jpg" height="400px">
+width at 10px
+--------------
+.. image:: https://www.zookcabins.com/wp-content/uploads/blog-posts/planning-hunting-cabin/beautiful-custom-log-cabin-hunting-lodge.jpg
+  :alt: demo image
+  :width: 10px
 
 
 * Free software: EUPL 1.2
