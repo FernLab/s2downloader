@@ -15,10 +15,10 @@ test_s2downloader:
     - source activate ci_env
 
     # install missing dependencies on the CI container
-    #- mamba env update --name ci_env --file tests/CI_docker/context/environment_s2downloader.yml
+    - mamba env update --name ci_env --file tests/CI_docker/context/environment_s2downloader.yml
 
     # run tests
-    #- make pytest
+    - make pytest
 
     # create the docs
     - make docs
@@ -48,10 +48,10 @@ test_subset:
     - source activate ci_env
 
     # install missing dependencies on the CI container
-    #- mamba env update --name ci_env --file tests/CI_docker/context/environment_s2downloader.yml
+    - mamba env update --name ci_env --file tests/CI_docker/context/environment_s2downloader.yml
 
     # run tests
-    #- pytest -m "subset" tests --verbosity=3 --color=yes --tb=short --cov=s2downloader --cov-report html:htmlcov --cov-report term-missing --cov-report xml:coverage.xml --template=html1/index.html --report=report.html --junitxml report.xml
+    - pytest -m "subset" tests --verbosity=3 --color=yes --tb=short --cov=s2downloader --cov-report html:htmlcov --cov-report term-missing --cov-report xml:coverage.xml --template=html1/index.html --report=report.html --junitxml report.xml
 
     # create the docs
     - make docs
@@ -69,6 +69,8 @@ test_subset:
       junit: report.xml
     expire_in: 30 days
     when: always
+  except:
+    - staging
 
 
 
@@ -103,7 +105,7 @@ test_s2downloader_install:
     - conda update -n base -c conda-forge --all
 
     # create s2downloader environment from environment_s2downloader.yml
-    #- mamba env create --name s2downloader_testinstall -f tests/CI_docker/context/environment_s2downloader.yml
+    - mamba env create --name s2downloader_testinstall -f tests/CI_docker/context/environment_s2downloader.yml
     - conda activate s2downloader_testinstall
 
     # run installer
@@ -118,6 +120,7 @@ test_s2downloader_install:
     - python -c "import s2downloader; print(s2downloader)"
   only:
     - main
+    - staging
 
 
 pages:  # this job must be called 'pages' to advise GitLab to upload content to GitLab Pages
@@ -143,10 +146,10 @@ pages:  # this job must be called 'pages' to advise GitLab to upload content to 
     - cp -r docs/images/* public/doc/docs/images/
 
     # Copy over the coverage reports
-    #- cp -r htmlcov/* public/coverage/
+    - cp -r htmlcov/* public/coverage/
 
     # Copy over the test reports
-    #- cp report.html public/test_reports/
+    - cp report.html public/test_reports/
 
     # Check if everything is working great
     - ls -al public
