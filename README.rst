@@ -1,8 +1,10 @@
+============
 S2Downloader
 ============
 
-.. image:: docs/images/s2downloader_logo.png
-  :width: 10 %
+.. raw:: html
+
+    <img src="https://upload.wikimedia.org/wikipedia/commons/0/0c/Cow_female_black_white.jpg" height="400px">
 
 
 * Free software: EUPL 1.2
