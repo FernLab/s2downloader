@@ -2,8 +2,8 @@ S2Downloader
 ============
 
 .. raw:: html
-   
-   <img src="https://fernlab.git-pages.gfz-potsdam.de/products/data-portal/s2downloader/images/s2downloader_logo.png" width="10" />
+
+   <img src="https://fernlab.git-pages.gfz-potsdam.de/products/data-portal/s2downloader/images/s2downloader_logo.png" width="10" alt="S2Downloader Logo" />
 
 
 * Free software: EUPL 1.2
