@@ -70,6 +70,7 @@ test_subset:
     expire_in: 30 days
     when: always
   except:
+    - main
     - staging
 
 
@@ -85,7 +86,7 @@ test_styles:
     - tests/linting/flake8.log
     - tests/linting/pycodestyle.log
     - tests/linting/pydocstyle.log
-    when: always
+  when: always
 
 
 test_urls:
