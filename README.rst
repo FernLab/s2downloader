@@ -2,8 +2,7 @@ S2Downloader |s2logo|
 ======================
 
 .. |s2logo| image:: https://fernlab.git-pages.gfz-potsdam.de/products/data-portal/s2downloader/images/s2downloader_logo.png
-    :scale: 1%
-
+    :width: 10px
 
 * Free software: EUPL 1.2
 * **Documentation:** https://fernlab.git-pages.gfz-potsdam.de/products/data-portal/s2downloader/doc/
