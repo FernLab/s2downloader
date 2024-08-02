@@ -1,9 +1,8 @@
 S2Downloader
 ============
 
-.. raw:: html
-
-   <img src="docs/images/s2downloader_logo.png" width="10" alt="S2Downloader Logo" />
+.. image:: docs/images/s2downloader_logo.png
+  :width: 10 %
 
 
 * Free software: EUPL 1.2
