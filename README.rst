@@ -1,9 +1,7 @@
-S2Downloader |S2LOGO|
+S2Downloader |s2logo|
 =====================
 
-.. |S2LOGO| image:: https://fernlab.git-pages.gfz-potsdam.de/products/data-portal/s2downloader/images/s2downloader_logo.png
-    :target: https://git.gfz-potsdam.de/fernlab/products/data-portal/s2downloader
-    :align: center
+.. |s2logo| image:: https://fernlab.git-pages.gfz-potsdam.de/products/data-portal/s2downloader/images/s2downloader_logo.png
     :width: 10px
 
 
