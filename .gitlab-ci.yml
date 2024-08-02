@@ -118,7 +118,6 @@ test_s2downloader_install:
     - python -c "import s2downloader; print(s2downloader)"
   only:
     - main
-    - staging
 
 
 pages:  # this job must be called 'pages' to advise GitLab to upload content to GitLab Pages
