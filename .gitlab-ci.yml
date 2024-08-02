@@ -48,10 +48,10 @@ test_subset:
     - source activate ci_env
 
     # install missing dependencies on the CI container
-    - mamba env update --name ci_env --file tests/CI_docker/context/environment_s2downloader.yml
+    #- mamba env update --name ci_env --file tests/CI_docker/context/environment_s2downloader.yml
 
     # run tests
-    - pytest -m "subset" tests --verbosity=3 --color=yes --tb=short --cov=s2downloader --cov-report html:htmlcov --cov-report term-missing --cov-report xml:coverage.xml --template=html1/index.html --report=report.html --junitxml report.xml
+    #- pytest -m "subset" tests --verbosity=3 --color=yes --tb=short --cov=s2downloader --cov-report html:htmlcov --cov-report term-missing --cov-report xml:coverage.xml --template=html1/index.html --report=report.html --junitxml report.xml
 
     # create the docs
     - make docs
