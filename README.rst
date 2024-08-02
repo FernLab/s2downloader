@@ -1,10 +1,10 @@
-.. figure:: https://fernlab.git-pages.gfz-potsdam.de/products/data-portal/s2downloader/images/s2downloader_logo.png
-    :target: https://git.gfz-potsdam.de/fernlab/products/data-portal/s2downloader
-    :align: center
+======================
+|s2logo| S2Downloader
+======================
 
-============
-S2Downloader
-============
+.. |s2logo| image:: https://fernlab.git-pages.gfz-potsdam.de/products/data-portal/s2downloader/images/s2downloader_logo.svg
+  :target: https://git.gfz-potsdam.de/fernlab/products/data-portal/s2downloader
+  :width: 50px
 
 * Free software: EUPL 1.2
 * **Documentation:** https://fernlab.git-pages.gfz-potsdam.de/products/data-portal/s2downloader/doc/
@@ -115,22 +115,18 @@ Contribution
 Contributions are always welcome. Please contact us, if you wish to contribute to the S2Downloader.
 
 
+Developed by
+------------
+
+.. image:: https://fernlab.git-pages.gfz-potsdam.de/products/data-portal/s2downloader/images/fernlab_logo.svg
+  :target: https://fernlab.gfz-potsdam.de/
+  :width: 10 %
+
+S2Downloader has been developed by `FERN.Lab <https://fernlab.gfz-potsdam.de/>`_, the Helmholtz Innovation Lab "Remote sensing for sustainable use of resources", located at the `Helmholtz Centre Potsdam, GFZ German Research Centre for Geosciences <https://www.gfz-potsdam.de/en/>`_. FERN.Lab is funded by the `Initiative and Networking Fund of the Helmholtz Association <https://www.helmholtz.de/en/about-us/structure-and-governance/initiating-and-networking/>`_.
+
+
 Credits
--------
-
-.. |FERNLOGO| image:: https://git.gfz-potsdam.de/fernlab/products/data-portal/s2downloader/raw/main/docs/images/fernlab_logo.png
-  :width: 40 %
-
-.. list-table::
-    :class: borderless
-    :widths: 10 50
-
-    * - |FERNLOGO|
-
-      - S2Downloader has been developed by `FERN.Lab <https://fernlab.gfz-potsdam.de/>`_, the Helmholtz Innovation Lab "Remote sensing for sustainable use of resources", located at the `Helmholtz Centre Potsdam, GFZ German Research Centre for Geosciences <https://www.gfz-potsdam.de/en/>`_. FERN.Lab is funded by the `Initiative and Networking Fund of the Helmholtz Association <https://www.helmholtz.de/en/about-us/structure-and-governance/initiating-and-networking/>`_.
-
-
-
+------------
 
 This package was created with Cookiecutter_ and the `fernlab/cookiecutter-pypackage`_ project template.
 

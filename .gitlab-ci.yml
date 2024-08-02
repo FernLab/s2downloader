@@ -35,9 +35,9 @@ test_s2downloader:
         path: coverage.xml
       junit: report.xml
     expire_in: 30 days
-
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "main"'
+  only:
+    - main
+    - staging
 
 
 # run a subset of tests on every branch
@@ -69,6 +69,9 @@ test_subset:
       junit: report.xml
     expire_in: 30 days
     when: always
+  except:
+    - main
+    - staging
 
 
 
@@ -83,7 +86,7 @@ test_styles:
     - tests/linting/flake8.log
     - tests/linting/pycodestyle.log
     - tests/linting/pydocstyle.log
-    when: always
+  when: always
 
 
 test_urls:
@@ -118,6 +121,7 @@ test_s2downloader_install:
     - python -c "import s2downloader; print(s2downloader)"
   only:
     - main
+    - staging
 
 
 pages:  # this job must be called 'pages' to advise GitLab to upload content to GitLab Pages
@@ -160,6 +164,7 @@ pages:  # this job must be called 'pages' to advise GitLab to upload content to 
   only:
     - documentation
     - main
+    - staging
 
 deploy_pypi:
   stage: deploy

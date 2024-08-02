@@ -2,6 +2,12 @@
 History
 =======
 
+1.3.0 (2024-08-02)
+------------------
+* Support all bands
+* Add band information to documentation
+* Add logo
+
 1.2.4 (2024-07-30)
 -------------------
 * Create a subset of tests and run the large ones only on main
