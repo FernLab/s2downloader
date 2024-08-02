@@ -37,7 +37,7 @@ test_s2downloader:
     expire_in: 30 days
   only:
     - main
-    - test_ci
+    - staging
 
 
 # run a subset of tests on every branch
@@ -118,7 +118,7 @@ test_s2downloader_install:
     - python -c "import s2downloader; print(s2downloader)"
   only:
     - main
-    - test_ci
+    - staging
 
 
 pages:  # this job must be called 'pages' to advise GitLab to upload content to GitLab Pages
@@ -161,7 +161,7 @@ pages:  # this job must be called 'pages' to advise GitLab to upload content to 
   only:
     - documentation
     - main
-    - test_ci
+    - staging
 
 deploy_pypi:
   stage: deploy
