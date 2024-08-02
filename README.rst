@@ -2,7 +2,7 @@
 |s2logo| S2Downloader
 ======================
 
-.. |s2logo| image:: docs/images/s2downloader_logo.svg
+.. |s2logo| image:: https://git.gfz-potsdam.de/fernlab/products/data-portal/s2downloader/raw/main/docs/images/s2downloader_logo.svg
   :target: https://git.gfz-potsdam.de/fernlab/products/data-portal/s2downloader
   :width: 50px
 
@@ -118,7 +118,7 @@ Contributions are always welcome. Please contact us, if you wish to contribute t
 Credits
 -------
 
-.. |FERNLOGO| image:: docs/images/fernlab_logo.svg
+.. |FERNLOGO| image:: https://git.gfz-potsdam.de/fernlab/products/data-portal/s2downloader/raw/main/docs/images/fernlab_logo.svg
   :target: https://fernlab.gfz-potsdam.de/
   :width: 20 %
 
@@ -127,8 +127,7 @@ Credits
     :widths: 10 50
 
     * - |FERNLOGO|
-
-    * - S2Downloader has been developed by `FERN.Lab <https://fernlab.gfz-potsdam.de/>`_, the Helmholtz Innovation Lab "Remote sensing for sustainable use of resources", located at the `Helmholtz Centre Potsdam, GFZ German Research Centre for Geosciences <https://www.gfz-potsdam.de/en/>`_. FERN.Lab is funded by the `Initiative and Networking Fund of the Helmholtz Association <https://www.helmholtz.de/en/about-us/structure-and-governance/initiating-and-networking/>`_.
+      - S2Downloader has been developed by `FERN.Lab <https://fernlab.gfz-potsdam.de/>`_, the Helmholtz Innovation Lab "Remote sensing for sustainable use of resources", located at the `Helmholtz Centre Potsdam, GFZ German Research Centre for Geosciences <https://www.gfz-potsdam.de/en/>`_. FERN.Lab is funded by the `Initiative and Networking Fund of the Helmholtz Association <https://www.helmholtz.de/en/about-us/structure-and-governance/initiating-and-networking/>`_.
 
 
 
