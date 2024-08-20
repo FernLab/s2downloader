@@ -2,6 +2,10 @@
 History
 =======
 
+1.4.0 (coming soon...)
+------------------
+* updated usage instructions
+
 1.3.0 (2024-08-02)
 ------------------
 * Support all bands
