@@ -1,0 +1,128 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+# S2Downloader - The S2Downloader allows to download Sentinel-2 L2A data
+#
+# Copyright (C) 2022-2023
+# - Helmholtz Centre Potsdam - GFZ German Research Centre for Geosciences Potsdam,
+#   Germany (https://www.gfz-potsdam.de/)
+#
+# Licensed only under the EUPL, Version 1.2 or - as soon they will be approved
+# by the European Commission - subsequent versions of the EUPL (the "Licence").
+# You may not use this work except in compliance with the Licence.
+#
+# You may obtain a copy of the Licence at:
+# https://joinup.ec.europa.eu/software/page/eupl
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+[build-system]
+requires = [
+    "setuptools>=61.2",
+    "setuptools-git",
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "s2downloader"
+description = "Downloader for Sentinel-2 from aws."
+authors = [{name = "FernLab", email = "fernlab@gfz-potsdam.de"}]
+license = {text = "EUPL-1.2"}
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering",
+    "License :: OSI Approved :: European Union Public Licence 1.2 (EUPL 1.2)",
+    "Natural Language :: English",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+keywords = [
+    "s2downloader",
+    "remote sensing",
+    "sentinel-2",
+    "copernicus",
+    "multispectral",
+    "satellite imagery",
+    "geospatial",
+    "mosaic"
+]
+requires-python = ">=3.10"
+dependencies = [
+    "numpy>=2.0",
+    "affine",
+    "pyproj",
+    "geojson",
+    "geojson-pydantic",
+    "rasterio",
+    "geopandas>=1.0",
+    "shapely",
+    "pystac",
+    "geopy",
+    "pystac-client",
+    "pydantic"
+]
+dynamic = ["version"]
+
+[project.readme]
+file = "README.rst"
+content-type = "text/x-rst"
+
+[project.urls]
+"Source code" = "https://git.gfz-potsdam.de/fernlab/products/data-portal/s2downloader"
+"Issue Tracker" = "https://git.gfz-potsdam.de/fernlab/products/data-portal/s2downloader/-/issues"
+"Documentation" = "https://fernlab.git-pages.gfz-potsdam.de/products/data-portal/s2downloader/doc/"
+"Change log" = "https://git.gfz-potsdam.de/fernlab/products/data-portal/s2downloader/-/blob/main/HISTORY.rst"
+"Zenodo" = "https://zenodo.org/record/13123061"
+
+[project.optional-dependencies]
+doc = [
+    "sphinx>=4.1.1",
+    "sphinx-argparse",
+    "sphinx_rtd_theme",
+    "sphinx-autodoc-typehints",
+    "numpydoc>=1.7"
+]
+test = [
+    "pytest>=3",
+    "pytest-cov",
+    "pytest-reporter-html1",
+    "urlchecker"
+]
+lint = [
+    "flake8",
+    "pycodestyle",
+    "pydocstyle",
+]
+dev = [
+    "s2downloader[test]",
+    "s2downloader[doc]",
+    "s2downloader[lint]",
+    "twine"
+]
+
+[project.scripts]
+s2downloader = "s2downloader.s2downloader_cli:main"
+
+[tool.setuptools]
+zip-safe = false
+include-package-data = true
+license-files = ["LICENSE"]
+
+[tool.setuptools.packages.find]
+exclude = [
+    "docs*",
+    "tests*",
+]
+namespaces = false
+
+[tool.setuptools.dynamic]
+version = {attr = "s2downloader.version.__version__"}
+
+[tool.distutils.bdist_wheel]
+universal = 1
