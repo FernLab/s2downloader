@@ -5,6 +5,7 @@ History
 1.4.0 (coming soon...)
 ------------------
 * updated usage instructions
+* moved from setup.py to pyproject.toml
 
 1.3.0 (2024-08-02)
 ------------------
