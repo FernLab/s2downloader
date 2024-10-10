@@ -78,6 +78,7 @@ code_quality:
   stage: test
   script:
     - source activate ci_env
+    - pip install pre-commit
     - pre-commit run --files s2downloader/* > tests/linting/pre-commit-output.txt 2>&1 || true
   artifacts:
     paths:
