@@ -7,6 +7,10 @@ stages:
   - deploy
   - cleanup
 
+# ---------------------- Test stage ----------------------
+
+# potentially place the linting checks here before the tests?
+
 # run all tests only on the main branch
 test_s2downloader:
   stage: test
@@ -74,7 +78,15 @@ test_subset:
     - staging
 
 
-
+code_quality:
+  stage: test
+  script:
+    - source activate ci_env
+    - pre-commit run --files s2downloader/* > pre-commit-output.txt 2>&1 || true
+  artifacts:
+    paths:
+      - tests/linting/pre-commit-output.txt
+    when: always
 
 test_styles:
   stage: test
@@ -191,4 +203,3 @@ create_github_release:
         - /^v\d+\.\d+\.\d+([abc]\d*)?$/  # PEP-440 compliant version (tags)
     except:
         - dev
-

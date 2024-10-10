@@ -23,13 +23,13 @@
 
 """Console script for s2downloader."""
 
-import os
 import argparse
 import json
+import os
 from json import JSONDecodeError
 
-from s2downloader.s2downloader import s2Downloader
 from s2downloader.config import Config
+from s2downloader.s2downloader import s2Downloader
 
 
 def getArgparser():
@@ -56,6 +56,7 @@ def main(prog_name="S2Downloader"):
     ------
     SystemExit
         If S2Downloader main process fails to run.
+
     """
     try:
         # check current directory

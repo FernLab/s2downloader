@@ -22,30 +22,36 @@
 
 import json
 import logging
+import os
 import sys
 import time
+import urllib.request
 from datetime import datetime
 from logging import Logger
-import os
+from typing import Dict, Union
 
 import geopandas
 import numpy as np
 import rasterio
-from rasterio.features import geometry_mask
-from rasterio.merge import merge
-from rasterio.windows import from_bounds, Window, bounds
-from rasterio.warp import Resampling
-import urllib.request
-from shapely.geometry import shape
-from shapely import bounds as shp_bounds
-from typing import Dict, Union
-
 from pystac import Item
 from pystac_client import Client
+from rasterio.features import geometry_mask
+from rasterio.merge import merge
+from rasterio.warp import Resampling
+from rasterio.windows import Window, bounds, from_bounds
+from shapely import bounds as shp_bounds
+from shapely.geometry import shape
 
-from .utils import (saveRasterToDisk, validPixelsFromSCLBand, getBoundsUTM,
-                    groupItemsPerDate, getUTMZoneBB, remove_duplicates_and_ensure_data_consistency, projectPolygon)
 from .config import Config
+from .utils import (
+    getBoundsUTM,
+    getUTMZoneBB,
+    groupItemsPerDate,
+    projectPolygon,
+    remove_duplicates_and_ensure_data_consistency,
+    saveRasterToDisk,
+    validPixelsFromSCLBand,
+)
 
 
 def searchDataAtAWS(*,
@@ -86,6 +92,7 @@ def searchDataAtAWS(*,
         When no data is found at AWS for given parameter settings.
     Exception
         Failed to find data at AWS server.
+
     """
     if logger is None:
         logger = logging.getLogger(__name__)
@@ -159,6 +166,7 @@ def downloadMosaic(*, config_dict: dict):
     ------
     Exception
         Failed to save raster to disk.
+
     """
     # read the variables from the config:
     tile_settings = config_dict['user_settings']['tile_settings']
@@ -472,6 +480,7 @@ def downloadTileID(*, config_dict: dict):
     ------
     Exception
         Failed to save raster to disk.
+
     """
     # read the variables from the config:
     tile_settings = config_dict['user_settings']['tile_settings']
@@ -696,6 +705,7 @@ def s2Downloader(*, config_dict: dict):
     ------
     Exception
         Failed to save raster to disk.
+
     """
     try:
         config_dict = Config(**config_dict).model_dump(by_alias=True)

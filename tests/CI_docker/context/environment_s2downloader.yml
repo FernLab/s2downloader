@@ -25,6 +25,7 @@ dependencies:
   - pytest-cov
   - urlchecker
   # lint requirements
+  - pre-commit
   - flake8
   - pycodestyle
   - pydocstyle

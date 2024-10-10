@@ -21,21 +21,21 @@
 """Input data module for S2Downloader."""
 
 # python native libraries
-import os
 import json
+import os
 import time
-
-import geopy.distance
-from datetime import datetime, date
+from datetime import date, datetime
 from enum import Enum
 from json import JSONDecodeError
+from typing import Dict, List, Optional, Union
 
+import geopy.distance
 import pydantic
+
 # third party packages
 from geojson_pydantic import Polygon
-from pydantic import BaseModel, Field, StrictBool, field_validator, HttpUrl, model_validator, TypeAdapter
+from pydantic import BaseModel, Field, HttpUrl, StrictBool, TypeAdapter, field_validator, model_validator
 from pydantic_core import ValidationError
-from typing import Optional, List, Dict, Union
 
 
 class ResamplingMethodName(str, Enum):
@@ -436,6 +436,7 @@ def loadConfiguration(*, path: str) -> dict:
         Invalid JSON file.
     ValueError
         Invalid value for configuration object.
+
     """
     try:
         with open(path) as config_fp:

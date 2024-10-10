@@ -20,19 +20,20 @@
 # limitations under the License.
 """Utils module for S2Downloader."""
 
+import logging
+from datetime import datetime
+from logging import Logger
+
 import affine
 import geopandas
-import logging
-from logging import Logger
 import numpy as np
 import pystac
 import rasterio
 import rasterio.io
 from pyproj import Proj, Transformer
 from pyproj.crs.crs import CRS
-from shapely.geometry import box, Polygon
+from shapely.geometry import Polygon, box
 from shapely.ops import transform
-from datetime import datetime
 
 
 def saveRasterToDisk(*, out_image: np.ndarray, raster_crs: CRS, out_transform: affine.Affine,
@@ -54,6 +55,7 @@ def saveRasterToDisk(*, out_image: np.ndarray, raster_crs: CRS, out_transform: a
     ------
     Exception
         Failed to save raster to disk.
+
     """
     try:
         img_height = None
@@ -121,6 +123,7 @@ def validPixelsFromSCLBand(*,
     ------
     Exception
         Failed to calculate percentage of valid SCL band pixels.
+
     """
     if logger is None:
         logger = logging.getLogger(__name__)
@@ -157,6 +160,7 @@ def groupItemsPerDate(*, items_list: list[pystac.item.Item]) -> dict:
     -------
     : dict
         A dictionary with item grouped by date.
+
     """
     items_per_date = {}
     for item in items_list:
@@ -184,6 +188,7 @@ def projectPolygon(poly: Polygon, source_crs: int, target_crs: int) -> Polygon:
     -------
     : Polygon
         Projected polygon to the target CRS.
+
     """
     source_proj = Proj(f'epsg:{source_crs}')
     target_proj = Proj(f'epsg:{target_crs}')
@@ -210,6 +215,7 @@ def getBoundsUTM(*, bounds: tuple, bb_crs: int) -> tuple:
     -------
     : tuple
         Bounds reprojected to the UTM zone.
+
     """
     bounding_box = box(*bounds)
     bbox = geopandas.GeoSeries([bounding_box], crs=4326)
