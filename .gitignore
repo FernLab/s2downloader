@@ -49,6 +49,9 @@ coverage.xml
 report.xml
 report.html
 
+# Code Qualiy Checks
+.ruff_cache/
+
 # Translations
 *.mo
 *.pot
