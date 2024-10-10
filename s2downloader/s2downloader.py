@@ -43,15 +43,8 @@ from shapely import bounds as shp_bounds
 from shapely.geometry import shape
 
 from .config import Config
-from .utils import (
-    getBoundsUTM,
-    getUTMZoneBB,
-    groupItemsPerDate,
-    projectPolygon,
-    remove_duplicates_and_ensure_data_consistency,
-    saveRasterToDisk,
-    validPixelsFromSCLBand,
-)
+from .utils import (saveRasterToDisk, validPixelsFromSCLBand, getBoundsUTM,
+                    groupItemsPerDate, getUTMZoneBB, remove_duplicates_and_ensure_data_consistency, projectPolygon)
 
 
 def searchDataAtAWS(*,
