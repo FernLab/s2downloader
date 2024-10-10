@@ -51,24 +51,6 @@ clean-test: ## remove test and coverage artifacts
 	rm -fr coverage.xml
 	rm -fr .pytest_cache
 
-# –----------------------------------------------------------------------------------------------------------------------------
-
-# ---------------------- Current linting tools setup: flake8, pycodestyle, pydocstyle ----------------------
-
-lint: ## check style with flake8
-# Tests weather files in folder tests have a max line length of 120 characters and saves results in ./tests/linting/flake8.log
-	flake8 --max-line-length=120 s2downloader tests > ./tests/linting/flake8.log || \
-# If flake8 finds issues, print the log and exit with an error
-		(cat ./tests/linting/flake8.log && exit 1)
-# Run pycodestyle, excluding any Jupyter Notebook files, and log results to pycodestyle.log
-	pycodestyle s2downloader --exclude="*.ipynb,*.ipynb*" --max-line-length=120 > ./tests/linting/pycodestyle.log || \
-		(cat ./tests/linting/pycodestyle.log && exit 1)
-# Run pydocstyle to check docstring conventions and save the results to pydocstyle.log
-	pydocstyle s2downloader > ./tests/linting/pydocstyle.log || \
-		(cat ./tests/linting/pydocstyle.log && exit 1)
-
-# –----------------------------------------------------------------------------------------------------------------------------
-
 urlcheck: ## check for dead URLs
 	urlchecker check . --file-types .py,.rst,.md,.json \
     --exclude-urls \
