@@ -259,7 +259,7 @@ def downloadMosaic(*, config_dict: dict):
                     new_bounds = bounds(scl_bb_window, scl_src.transform)
                 scl_mosaic.append(scl_src)
 
-            scl_band, scl_trans = merge(datasets=scl_mosaic,
+            scl_band, scl_trans = merge(sources=scl_mosaic,
                                         target_aligned_pixels=True,
                                         bounds=new_bounds,
                                         res=target_resolution,
@@ -385,7 +385,7 @@ def downloadMosaic(*, config_dict: dict):
                                 srcs_to_mosaic.append(band_src)
                             op_start = time.time()
                             raster_band, raster_trans = \
-                                merge(datasets=srcs_to_mosaic,
+                                merge(sources=srcs_to_mosaic,
                                       target_aligned_pixels=True,
                                       bounds=bounds_window,
                                       res=target_resolution,
