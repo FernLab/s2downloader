@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.0.1
+    rev: v5.0.0
     hooks:
       - id: trailing-whitespace  # Removes trailing whitespace from files
       - id: end-of-file-fixer  # Ensures files end with a newline
@@ -12,7 +12,7 @@ repos:
         args: [--branch, main]  # Prevents commits directly to the main branch
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.6.7  # Use the latest stable version
+    rev: v0.6.9  
     hooks:
       - id: ruff
         name: "Ruff - Lint and Style"
@@ -28,7 +28,7 @@ repos:
         files: ^s2downloader/
 
   - repo: https://github.com/PyCQA/pylint
-    rev: v3.3.0
+    rev: v3.3.1
     hooks:
       - id: pylint
         args:

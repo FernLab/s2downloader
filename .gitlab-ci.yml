@@ -78,7 +78,9 @@ code_quality:
   stage: test
   script:
     - source activate ci_env
-    - pip install pre-commit
+    # install missing dependencies on the CI container
+    - mamba env update --name ci_env --file tests/CI_docker/context/environment_s2downloader.yml
+    # run pre-commit and save output to file while not blocking a commit if it fails 
     - pre-commit run --files s2downloader/* > tests/linting/pre-commit-output.txt 2>&1 || true
   artifacts:
     paths:
