@@ -74,18 +74,19 @@ test_subset:
     - main
     - staging
 
-code_quality:
+test_styles:
   stage: test
   script:
     - source activate ci_env
-    # install missing dependencies on the CI container
-    - mamba env update --name ci_env --file tests/CI_docker/context/environment_s2downloader.yml
-    # run pre-commit and save output to file while not blocking a commit if it fails 
-    - pre-commit run --files s2downloader/* > tests/linting/pre-commit-output.txt 2>&1 || true
+    # install missing dependencies in the CI container
+    - mamba env update --name ci_env --file tests/CI_docker/context/environment_s2downloader.yml  --prune
+    # run style checks and save output to file while not blocking a commit if it fails
+    - make lint
   artifacts:
     paths:
-      - tests/linting/pre-commit-output.txt
+        - tests/linting/pre-commit-output.txt
     when: always
+
 
 test_urls:
   stage: test

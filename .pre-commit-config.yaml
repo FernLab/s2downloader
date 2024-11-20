@@ -1,3 +1,5 @@
+default_stages: [pre-commit, pre-push]
+
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
@@ -7,46 +9,57 @@ repos:
       - id: check-yaml  # Checks YAML files for syntax errors
       - id: check-json  # Checks JSON files for syntax errors
       - id: check-added-large-files  # Prevents adding large files to the repository
+        args: ["--maxkb=2048"]  # Set the maximum size to 1MB
       - id: detect-private-key  # Detects if a private key is being committed
       - id: no-commit-to-branch
         args: [--branch, main]  # Prevents commits directly to the main branch
 
+  - repo: https://github.com/PyCQA/pydocstyle
+    rev: 6.3.0
+    hooks:
+      - id: pydocstyle
+        args: ["--convention=numpy"]  # Change to numpy or pep257 if needed
+
+
+  - repo: https://github.com/terrencepreilly/darglint
+    rev: v1.8.1  # Use the latest version
+    hooks:
+      - id: darglint
+        args: ["--docstring-style", "numpy"]
+
+  # automatically format docstrings to match NumPy conventions
+  - repo: https://github.com/myint/docformatter
+    rev: "master"  # Use the latest version
+    hooks:
+      - id: docformatter
+        language: python
+        args: ["--in-place", "--pre-summary-newline", "--wrap-summaries", "120", "--wrap-descriptions", "120", "--style", "numpy"]
+
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.6.9  
+    rev: v0.7.2
+    # All configuration options: https://github.com/astral-sh/ruff/blob/main/docs/configuration.md
     hooks:
       - id: ruff
         name: "Ruff - Lint and Style"
         args:
           - "--fix"  # Automatically fix simple issues
-          - "--select=F,E,W,C,D,I"  # Includes: pyflakes, pycodestyle, pydocstyle, complexity, and isort checks
+          - "--show-fixes" # Show fixes applied
+          # Full list of available rule codes: https://docs.astral.sh/ruff/rules/
+          - "--select=F,E,W,C,C90,I,N,D,UP,S,B,SIM" # Includes: Pyflakes, pycodestyle, mccabe complexity, isort, pep8-naming, pydocstyle, pyupgrade, bandit, flake8-bugbear and flake8-simplify
+          - "--preview" # Enable preview checks
           - "--line-length=120"  # Adjust to custom line length according to FERN.Lab guidelines
+          - "--ignore=D212,D203,D401,D211,D213,D413,D417"  # Ignore missing blank line before class or method docstring due to conflicting rules
+          - "--respect-gitignore"  # Respect .gitignore files
+          - "--select=D" # check for PEP 257 docstring conventions
+          - "--select=N" # check for NumPy-specific conventions.
         files: ^s2downloader/
-      - id: ruff-format
+
+      - id: ruff-format # Integrated and more performant drop-in replacement for Black
         name: "Ruff - Format"
-        args: [--diff]  # Show diff instead of fixing
+        args:
+        #- "--diff"  # Show diff instead of fixing
+        - "--line-length=120"  # Adjust to custom line length according to FERN.Lab guidelines
+        - "--preview" # Enable preview checks
+        - "--respect-gitignore"  # Respect .gitignore files
         types_or: [python] # Only run on Python files
         files: ^s2downloader/
-
-  - repo: https://github.com/PyCQA/pylint
-    rev: v3.3.1
-    hooks:
-      - id: pylint
-        args:
-          - "-rn"  # Suppress final score
-          - "-sn"  # Suppress message count
-          - "--output-format=colorized"  # Colorize the output for easier readability
-          - "--disable=missing-docstring"  # Disable missing docstring check
-        files: ^s2downloader/
-
-  - repo: https://github.com/PyCQA/bandit
-    rev: 1.7.10
-    hooks:
-      - id: bandit
-        args: ["--skip=B101"]  # Example: skip hardcoded password check
-  
-    # Safety checks for Python dependencies
-    # Note: this pre-commit hook currently only handles pyproject.toml with Poetry ([tool.poetry] must be present in pyproject.toml
-  #-  repo: https://github.com/Lucas-C/pre-commit-hooks-safety
-  #   rev: v1.3.3
-  #   hooks:
-  #    - id: python-safety-dependencies-check

@@ -51,6 +51,15 @@ clean-test: ## remove test and coverage artifacts
 	rm -fr coverage.xml
 	rm -fr .pytest_cache
 
+lint: ## check for style issues
+	@PRE_COMMIT_COLOR=never pre-commit run --all-files | tee tests/linting/pre-commit-output.txt 2>&1; \
+    if [ $$? -eq 0 ]; then \
+        echo "pre-commit passed successfully."; \
+    else \
+        echo "pre-commit failed. Please check tests/linting/pre-commit-output.txt for details."; \
+        exit 1; \
+    fi
+
 urlcheck: ## check for dead URLs
 	urlchecker check . --file-types .py,.rst,.md,.json \
     --exclude-urls \

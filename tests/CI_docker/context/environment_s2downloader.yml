@@ -28,14 +28,15 @@ dependencies:
   - pre-commit
   # doc requirements
   - sphinx>=4.1.1
+  - sphinx-autodoc-typehints
   - sphinx-argparse
-  # - sphinx_autodoc_typehints
   - sphinx_rtd_theme
   - numpydoc>=1.7
   # deployment requirements
+  - python-build
   - twine
  # code requirements
 
 
   - pip:
-          - pytest-reporter-html1
+    - pytest-reporter-html1
