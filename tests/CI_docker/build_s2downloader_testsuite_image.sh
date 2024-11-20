@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -e
 
 context_dir="./context"
 dockerfile="s2downloader_ci.docker"
@@ -14,7 +15,9 @@ runner_tag="s2downloader_ci:$runner_version"
 gitlab_runner="s2downloader_ci_gitlab_ci_runner_$runner_version"
 
 echo "#### Build runner docker image"
-docker rmi ${runner_tag}
+if [[ "$(docker images ${runner_tag} | grep ${runner_tag} 2> /dev/null)" != "" ]]; then
+  docker rmi ${runner_tag}
+fi
 docker build --network=host -f ${context_dir}/${dockerfile} -m 20G -t ${runner_tag} ${context_dir}
 
 # create the gitlab-runner docker container for the current project
@@ -22,8 +25,12 @@ docker build --network=host -f ${context_dir}/${dockerfile} -m 20G -t ${runner_t
 rm -fr context/s2downloader
 
 echo "#### Create gitlab-runner (daemon) container"
-docker stop ${gitlab_runner}
-docker rm ${gitlab_runner}
+if [ "$(docker ps -qa -f name=${gitlab_runner})" ]; then
+    if [ "$(docker ps -q -f name=${gitlab_runner})" ]; then
+        docker stop ${gitlab_runner};
+    fi
+    docker rm ${gitlab_runner};
+fi
 docker run -d --name ${gitlab_runner} --network host --restart always -v /var/run/docker.sock:/var/run/docker.sock gitlab/gitlab-runner:latest
 
 echo "#### Register container at gitlab"

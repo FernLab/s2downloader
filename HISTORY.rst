@@ -2,6 +2,17 @@
 History
 =======
 
+1.4.0 (coming soon...)
+------------------
+* !50: updated usage instructions
+* !51: Migrated setup procedure from using setup.py + setup.cfg to using pyproject.toml only.
+
+1.3.0 (2024-08-02)
+------------------
+* Support all bands
+* Add band information to documentation
+* Add logo
+
 1.2.4 (2024-07-30)
 -------------------
 * Create a subset of tests and run the large ones only on main

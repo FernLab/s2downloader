@@ -116,6 +116,26 @@ The package expects a configuration file in ``json`` format, like the `default_c
         }
     }
 
+Simplified example for using a Polygon instead of a bounding box. The bounding_box option has to stay as empty list when a polygon is added.
+
+.. code-block:: json
+
+        {
+        "user_settings": {
+            "aoi_settings": {
+                "bounding_box": [],
+                "polygon": {
+                    "coordinates": [[
+                    [13.015460350735339,52.37318812959998],
+                    [13.065452289464673,52.36922264156371],
+                    [13.064008952650568,52.39609286789508],
+                    [13.015460350735339,52.37318812959998]]],
+                    "type": "Polygon"},
+                "apply_SCL_band_mask": true
+            },
+        },
+    }
+
 
 
 In the following, the parameter configuration is described in detail:
