@@ -48,7 +48,7 @@ repos:
           - "--select=F,E,C90,I,N,D,UP,S,B,SIM" # Includes: Pyflakes, pycodestyle, pep8-naming, pydocstyle, pyupgrade, bandit, flake8-bugbear and flake8-simplify
           - "--preview" # Enable preview checks
           - "--line-length=120"  # Adjust to custom line length according to FERN.Lab guidelines
-          - "--ignore=D212,D203,D401,D211,D213,D413,D417"  # Ignore missing blank line before class or method docstring due to conflicting rules
+          - "--ignore=N802,D212,D203,D401,D211,D213,D413,D417"  # Ignore missing blank line before class or method docstring due to conflicting rules
           - "--respect-gitignore"  # Respect .gitignore files
         files: ^s2downloader/
 

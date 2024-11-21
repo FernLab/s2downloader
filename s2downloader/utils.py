@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # S2Downloader - The S2Downloader allows to download Sentinel-2 L2A data
 #
 # Copyright (C) 2022-2023
@@ -36,15 +34,15 @@ from shapely.geometry import Polygon, box
 from shapely.ops import transform
 
 
-def saveRasterToDisk(*, out_image: np.ndarray, raster_crs: CRS, out_transform: affine.Affine,
-                     output_raster_path: str):
-    """Save raster imagery data to disk.
+def saveRasterToDisk(*, out_image: np.ndarray, raster_crs: CRS, out_transform: affine.Affine, output_raster_path: str):
+    """
+    Save raster imagery data to disk.
 
     Parameters
     ----------
     out_image : np.ndarray
         Array containing output raster data.
-    raster_crs : pyproj.crs.crs.CRS
+    raster_crs : CRS
         Output raster coordinate system.
     out_transform : affine.Affine
         Output raster transformation parameters.
@@ -55,7 +53,6 @@ def saveRasterToDisk(*, out_image: np.ndarray, raster_crs: CRS, out_transform: a
     ------
     Exception
         Failed to save raster to disk.
-
     """
     try:
         img_height = None
@@ -75,29 +72,30 @@ def saveRasterToDisk(*, out_image: np.ndarray, raster_crs: CRS, out_transform: a
             img_width = out_image.shape[2]
             img_count = out_image.shape[0]
 
-        with rasterio.open(output_raster_path, 'w',
-                           driver='GTiff',
-                           height=img_height,
-                           width=img_width,
-                           count=img_count,  # nr of bands
-                           dtype=out_image.dtype,
-                           crs=raster_crs,
-                           transform=out_transform,
-                           compress='lzw',
-                           nodata=0
-                           ) as dst:
+        with rasterio.open(
+            output_raster_path,
+            "w",
+            driver="GTiff",
+            height=img_height,
+            width=img_width,
+            count=img_count,  # nr of bands
+            dtype=out_image.dtype,
+            crs=raster_crs,
+            transform=out_transform,
+            compress="lzw",
+            nodata=0,
+        ) as dst:
             dst.write(out_image)
 
     except Exception as e:  # pragma: no cover
-        raise Exception(f"Failed to save raster to disk => {e}")
+        raise Exception(f"Failed to save raster to disk => {e}") from e
 
 
-def validPixelsFromSCLBand(*,
-                           scl_band: np.ndarray,
-                           scl_filter_values: list[int],
-                           aoi_mask: np.ndarray = None,
-                           logger: Logger = None) -> tuple[float, float, float]:
-    """Percentage of valid SCL band pixels.
+def validPixelsFromSCLBand(
+    *, scl_band: np.ndarray, scl_filter_values: list[int], aoi_mask: np.ndarray = None, logger: Logger = None
+) -> tuple[float, float, float]:
+    """
+    Percentage of valid SCL band pixels.
 
     Parameters
     ----------
@@ -123,7 +121,6 @@ def validPixelsFromSCLBand(*,
     ------
     Exception
         Failed to calculate percentage of valid SCL band pixels.
-
     """
     if logger is None:
         logger = logging.getLogger(__name__)
@@ -145,11 +142,12 @@ def validPixelsFromSCLBand(*,
 
         return nonzero_pixels_per, masked_pixels_per, valid_pixels_per
     except Exception as e:  # pragma: no cover
-        raise Exception(f"Failed to count the number of valid pixels for the SCl band => {e}")
+        raise Exception(f"Failed to count the number of valid pixels for the SCl band => {e}") from e
 
 
 def groupItemsPerDate(*, items_list: list[pystac.item.Item]) -> dict:
-    """Group STAC Items per date.
+    """
+    Group STAC Items per date.
 
     Parameters
     ----------
@@ -160,12 +158,11 @@ def groupItemsPerDate(*, items_list: list[pystac.item.Item]) -> dict:
     -------
     : dict
         A dictionary with item grouped by date.
-
     """
     items_per_date = {}
     for item in items_list:
         date = item.datetime.strftime("%Y-%m-%d")
-        if date in items_per_date.keys():
+        if date in items_per_date:
             items_per_date[date].append(item)
         else:
             items_per_date[date] = [item]
@@ -173,7 +170,8 @@ def groupItemsPerDate(*, items_list: list[pystac.item.Item]) -> dict:
 
 
 def projectPolygon(poly: Polygon, source_crs: int, target_crs: int) -> Polygon:
-    """Project polygon.
+    """
+    Project polygon.
 
     Parameters
     ----------
@@ -188,21 +186,36 @@ def projectPolygon(poly: Polygon, source_crs: int, target_crs: int) -> Polygon:
     -------
     : Polygon
         Projected polygon to the target CRS.
-
     """
-    source_proj = Proj(f'epsg:{source_crs}')
-    target_proj = Proj(f'epsg:{target_crs}')
+    source_proj = Proj(f"epsg:{source_crs}")
+    target_proj = Proj(f"epsg:{target_crs}")
     transformer = Transformer.from_proj(source_proj, target_proj, always_xy=True)
 
-    def project_coords(x, y):
-        """Project a pair of coordinates (x,y)."""
-        return transformer.transform(x, y)
+    def project_coords(x: float, y: float, z: float = None) -> tuple[float, ...]:
+        """
+        Project a pair of coordinates (x,y).
+
+        Parameters
+        ----------
+        x : float
+            X coordinate.
+        y: float
+            Y coordinate.
+        z: float
+            Z coordinate.
+
+        Returns
+        -------
+        Tuple : Transform of two coordinates.
+        """
+        return transformer.transform(x, y, z)
 
     return transform(project_coords, poly)
 
 
 def getBoundsUTM(*, bounds: tuple, bb_crs: int) -> tuple:
-    """Get the bounds of a bounding box in UTM coordinates.
+    """
+    Get the bounds of a bounding box in UTM coordinates.
 
     Parameters
     ----------
@@ -215,7 +228,6 @@ def getBoundsUTM(*, bounds: tuple, bb_crs: int) -> tuple:
     -------
     : tuple
         Bounds reprojected to the UTM zone.
-
     """
     bounding_box = box(*bounds)
     bbox = geopandas.GeoSeries([bounding_box], crs=4326)
@@ -224,7 +236,8 @@ def getBoundsUTM(*, bounds: tuple, bb_crs: int) -> tuple:
 
 
 def getUTMZoneBB(*, tiles_gpd: geopandas.GeoDataFrame, bbox: tuple, logger: Logger = None) -> int:
-    """Get the UTM zone for the bounding box.
+    """
+    Get the UTM zone for the bounding box.
 
     Parameters
     ----------
@@ -239,7 +252,6 @@ def getUTMZoneBB(*, tiles_gpd: geopandas.GeoDataFrame, bbox: tuple, logger: Logg
     -------
     : int
         The UTM zone.
-
     """
     if logger is None:
         logger = logging.getLogger(__name__)
@@ -258,8 +270,8 @@ def getUTMZoneBB(*, tiles_gpd: geopandas.GeoDataFrame, bbox: tuple, logger: Logg
     fits_one_epgs = False
     if len(s2_tiles_g) != 1:
         f = ""
-        for f in s2_tiles_g['EPSG']:
-            tiles_polygon = s2_tiles.loc[s2_tiles.EPSG == f[0]].geometry.union_all()
+        for f in s2_tiles_g["EPSG"]:
+            tiles_polygon = s2_tiles.loc[f[0] == s2_tiles.EPSG].geometry.union_all()
             if tiles_polygon.contains(bounding_box):
                 fits_one_epgs = True
                 break
@@ -282,7 +294,8 @@ def getUTMZoneBB(*, tiles_gpd: geopandas.GeoDataFrame, bbox: tuple, logger: Logg
 
 
 def remove_duplicates_and_ensure_data_consistency(item_list_dict: list) -> list:
-    """Remove dicts with duplicate date based on highest s2:processing_baseline and check data consistency.
+    """
+    Remove dicts with duplicate date based on highest s2:processing_baseline and check data consistency.
 
     Parameters
     ----------
@@ -293,35 +306,42 @@ def remove_duplicates_and_ensure_data_consistency(item_list_dict: list) -> list:
     -------
     : list
        Contains remaining data dicts.
-
     """
     # find duplicates based on the date and tile location of the images, for dates only compare yyyy-mm-dd part
     duplicates = {}
     for item in item_list_dict:
-        date_part = datetime.strptime(item['properties']['datetime'][:10], '%Y-%m-%d')
-        key = (date_part,
-               item['properties']['mgrs:utm_zone'],
-               item['properties']['mgrs:latitude_band'],
-               item['properties']['mgrs:grid_square'])
+        date_part = datetime.strptime(item["properties"]["datetime"][:10], "%Y-%m-%d")
+        key = (
+            date_part,
+            item["properties"]["mgrs:utm_zone"],
+            item["properties"]["mgrs:latitude_band"],
+            item["properties"]["mgrs:grid_square"],
+        )
         if key in duplicates:
             duplicates[key].append(item)
         else:
             duplicates[key] = [item]
 
     # for each group of duplicates, find the one with the highest value of s2:processing_baseline
-    for date_part, items in duplicates.items():
+    for _, items in duplicates.items():
         if len(items) > 1:  # Only if there are duplicates
-            max_b_item = max(items, key=lambda x: x['properties']['s2:processing_baseline'])
+            max_b_item = max(items, key=lambda x: x["properties"]["s2:processing_baseline"])
             items.remove(max_b_item)
             for item in items:
                 item_list_dict.remove(item)
 
     # for remaining list without duplicate dates, keep only data that is comparable to each other,
-    item_list_dict = [item for item in item_list_dict if
-                      (float(item['properties']['s2:processing_baseline']) >= 4.0 and
-                       item['properties']['earthsearch:boa_offset_applied'] is True)
-                      or
-                      (float(item['properties']['s2:processing_baseline']) < 4.0 and
-                       item['properties']['earthsearch:boa_offset_applied'] is False)]
+    item_list_dict = [
+        item
+        for item in item_list_dict
+        if (
+            float(item["properties"]["s2:processing_baseline"]) >= 4.0
+            and item["properties"]["earthsearch:boa_offset_applied"] is True
+        )
+        or (
+            float(item["properties"]["s2:processing_baseline"]) < 4.0
+            and item["properties"]["earthsearch:boa_offset_applied"] is False
+        )
+    ]
 
     return item_list_dict

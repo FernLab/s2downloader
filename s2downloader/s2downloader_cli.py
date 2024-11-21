@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 # S2Downloader - The S2Downloader allows to download Sentinel-2 L2A data
 #
@@ -19,44 +18,59 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-
 """Console script for s2downloader."""
 
 import argparse
 import json
 import os
+from argparse import ArgumentParser
 from json import JSONDecodeError
 
 from s2downloader.config import Config
 from s2downloader.s2downloader import s2Downloader
 
 
-def getArgparser():
-    """Get a console argument parser for Sentinel2 Downloader."""
+def getArgparser() -> ArgumentParser:
+    """
+    Get a console argument parser for Sentinel2 Downloader.
+
+    Returns
+    -------
+    ArgumentParser
+        Argument Parser.
+    """
     parser = argparse.ArgumentParser(
-        prog='S2Downloader',
-        usage='S2Downloader [-h] --filepath FILEPATH',
-        epilog='Python package to download Sentinel-2 data from the AWS server. Powered by FERN.Lab'
+        prog="S2Downloader",
+        usage="S2Downloader [-h] --filepath FILEPATH",
+        epilog="Python package to download Sentinel-2 data from the AWS server. Powered by FERN.Lab",
     )
 
-    parser.add_argument('-f', '--filepath',
-                        type=str,
-                        required=True,
-                        help="Path to the config.json file",
-                        metavar="FILE")
+    parser.add_argument(
+        "-f", "--filepath", type=str, required=True, help="Path to the config.json file", metavar="FILE"
+    )
 
     return parser
 
 
-def main(prog_name="S2Downloader"):
-    """Call the Main function for pipeline test.
+def main(prog_name="S2Downloader") -> int:
+    """
+    Call the Main function for pipeline test.
+
+    Parameters
+    ----------
+    prog_name : str
+        Program name.
+
+    Returns
+    -------
+    int : Successful or not the execution.
 
     Raises
     ------
+    OSError
+        Failed to load the configuration json file.
     SystemExit
         If S2Downloader main process fails to run.
-
     """
     try:
         # check current directory
@@ -68,10 +82,12 @@ def main(prog_name="S2Downloader"):
         fp = args.filepath
 
         root_path = "../bin/"
-        if os.path.basename(os.getcwd()) == "bin" or \
-           os.path.basename(os.getcwd()) == "demo" or \
-           os.path.basename(os.getcwd()) == "test" or \
-           os.path.basename(os.getcwd()) == os.path.basename(os.path.dirname(os.getcwd())):
+        if (
+            os.path.basename(os.getcwd()) == "bin"
+            or os.path.basename(os.getcwd()) == "demo"
+            or os.path.basename(os.getcwd()) == "test"
+            or os.path.basename(os.getcwd()) == os.path.basename(os.path.dirname(os.getcwd()))
+        ):
             root_path = "/"
 
         config_file_path = os.path.abspath(os.path.join(root_path, fp))
@@ -81,13 +97,12 @@ def main(prog_name="S2Downloader"):
                 config_dict = json.load(config_fp)
                 config = Config(**config_dict).model_dump(by_alias=True)
         except JSONDecodeError as e:
-            raise IOError(f'Failed to load the configuration json file => {e}')
+            raise OSError(f"Failed to load the configuration json file => {e}") from e
 
         # call main function for retrieving Sentinel 2 data from AWS server
         s2Downloader(config_dict=config)
     except Exception as e:
-        raise SystemExit(f'Exit in {prog_name} function\n'
-                         f'{e}')
+        raise SystemExit(f"Exit in {prog_name} function\n{e}") from e
 
     print(f"{prog_name} succeeded.")
     return 0
