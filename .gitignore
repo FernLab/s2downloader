@@ -49,8 +49,8 @@ coverage.xml
 report.xml
 report.html
 
-# Code Qualiy Checks
-.ruff_cache/
+# pre-commit
+tests/linting/
 
 # Translations
 *.mo
