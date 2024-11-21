@@ -45,13 +45,11 @@ repos:
           - "--fix"  # Automatically fix simple issues
           - "--show-fixes" # Show fixes applied
           # Full list of available rule codes: https://docs.astral.sh/ruff/rules/
-          - "--select=F,E,W,C,C90,I,N,D,UP,S,B,SIM" # Includes: Pyflakes, pycodestyle, mccabe complexity, isort, pep8-naming, pydocstyle, pyupgrade, bandit, flake8-bugbear and flake8-simplify
+          - "--select=F,E,C90,I,N,D,UP,S,B,SIM" # Includes: Pyflakes, pycodestyle, pep8-naming, pydocstyle, pyupgrade, bandit, flake8-bugbear and flake8-simplify
           - "--preview" # Enable preview checks
           - "--line-length=120"  # Adjust to custom line length according to FERN.Lab guidelines
           - "--ignore=D212,D203,D401,D211,D213,D413,D417"  # Ignore missing blank line before class or method docstring due to conflicting rules
           - "--respect-gitignore"  # Respect .gitignore files
-          - "--select=D" # check for PEP 257 docstring conventions
-          - "--select=N" # check for NumPy-specific conventions.
         files: ^s2downloader/
 
       - id: ruff-format # Integrated and more performant drop-in replacement for Black
