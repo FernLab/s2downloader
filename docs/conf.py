@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""Documentation configuration."""
 
 # S2Downloader - The S2Downloader allows to download Sentinel-2 L2A data
 #
@@ -150,6 +151,18 @@ todo_include_todos = True
 
 # Apply custom sphinx styles (e.g., increase content width of generated docs)
 def setup(app):
+    """
+    Add a custom CSS file to the documentation.
+
+    The custom CSS file should be
+    put in the /docs/static directory and can be used to override styles in
+    the main CSS file.
+
+    Parameters
+    ----------
+    app : sphinx.application
+        The Sphinx application.
+    """
     app.add_css_file('custom.css')
 
 
