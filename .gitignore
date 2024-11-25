@@ -118,3 +118,6 @@ ENV/
 ## mpeltonen/sbt-idea plugin
 .idea_modules/
 /meta.yaml
+
+# System cache
+.DS_Store
