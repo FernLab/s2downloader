@@ -19,7 +19,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Tests for `s2downloader` package."""
 import fnmatch
 import json
@@ -37,19 +36,20 @@ from s2downloader.config import loadConfiguration, Config
 from copy import deepcopy
 
 
-def find_files(base_dir, pattern):
-    """Return list of files matching a pattern in the base folder.
+def find_files(base_dir: str, pattern: str) -> list[str]:
+    """
+    Return list of files matching a pattern in the base folder.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     base_dir: str
         Base directory.
     pattern: str
         Pattern for the file's name.
 
-    Returns:
-    --------
-    :list
+    Returns
+    -------
+    list
         List of filenames.
     """
     return [n for n in fnmatch.filter(os.listdir(os.path.realpath(base_dir)), pattern) if
@@ -64,7 +64,14 @@ class TestS2Downloader(unittest.TestCase):
 
     @classmethod
     def setUp(cls) -> None:
-        """Define the Class method SetUp."""
+        """
+        Define the Class method SetUp.
+
+        Raises
+        ------
+        OSError
+            Failed to load the configuration json file.
+        """
         cls.root_path = "./"
         if os.path.basename(os.getcwd()) == "tests":
             cls.root_path = "../"
@@ -328,7 +335,7 @@ class TestS2Downloader(unittest.TestCase):
 
     @pytest.mark.subset
     def testS2DownloaderPolygonSCLMasking(self):
-        """Test the SCL masking funktion with a polygon"""
+        """Test the SCL masking funktion with a polygon."""
 
         config = deepcopy(self.configuration)
 
@@ -856,7 +863,7 @@ class TestS2Downloader(unittest.TestCase):
                                  equal_nan=False).all()
 
     def testS2DownloaderOnlyDates(self):
-        """Test configuration to test only dates download for the tile settings"""
+        """Test configuration to test only dates download for the tile settings."""
 
         config = deepcopy(self.configuration)
         scene_tif_path = os.path.join(self.output_data_path, "20210905_S2B_rededge1.tif")
@@ -907,7 +914,7 @@ class TestS2Downloader(unittest.TestCase):
             assert False
 
     def testS2DownloaderErrorNoItemsAtAWS(self):
-        """Test configuration for error when search parameters do not yield a result"""
+        """Test configuration for error when search parameters do not yield a result."""
 
         config = deepcopy(self.configuration)
 
@@ -925,7 +932,7 @@ class TestS2Downloader(unittest.TestCase):
             assert str(message).__contains__('Failed to find data at AWS server')
 
     def testS2DownloaderThumbnailsOverviews(self):
-        """Test configuration to download thumbnails and overviews for the tile settings"""
+        """Test configuration to download thumbnails and overviews for the tile settings."""
 
         config = deepcopy(self.configuration)
 

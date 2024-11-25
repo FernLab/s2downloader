@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # S2Downloader - The S2Downloader allows to download Sentinel-2 L2A data
 #
 # Copyright (C) 2022-2023
@@ -20,5 +18,5 @@
 # limitations under the License.
 """Version module for S2Downloader."""
 
-__version__ = '1.3.0'
-__versionalias__ = '2024-08-02_01'
+__version__ = "1.3.0"
+__versionalias__ = "2024-08-02_01"

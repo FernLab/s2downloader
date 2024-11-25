@@ -135,4 +135,3 @@ This package was created with Cookiecutter_ and the `fernlab/cookiecutter-pypack
 .. _coverage: https://fernlab.git-pages.gfz-potsdam.de/products/data-portal/sentinel2_portal/coverage/
 .. _pytest: https://fernlab.git-pages.gfz-potsdam.de/products/data-portal/sentinel2_portal/test_reports/report.html
 .. _default_config.json: https://git.gfz-potsdam.de/fernlab/products/data-portal/s2downloader/-/blob/main/data/default_config.json
-

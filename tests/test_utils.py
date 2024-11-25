@@ -19,7 +19,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Tests for `s2downloader` package."""
 
 import os
@@ -41,7 +40,14 @@ class TestUtils(unittest.TestCase):
 
     @classmethod
     def setUp(cls) -> None:
-        """Define the Class method SetUp."""
+        """
+        Define the Class method SetUp.
+
+        Raises
+        ------
+        OSError
+            Failed to load the configuration json file.
+        """
         cls.root_path = "./"
         if os.path.basename(os.getcwd()) == "tests":
             cls.root_path = "../"

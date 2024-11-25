@@ -19,7 +19,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Tests for `s2Downloader` package."""
 
 import os
@@ -39,7 +38,14 @@ class TestConfig(unittest.TestCase):
 
     @classmethod
     def setUp(cls) -> None:
-        """Define the Class method SetUp."""
+        """
+        Define the Class method SetUp.
+
+        Raises
+        ------
+        OSError
+            Failed to load the configuration json file.
+        """
         cls.root_path = "./"
         if os.path.basename(os.getcwd()) == "tests":
             cls.root_path = "../"
@@ -75,7 +81,7 @@ class TestConfig(unittest.TestCase):
 
     @pytest.mark.subset
     def testS2DownloaderAOISettingsDateRange(self):
-        """Test configuration to test time range for the tile settings"""
+        """Test configuration to test time range for the tile settings."""
 
         config = deepcopy(self.configuration)
         config['user_settings']['aoi_settings']['date_range'] = ["2020-06-01", "2020-09-01"]
@@ -122,7 +128,7 @@ class TestConfig(unittest.TestCase):
 
     @pytest.mark.subset
     def testS2DownloaderDataCoverage(self):
-        """Test configuration to test coverage for the tile settings"""
+        """Test configuration to test coverage for the tile settings."""
 
         config = deepcopy(self.configuration)
         config['user_settings']['tile_settings']['s2:nodata_pixel_percentage'] = {"lt": 80}
@@ -150,7 +156,7 @@ class TestConfig(unittest.TestCase):
 
     @pytest.mark.subset
     def testS2DownloaderCloudCoverage(self):
-        """Test configuration to test coverage for the tile settings"""
+        """Test configuration to test coverage for the tile settings."""
 
         config = deepcopy(self.configuration)
         config['user_settings']['tile_settings']['eo:cloud_cover'] = {"lt": 80}
@@ -178,7 +184,7 @@ class TestConfig(unittest.TestCase):
 
     @pytest.mark.subset
     def testS2DownloaderTileSettingsBands(self):
-        """Test configuration to test bands for the tile settings"""
+        """Test configuration to test bands for the tile settings."""
 
         config = deepcopy(self.configuration)
         config['user_settings']['tile_settings']['bands'] = \
@@ -211,7 +217,7 @@ class TestConfig(unittest.TestCase):
 
     @pytest.mark.subset
     def testS2DownloaderSCLFilterValues(self):
-        """Test configuration to test SCL filter values for mask"""
+        """Test configuration to test SCL filter values for mask."""
 
         config = deepcopy(self.configuration)
         config['user_settings']['aoi_settings']['SCL_filter_values'] = \
@@ -386,7 +392,7 @@ class TestConfig(unittest.TestCase):
 
     @pytest.mark.subset
     def testStacCatalogURL(self):
-        """Test the stac catalog URL"""
+        """Test the stac catalog URL."""
         config = deepcopy(self.configuration)
         config['s2_settings']["stac_catalog_url"] = "hts://earth-search.aws.element84.com/v1"
         with pytest.raises(ValueError):

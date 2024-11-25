@@ -7,6 +7,7 @@ stages:
   - deploy
   - cleanup
 
+
 # run all tests only on the main branch
 test_s2downloader:
   stage: test
@@ -73,20 +74,18 @@ test_subset:
     - main
     - staging
 
-
-
-
 test_styles:
   stage: test
   script:
     - source activate ci_env
+    # install missing dependencies in the CI container
+    - mamba env update --name ci_env --file tests/CI_docker/context/environment_s2downloader.yml  --prune
+    # run style checks and save output to file while not blocking a commit if it fails
     - make lint
   artifacts:
     paths:
-    - tests/linting/flake8.log
-    - tests/linting/pycodestyle.log
-    - tests/linting/pydocstyle.log
-  when: always
+        - tests/linting/pre-commit-output.txt
+    when: always
 
 
 test_urls:
@@ -191,4 +190,3 @@ create_github_release:
         - /^v\d+\.\d+\.\d+([abc]\d*)?$/  # PEP-440 compliant version (tags)
     except:
         - dev
-

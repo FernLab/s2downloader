@@ -95,9 +95,7 @@ test = [
     "urlchecker"
 ]
 lint = [
-    "flake8",
-    "pycodestyle",
-    "pydocstyle",
+    "pre-commit",
 ]
 dev = [
     "s2downloader[test]",

@@ -1,0 +1,63 @@
+default_stages: [pre-commit, pre-push]
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace  # Removes trailing whitespace from files
+      - id: end-of-file-fixer  # Ensures files end with a newline
+      - id: check-yaml  # Checks YAML files for syntax errors
+      - id: check-json  # Checks JSON files for syntax errors
+      - id: check-added-large-files  # Prevents adding large files to the repository
+        args: ["--maxkb=2048"]  # Set the maximum size to 1MB
+      - id: detect-private-key  # Detects if a private key is being committed
+      - id: no-commit-to-branch
+        args: [--branch, main]  # Prevents commits directly to the main branch
+
+  - repo: https://github.com/PyCQA/pydocstyle
+    rev: 6.3.0
+    hooks:
+      - id: pydocstyle
+        args: ["--convention=numpy"]  # Change to numpy or pep257 if needed
+
+
+  - repo: https://github.com/terrencepreilly/darglint
+    rev: v1.8.1  # Use the latest version
+    hooks:
+      - id: darglint
+        args: ["--docstring-style", "numpy"]
+
+  # automatically format docstrings to match NumPy conventions
+  - repo: https://github.com/myint/docformatter
+    rev: "master"  # Use the latest version
+    hooks:
+      - id: docformatter
+        language: python
+        args: ["--in-place", "--pre-summary-newline", "--wrap-summaries", "120", "--wrap-descriptions", "120", "--style", "numpy"]
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.7.2
+    # All configuration options: https://github.com/astral-sh/ruff/blob/main/docs/configuration.md
+    hooks:
+      - id: ruff
+        name: "Ruff - Lint and Style"
+        args:
+          - "--fix"  # Automatically fix simple issues
+          - "--show-fixes" # Show fixes applied
+          # Full list of available rule codes: https://docs.astral.sh/ruff/rules/
+          - "--select=F,E,C90,I,N,D,UP,S,B,SIM" # Includes: Pyflakes, pycodestyle, pep8-naming, pydocstyle, pyupgrade, bandit, flake8-bugbear and flake8-simplify
+          - "--preview" # Enable preview checks
+          - "--line-length=120"  # Adjust to custom line length according to FERN.Lab guidelines
+          - "--ignore=N802,D212,D203,D401,D211,D213,D413,D417"  # Ignore missing blank line before class or method docstring due to conflicting rules
+          - "--respect-gitignore"  # Respect .gitignore files
+        files: ^s2downloader/
+
+      - id: ruff-format # Integrated and more performant drop-in replacement for Black
+        name: "Ruff - Format"
+        args:
+        #- "--diff"  # Show diff instead of fixing
+        - "--line-length=120"  # Adjust to custom line length according to FERN.Lab guidelines
+        - "--preview" # Enable preview checks
+        - "--respect-gitignore"  # Respect .gitignore files
+        types_or: [python] # Only run on Python files
+        files: ^s2downloader/

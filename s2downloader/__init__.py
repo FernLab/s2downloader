@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 # S2Downloader - The S2Downloader allows to download Sentinel-2 L2A data
 #
 # Copyright (C) 2022-2023
@@ -18,14 +16,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Top-level package for S2Downloader."""
 
 __author__ = """FernLab"""
-__email__ = 'fernlab@gfz-potsdam.de'
+__email__ = "fernlab@gfz-potsdam.de"
 
 from .version import __version__
 
-__all__ = [
-    '__version__'
-    ]
+__all__ = ["__version__"]
