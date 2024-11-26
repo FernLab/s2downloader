@@ -1,0 +1,108 @@
+{
+    "title": "S2Downloader",
+    "description": "The S2Downloader allows to download Sentinel-2 L2A data from the from the AWS Public Datasets, the Sentinel-2 Cloud-Optimized GeoTIFFs managed by element84. It specifically serves the purpose to download data for user-defined area of interests (AOI), defined by a bounding box or whole tiles which are the original data product provided by ESA.",
+    "license": "EUPL-1.2",
+    "upload_type": "software",
+    "keywords": [
+        "S2Downloader",
+        "sentinel-2",
+        "copernicus",
+        "multispectral",
+        "remote sensing",
+        "satellite",
+        "satellite imagery",
+        "geospatial",
+        "mosaic"
+    ],
+    "creators": [
+        {
+            "name": "Beamish, Alison",
+            "affiliation": "Helmholtz Centre Potsdam German Research Centre for Geosciences GFZ, FERN.Lab",
+            "orcid": "0000-0003-0976-6064"
+        },
+        {
+            "name": "Behling, Robert",
+            "affiliation": "Helmholtz Centre Potsdam German Research Centre for Geosciences GFZ, FERN.Lab",
+            "orcid": "0000-0002-5298-1547"
+        },
+        {
+            "name": "Goncalves, Romulo",
+            "affiliation": "Helmholtz Centre Potsdam German Research Centre for Geosciences GFZ, FERN.Lab",
+            "orcid": "0000-0003-2225-1428"
+        },
+        {
+            "name": "Knoch, Johannes",
+            "affiliation": "Helmholtz Centre Potsdam German Research Centre for Geosciences GFZ, FERN.Lab",
+            "orcid": "0009-0003-1604-4622"
+        },
+        {
+            "name": "Madadi, Arash",
+            "affiliation": "Helmholtz Centre Potsdam German Research Centre for Geosciences GFZ, FERN.Lab",
+            "orcid": "0009-0003-5944-0385"
+        },
+        {
+            "name": "Rabe, Daniela",
+            "affiliation": "Helmholtz Centre Potsdam German Research Centre for Geosciences GFZ, FERN.Lab",
+            "orcid": "0000-0001-7919-3543"
+        }
+    ],
+    "contributors": [
+        {
+            "name": "Beamish, Alison",
+            "affiliation": "Helmholtz Centre Potsdam German Research Centre for Geosciences GFZ, FERN.Lab",
+            "orcid": "0000-0003-0976-6064",
+            "type": "ProjectLeader"
+        },
+        {
+            "name": "Behling, Robert",
+            "affiliation": "Helmholtz Centre Potsdam German Research Centre for Geosciences GFZ, FERN.Lab",
+            "orcid": "0000-0002-5298-1547",
+            "type": "Researcher"
+        },
+        {
+            "name": "Goncalves, Romulo",
+            "affiliation": "Helmholtz Centre Potsdam German Research Centre for Geosciences GFZ, FERN.Lab",
+            "orcid": "0000-0003-2225-1428",
+            "type": "Researcher"
+        },
+        {
+            "name": "Knoch, Johannes",
+            "affiliation": "Helmholtz Centre Potsdam German Research Centre for Geosciences GFZ, FERN.Lab",
+            "orcid": "0009-0003-1604-4622",
+            "type": "Researcher"
+        },
+        {
+            "name": "Madadi, Arash",
+            "affiliation": "Helmholtz Centre Potsdam German Research Centre for Geosciences GFZ, FERN.Lab",
+            "orcid": "0009-0003-5944-0385",
+            "type": "Researcher"
+        },
+        {
+            "name": "Rabe, Daniela",
+            "affiliation": "Helmholtz Centre Potsdam German Research Centre for Geosciences GFZ, FERN.Lab",
+            "orcid": "0000-0001-7919-3543",
+            "type": "Researcher"
+        },
+        {
+            "name": "Wenzel, Jennifer",
+            "affiliation": "Helmholtz Centre Potsdam German Research Centre for Geosciences GFZ, FERN.Lab",
+            "orcid": "0009-0001-0306-4873",
+            "type": "Researcher"
+        }
+    ],
+    "related_identifiers": [
+        {
+            "scheme": "url",
+            "identifier": "https://git.gfz-potsdam.de/fernlab/products/data-portal/s2downloader",
+            "relation": "isSupplementTo",
+            "resource_type": "software"
+        },
+        {
+            "scheme": "url",
+            "identifier": "https://fernlab.git-pages.gfz-potsdam.de/products/data-portal/s2downloader/doc/",
+            "relation": "isDocumentedBy",
+            "resource_type": "publication-softwaredocumentation"
+        }
+    ]
+}
+
