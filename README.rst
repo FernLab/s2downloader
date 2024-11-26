@@ -33,7 +33,7 @@ Downloader for Sentinel-2 data.
 Feature overview
 ----------------
 
-The **S2Downloader** allows to download Sentinel-2 L2A data from the cost-free `element84 AWS <https://registry.opendata.aws/sentinel-2-l2a-cogs/>`_ Amazon Cloud server. It specifically serves the purpose to download data for user-defined area of interests (AOI), defined by a bounding box or whole tiles which are the original data product provided by ESA.
+The **S2Downloader** allows to download Sentinel-2 L2A data from the from the AWS Public Datasets, the [Sentinel-2 Cloud-Optimized GeoTIFFs](https://registry.opendata.aws/sentinel-2-l2a-cogs/) managed by [element84](https://www.element84.com/). Amazon Cloud server. It specifically serves the purpose to download data for user-defined area of interests (AOI), defined by a bounding box or whole tiles which are the original data product provided by ESA.
 
 Features
 ########
