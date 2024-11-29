@@ -2,10 +2,12 @@
 History
 =======
 
-1.4.0 (coming soon...)
+1.4.0 (2024-11-29)
 ------------------
-* !50: updated usage instructions
+* !53: Add automatic zenodo updates.
+* !52: Setup pre-commit code quality gate.
 * !51: Migrated setup procedure from using setup.py + setup.cfg to using pyproject.toml only.
+* !50: Updated usage instructions.
 
 1.3.0 (2024-08-02)
 ------------------
