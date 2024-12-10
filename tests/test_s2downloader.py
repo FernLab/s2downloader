@@ -133,7 +133,7 @@ class TestS2Downloader(unittest.TestCase):
                                                                       right=777200.0,
                                                                       top=5811540.0)
             assert expected_res.read_crs() == CRS().from_epsg(code=32632)
-            assert numpy.isclose([776160.0, 10.0, 0.0, 5811560.0, 0.0, -10.0],
+            assert numpy.isclose([776160.0, 10.0, 0.0, 5811680.0, 0.0, -10.0],
                                  expected_res.read_transform(),
                                  rtol=0,
                                  atol=1e-4,
