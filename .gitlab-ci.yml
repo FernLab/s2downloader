@@ -209,7 +209,7 @@ send_to_zenodo:
 test-zenodo:
   stage: test
   script:
-      - export CI_COMMIT_TAG=v0.0.0
+      - export CI_COMMIT_TAG=v1.4.0
       - source activate ci_env
       - pip install -U gitlab2zenodo
       - git archive --format zip --output s2downloader-${CI_COMMIT_TAG}.zip ${CI_COMMIT_TAG}
