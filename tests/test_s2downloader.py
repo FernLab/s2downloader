@@ -890,11 +890,11 @@ class TestS2Downloader(unittest.TestCase):
             assert expected_res.dtypes[0] == "uint16"
             assert expected_res.shape == (86, 104)
             assert expected_res.bounds == rasterio.coords.BoundingBox(left=776160.0,
-                                                                      bottom=5810700.0,
+                                                                      bottom=5810680.0,
                                                                       right=777200.0,
-                                                                      top=5811560.0)
+                                                                      top=5811540.0)
             assert expected_res.read_crs() == CRS().from_epsg(code=32632)
-            assert numpy.isclose([776160.0, 10.0, 0.0, 5811560.0, 0.0, -10.0],
+            assert numpy.isclose([776160.0, 10.0, 0.0, 5811540.0, 0.0, -10.0],
                                  expected_res.read_transform(),
                                  rtol=0,
                                  atol=1e-4,
