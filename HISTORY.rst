@@ -2,6 +2,10 @@
 History
 =======
 
+1.4.1 (2025-01-16)
+------------------
+* !57: Fix bug in calculating pixel percentages.
+
 1.4.0 (2024-11-29)
 ------------------
 * !53: Add automatic zenodo updates.

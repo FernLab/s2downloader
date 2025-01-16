@@ -133,7 +133,11 @@ def validPixelsFromSCLBand(
         logger.info(f"Nonzero pixels: {nonzero_pixels_per} %")
 
         scl_band_scl_mask = np.where(np.isin(scl_band, scl_filter_values), 1, 0)
-        masked_pixels_per = (float(np.count_nonzero(scl_band_scl_mask)) / float(scl_band_nonzero)) * 100
+        masked_pixels_per = (
+            (float(np.count_nonzero(scl_band_scl_mask)) / float(scl_band_nonzero)) * 100
+            if scl_band_nonzero != 0
+            else 0.0  # Or another default value
+        )
         logger.info(f"Masked pixels: {masked_pixels_per} %")
 
         scl_band_mask = np.where(np.isin(scl_band, scl_filter_values), 0, 1)
