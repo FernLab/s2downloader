@@ -145,6 +145,10 @@ def searchDataAtAWS(
                 "Date", "ID", "UTM Zone", "EPSG", "Tile Cloud Cover %", "Tile NoData %"
             )
         )
+
+        for i in item_list_dict:
+            print(i["properties"])
+
         for i in item_list_dict:
             logger.info(
                 "{:<30} {:<25} {:<12} {:<10} {:<22} {:<15}\n".format(
