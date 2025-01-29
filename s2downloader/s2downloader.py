@@ -152,7 +152,7 @@ def searchDataAtAWS(
                     i["properties"]["datetime"],
                     i["id"],
                     i["properties"]["mgrs:utm_zone"],
-                    i["properties"]["proj:epsg"],
+                    i["properties"]["proj:code"],
                     i["properties"]["eo:cloud_cover"],
                     i["properties"]["s2:nodata_pixel_percentage"],
                 )
@@ -253,10 +253,12 @@ def downloadMosaic(*, config_dict: dict):  # noqa: C901
         sensor_name = items[0].id[0:3]
         aoi_utm = None
         if aoi_is_bb:
-            bounds_utm = getBoundsUTM(bounds=bbox, bb_crs=items[0].properties["proj:epsg"])
+            bounds_utm = getBoundsUTM(bounds=bbox, bb_crs=items[0].properties["proj:code"].split(":")[1])
         else:
             aoi_utm = projectPolygon(
-                poly=shape(aoi_settings["polygon"]), source_crs=4326, target_crs=items[0].properties["proj:epsg"]
+                poly=shape(aoi_settings["polygon"]),
+                source_crs=4326,
+                target_crs=items[0].properties["proj:code"].split(":")[1],
             ).buffer(target_resolution * 1.5)
             bounds_utm = tuple(shp_bounds(aoi_utm))
         scl_src = None
