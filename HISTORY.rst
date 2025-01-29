@@ -2,6 +2,10 @@
 History
 =======
 
+1.4.2 (2025-01-29)
+------------------
+* !58: Fix bug in pystac-catalogue naming.
+
 1.4.1 (2025-01-16)
 ------------------
 * !57: Fix bug in calculating pixel percentages.
